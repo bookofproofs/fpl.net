@@ -1,5 +1,3 @@
-/// This module contains all functions in the Fpl.Interpreter namespace
-/// to compare / match two FPL types
 
 (* MIT License
 
@@ -12,6 +10,17 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
+
+/// <summary>
+/// Utilities to compare and match FPL types used by the interpreter's symbol table.
+/// </summary>
+/// <remarks>
+/// This module implements helpers for extracting parameters/arguments from symbol-table
+/// nodes, computing distinct free variables of expressions, and matching argument lists
+/// and individual types according to FPL's complex type and inheritance rules. Diagnostics
+/// are emitted via the emitter helpers; the functions return optional error information
+/// rather than throwing exceptions for semantic diagnostics.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.TypeMatching
 open System
 open System.Collections.Generic
@@ -25,7 +34,15 @@ open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 
 
-/// Gets the list of parameters of an FplValue if any
+/// <summary>
+/// Get the parameter list for an FPL node if that node exposes parameters/signature variables.
+/// </summary>
+/// <param name="fv">Node whose parameters should be retrieved.</param>
+/// <returns>List of parameter nodes; empty list if none.</returns>
+/// <remarks>
+/// Handles variable nodes, variable arrays (via IHasDimensions), functional/predicate blocks,
+/// constructors and mandatory variants. For other nodes an empty list is returned.
+/// </remarks>
 let getParameters (fv:FplGenericNode) =
     match fv.Name with
     | PrimVariableL ->
@@ -43,7 +60,15 @@ let getParameters (fv:FplGenericNode) =
         fv.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
     | _ -> []
 
-/// Gets the list of arguments of an FplValue if any
+/// <summary>
+/// Get the argument list for an FPL node.
+/// </summary>
+/// <param name="fv">Node whose argument list should be retrieved.</param>
+/// <returns>Argument nodes as a list.</returns>
+/// <remarks>
+/// For references that point to a variable and have no own arguments, this falls back
+/// to the referenced variable's parameters.
+/// </remarks>
 let getArguments (fv:FplGenericNode) =
     match fv.Name, fv.RefersTo with
     | PrimRefL, Some var when var.Name = PrimVariableL && fv.ArgList.Count = 0 ->
@@ -54,7 +79,15 @@ let getArguments (fv:FplGenericNode) =
         fv.ArgList 
         |> Seq.toList
 
-/// Gets the list of distinct variables used in an expression 
+/// <summary>
+/// Compute the distinct set of variables used in an expression.
+/// </summary>
+/// <param name="expr">Expression node to analyze.</param>
+/// <returns>List of distinct variable nodes referenced by the expression.</returns>
+/// <remarks>
+/// The function traverses the expression and collects variable references,
+/// avoiding duplicates by variable identifier.
+/// </remarks>
 let getDistinctVarsOfExpression (expr:FplGenericNode) =
     let seen = new HashSet<string>()
     let rec getDVoE (expr1:FplGenericNode) acc = 
@@ -75,7 +108,15 @@ let getDistinctVarsOfExpression (expr:FplGenericNode) =
             |> List.concat
     getDVoE expr []
 
-/// Checks, if an FplValue uses parentheses or brackets
+/// <summary>
+/// Determine whether the node uses parentheses or brackets in its signature/usage.
+/// </summary>
+/// <param name="fv">Node to inspect.</param>
+/// <returns><c>true</c> when parentheses or brackets are present; otherwise <c>false</c>.</returns>
+/// <remarks>
+/// This helper inspects variables, functional terms, predicates, constructors and references.
+/// It is used to detect inconsistencies in call/parameter styles.
+/// </remarks>
 let hasBracketsOrParentheses (fv:FplGenericNode) = 
     match fv.Name with 
     | PrimVariableL when fv.ArgType = ArgType.Nothing ->
@@ -99,7 +140,9 @@ let private errExprMismatchOpenFormulasWrapper (aOriginal:FplGenericNode) (aOpen
     let pName = pOriginal.Type SignatureType.Name
     let pOpenFormulaType = pOpenFormula.Type SignatureType.Type
 
-    /// Generates a string of a FplGenericNode list based on their SignatureType.
+    /// <summary>
+    /// Create comma-separated string from signature names of nodes.
+    /// </summary>
     let lstToString (lst:FplGenericNode list) =
         lst
         |> List.map (fun fv -> fv.Type SignatureType.Name)
@@ -115,9 +158,20 @@ let private errExprMismatchOpenFormulasWrapper (aOriginal:FplGenericNode) (aOpen
     errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType 
 
 
-/// Checks if the baseNode is contained in the roots's base nodes (it derives from).
-/// If so, the function will produce Some path where path equals a string of base nodes concatenated by ":".
-/// The baseNode is required to be a definition (i.e., FplClass, FplFunctionalTerm, or FplPredicate)
+/// <summary>
+/// Find inheritance chains for a definition node (class, predicate, or functional term).
+/// </summary>
+/// <param name="baseNode">Definition node to analyze.</param>
+/// <returns>
+/// A dictionary mapping encountered node names (or path strings) to either "ok" or an error message describing cycles/cross-inheritance.
+/// </returns>
+/// <remarks>
+/// The returned dictionary can be inspected to determine whether a given type is in the inheritance closure.
+/// The function throws if the provided node is not a definition node.
+/// </remarks>
+/// <exceptions>
+/// <exception cref="System.Exception">Thrown when baseNode is not a class, predicate or functional term definition.</exception>
+/// </exceptions>
 let findInheritanceChains (baseNode: FplGenericNode) =
     let distinctNames = HashSet<string>()
     let paths = Dictionary<string,string>() // collects all paths (keys) and errors (values)
@@ -195,7 +249,15 @@ let findInheritanceChains (baseNode: FplGenericNode) =
         distinctNames |> Seq.iter (fun s -> paths.Add (s, "ok"))
     paths
 
-/// Checks if a node inherits from some type (or is already that type).
+/// <summary>
+/// Check whether a node inherits from a given type name (or is that type).
+/// </summary>
+/// <param name="node">Node to check.</param>
+/// <param name="someType">Type identifier to test.</param>
+/// <returns><c>true</c> when the node inherits from or equals the given type identifier.</returns>
+/// <remarks>
+/// Accepts "obj" as the root of class inheritance. Uses <see cref="findInheritanceChains"/> to search closures.
+/// </remarks>
 let inheritsFrom (node:FplGenericNode) someType = 
     match node, someType with 
     | :? FplClass, "obj" -> true
@@ -220,7 +282,6 @@ let inheritsFrom (node:FplGenericNode) someType =
 type Parameter =
     | Consumed
     | NotConsumed
-
 
 let private errWrongReturnType aName aType pType (p:FplGenericNode) =
     let pBlockOpt = p.UltimateBlockNode
@@ -352,9 +413,18 @@ let private isFuncWithoutParentheses (fv:FplGenericNode) =
     | ArgType.Nothing when fv.TypeId = LiteralFunc -> true
     | _ -> false
 
-/// Checks if an FplValue is a reference to a variable that points to a class, and at the same time is marked as 'initialized' and still does not any values.
-/// (this is the convention flagging that a variable has been assigned to its class instead of the constructor of the class generating an instance value).
-/// If the function returns a non-empty string, it contains the identifier of the referenced class (that has not been instantiated).
+/// <summary>
+/// Determine whether a reference refers to a variable that points to a class instance-construction intent.
+/// </summary>
+/// <param name="fv">Reference or node to inspect.</param>
+/// <returns>
+/// The identifier of the referenced class when the convention indicates a call-by-reference to a class;
+/// otherwise an empty string.
+/// </returns>
+/// <remarks>
+/// The interpreter uses the IsInitialized flag combined with missing value to indicate that a variable
+/// refers to a class itself (not a constructed instance). This helper discovers that convention.
+/// </remarks>
 let private getCallByReferenceToClass (fv:FplGenericNode) =
     match fv.RefersTo with 
     | Some refNode ->
@@ -385,14 +455,27 @@ let private getNames (fv:FplGenericNode) =
     fvName, fvType, fvTypeName
 
 
-/// Type matching in FPL is complex and requires referencing functions declared later in code.
-/// Since top‑level let bindings of pure functions does not allow this,
-/// we use a class to match types in FPL. Inside an F# class,
-/// members can freely reference other members that are declared later.
+/// <summary>
+/// Class-based entry point for complex type matching algorithms.
+/// </summary>
+/// <remarks>
+/// The class groups mutually recursive matching helpers as members so they can refer to
+/// each other even when declared later in the source file.
+/// </remarks>
 type FplTypeMatcher() =
 
-    /// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
-    /// Some(specific error message) or None, if the match succeeded.
+    /// <summary>
+    /// Attempt to match the argument list of a calling node to the parameters of a called node.
+    /// </summary>
+    /// <param name="fva">Calling node (argument provider).</param>
+    /// <param name="fvp">Called node (parameter provider).</param>
+    /// <returns>
+    /// None when the match succeeds; Some error message string when the match fails.
+    /// </returns>
+    /// <remarks>
+    /// Issues special fallbacks for variable parameters and attaches contextual location information
+    /// to produced error messages.
+    /// </remarks>
     static member MatchArgumentsWithParameters (fva: FplGenericNode) (fvp: FplGenericNode) =
         let parameters = getParameters fvp
         let arguments = getArguments fva
@@ -432,8 +515,15 @@ type FplTypeMatcher() =
         | Some err -> formatErrorWithContext err
         | None -> None
 
-    /// Tries to match a list of arguments with a list of parameters by their type recursively.
-    /// The comparison depends on MatchingMode.
+    /// <summary>
+    /// Recursively match an argument list against a parameter list.
+    /// </summary>
+    /// <param name="args">Arguments as a list of nodes.</param>
+    /// <param name="pars">Parameters as a list of nodes.</param>
+    /// <returns>None when match succeeds; Some error message when it fails.</returns>
+    /// <remarks>
+    /// Handles variadic/consumption semantics via the Parameter discriminant returned by individual matches.
+    /// </remarks>
     static member MatchPwA (args: FplGenericNode list) (pars: FplGenericNode list) =
         let rec mpwa (args: FplGenericNode list) (pars: FplGenericNode list) =
             match (args, pars) with
@@ -626,10 +716,18 @@ type FplTypeMatcher() =
                 matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName
         matchTwoTypes a p
 
-    /// Transforms a given expression to its open formula - a named
-    /// formula that contains only the distinct free variables of the expression
-    /// while preserving the expression's input FPL type (being either pred or func)
-    /// The function returns None, if the input type is not pred or func.
+    /// <summary>
+    /// Transform an expression into an "open formula" capturing only distinct free variables.
+    /// </summary>
+    /// <param name="expr">Expression node to convert.</param>
+    /// <returns>
+    /// Some node representing the open formula (a top-level synthetic variable node carrying the free variables),
+    /// or None if the input is not a predicate/functional-style expression.
+    /// </returns>
+    /// <remarks>
+    /// This helper is used when matching open-formula style predicate/function comparisons.
+    /// The returned node contains the distinct free variables in its scope.
+    /// </remarks>
     static member GetOpenFormulaOfExpression (expr:FplGenericNode) =
         let outputType = 
             match isArgPred expr with
@@ -704,6 +802,14 @@ type FplTypeMatcher() =
             extractDistinctFreeVariables expr rootRecursion
             Some topLevel
 
+    /// <summary>
+    /// Compare two nodes as open-formula expressions by converting both to open formulas and matching their free-variable signatures.
+    /// </summary>
+    /// <param name="a">Left expression.</param>
+    /// <param name="p">Right expression (parameter).</param>
+    /// <returns>
+    /// A tuple (optionErrorMessage, Parameter) where the first component is an optional error message and the second indicates consumption semantics.
+    /// </returns>
     static member ComparisonBasedOnOpenFormulas (a:FplGenericNode) (p:FplGenericNode) = 
         let aOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression a
         let pOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression p
@@ -724,8 +830,15 @@ type FplTypeMatcher() =
             errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name), Parameter.Consumed
 
 
-/// Tries to match the signatures of toBeMatched with the signatures of all candidates and accumulates any
-/// error messages in accResultList.
+/// <summary>
+/// Try all candidate signatures and accumulate errors.
+/// </summary>
+/// <param name="toBeMatched">The node whose signature is being matched.</param>
+/// <param name="candidates">Candidate parameter providers.</param>
+/// <param name="accResultList">Accumulator for collected error messages.</param>
+/// <returns>
+/// A pair (Some matchingCandidate, []) when a candidate matched, or (None, accumulatedErrors) when none matched.
+/// </returns>
 let rec checkCandidates (toBeMatched: FplGenericNode) (candidates: FplGenericNode list) (accResultList: string list) =
     match candidates with
     | [] -> (None, accResultList)
@@ -734,7 +847,14 @@ let rec checkCandidates (toBeMatched: FplGenericNode) (candidates: FplGenericNod
         | None -> (Some candidate, [])
         | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
 
-/// Checks if there is a candidate among the candidates that matches the signature of a calling FplValue and returns this as an option.
+/// <summary>
+/// Check SIG04 diagnostics for a calling node against a set of candidate definitions.
+/// </summary>
+/// <param name="calling">The calling node.</param>
+/// <param name="candidates">Candidate definitions to try.</param>
+/// <returns>
+/// Optionally the candidate that matched, otherwise None after emitting SIG04 diagnostic on the calling node.
+/// </returns>
 let checkSIG04Diagnostics (calling:FplGenericNode) (candidates: FplGenericNode list) = 
     if candidates.Length = 0 then
         None
@@ -746,7 +866,15 @@ let checkSIG04Diagnostics (calling:FplGenericNode) (candidates: FplGenericNode l
             calling.ErrorOccurred <- emitSIG04Diagnostics (calling.Type SignatureType.Mixed) errListStr calling.StartPos calling.EndPos
             None
 
-/// Checks type consistency of an infix operation with respect to its operands
+/// <summary>
+/// Check operand/argument compatibility for an infix operator and emit SIG04 diagnostics on mismatches.
+/// </summary>
+/// <param name="infixOp">Reference node to operator (callable).</param>
+/// <param name="firstOp">Left operand.</param>
+/// <param name="secondOp">Right operand.</param>
+/// <remarks>
+/// The function inspects the operator's referenced definition, extracts signature variables and attempts per-operand matching.
+/// </remarks>
 let checkSIG04DiagnosticsForInfixOperator (infixOp:FplGenericNode) (firstOp:FplGenericNode) (secondOp:FplGenericNode) = 
     let refNodeOpt = referencedNodeOpt infixOp
     match refNodeOpt with 
@@ -774,7 +902,14 @@ let checkSIG04DiagnosticsForInfixOperator (infixOp:FplGenericNode) (firstOp:FplG
     | _ -> ()
 
 
-/// Checks if a reference to an array matches its dimensions (in terms of number and types)
+/// <summary>
+/// Validate reference-to-array indexing with respect to declared mapping dimensions and emit SIG08/SIG09/SIG10 diagnostics.
+/// </summary>
+/// <param name="referenceToArray">Reference node that addresses an array variable.</param>
+/// <remarks>
+/// The function compares the number of provided indexes and their types with the mapping's declared dimension types.
+/// Mismatches are reported using SIG08 (index type mismatch), SIG09 (missing index) or SIG10 (extra index).
+/// </remarks>
 let checkSIG08_SIG10Diagnostics (referenceToArray:FplGenericNode) =
     let rec matchIndexesWithDimensions (refToArray:FplReference) =
         match refToArray.RefersTo with

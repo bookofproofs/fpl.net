@@ -30,7 +30,6 @@ open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 
-[<AbstractClass>]
 /// <summary>
 /// Abstract base type for variables that may carry values and participate in scoping rules.
 /// </summary>
@@ -42,6 +41,7 @@ open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 /// initialized, bound or used. Provides embedding logic for a variety of parent node types
 /// and integrates with diagnostic emitters for scope conflicts.
 /// </remarks>
+[<AbstractClass>]
 type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasValue(positions, parent)
     let mutable _isSignatureVariable = false

@@ -1,6 +1,3 @@
-/// This module contains all classes in the Fpl.Interpreter namespace
-/// to model predicative nodes in the symbol table, like axioms, and theorem-like statments
-
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -12,6 +9,17 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
+/// <summary>
+/// Module containing predicative block node implementations for axioms, theorems,
+/// lemmas, propositions, corollaries and conjectures in the symbol table.
+/// </summary>
+/// <remarks>
+/// These nodes represent FPL predicative blocks that can contain expressions and
+/// statements. They provide symbol-table embedding, semantic consistency checks,
+/// runtime evaluation semantics (registration in the valid-statement store) and
+/// diagnostic emission via emitter helpers. Evaluation is idempotent (guarded by an
+/// internal ready flag) and may trigger corollary/proof evaluation when registered.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open FParsec
 open Fpl.Primitives
@@ -26,6 +34,17 @@ open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.Variables
 
+/// <summary>
+/// Run all arguments of a generic predicate that contains expressions and assign
+/// the last argument value to the predicate when arguments yield values.
+/// </summary>
+/// <param name="fv">Predicate node whose argument list will be executed.</param>
+/// <returns>Unit.</returns>
+/// <remarks>
+/// For each argument: runs the argument, and if the argument is a value-carrying node
+/// the predicate takes that argument's value as its own (via SetValueOf). If an argument
+/// is not a value node, an LG004 diagnostic is emitted (warning about statement side-effects).
+/// </remarks>
 let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericHasValue) = 
     fv.ArgList
     |> Seq.iter (fun fv1 -> 
@@ -39,16 +58,32 @@ let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericHasValue) =
             
     )
 
+/// <summary>
+/// Abstract base for predicative block nodes that contain expressions (e.g. axioms, theorem-like statements).
+/// </summary>
+/// <param name="positions">Tuple of start and end positions used for diagnostics.</param>
+/// <param name="parent">Parent node in the symbol table.</param>
+/// <remarks>
+/// Provides signature position tracking, signature-consistency checks and variable-usage
+/// diagnostics for non-intrinsic definitions. Derived classes should call base checks
+/// via <c>CheckConsistency</c> and implement Run/Embed behavior as required.
+/// </remarks>
 [<AbstractClass>]
 type FplGenericPredicateWithExpression(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
 
+    /// <summary>
+    /// Signature start position for diagnostics.
+    /// </summary>
     member this.SignStartPos
         with get() = _signStartPos
         and set(value) = _signStartPos <- value
 
+    /// <summary>
+    /// Signature end position for diagnostics.
+    /// </summary>
     member this.SignEndPos
         with get() = _signEndPos
         and set(value) = _signEndPos <- value
@@ -61,14 +96,37 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplGenericN
             with get () = this.SignEndPos
             and set (value) = this.SignEndPos <- value
 
+    /// <summary>
+    /// Return the FPL head representation for this predicative block.
+    /// </summary>
+    /// <param name="signatureType">Requested signature rendering mode.</param>
+    /// <returns>Head string according to the requested signature type.</returns>
     override this.Type signatureType = getFplHead this signatureType
 
+    /// <summary>
+    /// Perform consistency checks for signature variables and predicate expression returns.
+    /// </summary>
+    /// <remarks>
+    /// Emits VAR04 diagnostics for unused variables (when not intrinsic) and checks that
+    /// predicate expressions return predicate types using helper checks.
+    /// </remarks>
     override this.CheckConsistency () = 
         base.CheckConsistency()
         if not this.IsIntrinsic then
             checkVAR04Diagnostics this
         checkPredicateExpressionReturnsPredicate this
 
+/// <summary>
+/// Represents an FPL axiom block.
+/// </summary>
+/// <param name="positions">Start and end positions for diagnostics.</param>
+/// <param name="parent">Parent symbol-table node.</param>
+/// <param name="runOrder">Execution ordering index for axiom evaluation.</param>
+/// <remarks>
+/// Axioms register themselves in the valid-statement store. When successfully registered,
+/// their corollaries (if any) are evaluated in run-order. If no error occurs the axiom's
+/// default truth value is set to intrinsic true.
+/// </remarks>
 type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
@@ -80,6 +138,10 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
     override this.Name = LiteralAxL
     override this.ShortName = LiteralAx
 
+    /// <summary>
+    /// Produce a ValidStatement describing the axiom's validated expression and reason.
+    /// </summary>
+    /// <returns>A ValidStatement record indicating this axiom and its validity reason.</returns>
     member this.ValidExpression =
         let validityReason = 
             let exprOpt = this.ArgList |> Seq.tryLast
@@ -97,6 +159,9 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
             with get () = this.ValidExpression
 
 
+    /// <summary>
+    /// Create a deep copy of this axiom node.
+    /// </summary>
     override this.Clone () =
         let ret = new FplAxiom((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
@@ -105,10 +170,20 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
+    /// <summary>
+    /// Embed this axiom into the parent scope using its FPL identifier.
+    /// </summary>
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
         tryAddToParentUsingFplId this
 
+    /// <summary>
+    /// Execute axiom initialization and registration in the valid-statement store.
+    /// </summary>
+    /// <remarks>
+    /// Runs all argument expressions, emits LG003 diagnostics, registers the axiom and
+    /// triggers evaluation of corollaries. If no error occurred, sets the axiom's value to true.
+    /// </remarks>
     override this.Run() = 
         StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
@@ -128,7 +203,7 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
             match this.ErrorOccurred with
             | Some err -> () // the value of the axiom remains as it is
             | _ ->
-                // if no error occured, we wet the truth value of the axiom to "true" as default
+                // if no error occured, we set the truth value of the axiom to "true" as default
                 let v = FplIntrinsicTrue((this.StartPos, this.EndPos), this)
                 this.SetValue v
 
@@ -136,6 +211,16 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
+/// <summary>
+/// Base class for theorem-like statements (theorem, lemma, proposition, corollary).
+/// </summary>
+/// <param name="positions">Start/end positions used for diagnostics.</param>
+/// <param name="parent">Parent node in the symbol table.</param>
+/// <param name="runOrder">Execution ordering index for evaluation.</param>
+/// <remarks>
+/// Supports proof tracking (HasProof flag), registration in the valid statement store and
+/// evaluation of corollaries and proofs. Emits PR007 when no proof exists after run.
+/// </remarks>
 [<AbstractClass>]
 type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -154,6 +239,10 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
             with get (): bool = _hasProof
             and set (value) = _hasProof <- value
 
+    /// <summary>
+    /// Produce a ValidStatement describing the derived nature of this theorem-like statement.
+    /// </summary>
+    /// <returns>ValidStatement indicating the node and that it is derived.</returns>
     member this.ValidExpression =
         let validityReason = 
             let exprOpt = this.ArgList |> Seq.tryLast
@@ -173,10 +262,20 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
+    /// <summary>
+    /// Embed the theorem-like statement in the parent scope using its FPL identifier.
+    /// </summary>
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
         tryAddToParentUsingFplId this 
 
+    /// <summary>
+    /// Execute registration and evaluation of corollaries and proofs for the statement.
+    /// </summary>
+    /// <remarks>
+    /// Runs arguments, registers the statement, evaluates corollaries and proofs in run order.
+    /// Emits PR007 when no proof is present for a theorem-like statement after evaluation.
+    /// </remarks>
     override this.Run() = 
         StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
@@ -200,6 +299,12 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
 
     override this.RunOrder = Some _runOrder
 
+/// <summary>
+/// Concrete theorem node.
+/// </summary>
+/// <param name="positions">Source positions for diagnostics.</param>
+/// <param name="parent">Parent AST node.</param>
+/// <param name="runOrder">Run ordering index.</param>
 type FplTheorem(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
@@ -211,6 +316,9 @@ type FplTheorem(positions: Positions, parent: FplGenericNode, runOrder) =
         this.AssignParts(ret)
         ret
 
+/// <summary>
+/// Concrete lemma node.
+/// </summary>
 type FplLemma(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
@@ -222,6 +330,9 @@ type FplLemma(positions: Positions, parent: FplGenericNode, runOrder) =
         this.AssignParts(ret)
         ret
 
+/// <summary>
+/// Concrete proposition node.
+/// </summary>
 type FplProposition(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
@@ -233,6 +344,14 @@ type FplProposition(positions: Positions, parent: FplGenericNode, runOrder) =
         this.AssignParts(ret)
         ret
 
+/// <summary>
+/// Concrete corollary node.
+/// </summary>
+/// <remarks>
+/// Corollaries are associated with another provable statement; embedding attempts to find
+/// and reparent the corollary to its associated block and emits diagnostics when not found
+/// or used in an incorrect context.
+/// </remarks>
 type FplCorollary(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
@@ -244,6 +363,9 @@ type FplCorollary(positions: Positions, parent: FplGenericNode, runOrder) =
         this.AssignParts(ret)
         ret
 
+    /// <summary>
+    /// Embed the corollary into the most appropriate associated block or emit diagnostics.
+    /// </summary>
     override this.EmbedInSymbolTable _ =
         match tryFindAssociatedBlockForCorollary this with
         | ScopeSearchResult.FoundAssociate potentialParent -> 
@@ -256,6 +378,16 @@ type FplCorollary(positions: Positions, parent: FplGenericNode, runOrder) =
         | _ -> ()
         tryAddToParentUsingFplId this
 
+/// <summary>
+/// Concrete conjecture node (an unproven statement).
+/// </summary>
+/// <param name="positions">Source positions for diagnostics.</param>
+/// <param name="parent">Parent AST node.</param>
+/// <param name="runOrder">Run ordering index.</param>
+/// <remarks>
+/// Conjectures register and evaluate corollaries similarly to axioms/theorem-like statements
+/// but do not register as valid statements.
+/// </remarks>
 type FplConjecture(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
@@ -279,6 +411,12 @@ type FplConjecture(positions: Positions, parent: FplGenericNode, runOrder) =
         this.CheckConsistency()
         tryAddToParentUsingFplId this 
 
+    /// <summary>
+    /// Execute evaluation of the conjecture's arguments and corollaries.
+    /// </summary>
+    /// <remarks>
+    /// Runs all argument expressions, emits LG003 diagnostics and evaluates corollaries in run order.
+    /// </remarks>
     override this.Run() = 
         StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
