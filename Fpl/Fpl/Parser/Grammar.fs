@@ -670,9 +670,7 @@ let statement =
         assignmentStatement
     ]) .>> IW
 
-/// <summary>
 /// Assign the statement-list forward reference value (actual definition resides elsewhere).
-/// </summary>
 statementListRef.Value <- many statement
 
 /// <summary>
@@ -710,14 +708,10 @@ let referencingIdentifier = positions (predicateIdentifier .>>. dollarDigitList)
 /// </summary>
 let referenceToProofOrCorollary = positions referencingIdentifier |>> Ast.ReferenceToProofOrCorollary <!> "ReferenceToProofOrCorollary"
 
-/// <summary>
 /// Assigns the predicate-with-qualification forward reference.
-/// </summary>
 predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification <!> "PredicateWithQualification" 
 
-/// <summary>
 /// Forwarded prime predicate choices (true, false, delegate, references, etc.).
-/// </summary>
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
@@ -949,9 +943,7 @@ let pPostfixExpr : Parser<Ast,unit> =
             List.fold (fun acc op -> Ast.PostfixOp(op, acc)) expr postfixes
         ) <!> "pPostfixExpr"
 
-/// <summary>
 /// Assigns the prefix-expression reference value using a fold of prefix operators over postfix expressions.
-/// </summary>
 pPrefixExprRef.Value <-
     pipe2
         (many (attempt (prefixSymbolWithPos .>> NW)) <?> "<prefix symbol>")
@@ -993,14 +985,10 @@ let pInfixExpr : Parser<Ast,unit> =
 /// </summary>
 let expression = pInfixExpr
 
-/// <summary>
 /// Assigns the main predicate reference value to the expression parser.
-/// </summary>
 predicateRef.Value <- expression
 
-/// <summary>
 /// Assigns the predicate-list forward reference value to the pExprList implementation.
-/// </summary>
 predicateListRef.Value <- pExprList 
 
 // ------------------------------------------------------------
@@ -1217,9 +1205,7 @@ let predicateInstanceSignature = positions (keywordPredicate >>. SW >>. simpleSi
 /// </summary>
 let predicateInstance = positions (keywordProperty >>. predicateInstanceSignature .>>. predicateInstanceBlock) |>> Ast.PredicateInstance <!> "PredicateInstance"
 
-/// <summary>
 /// Assigns the mapping forward reference value to the arrow/mapping parser.
-/// </summary>
 mappingRef.Value <- toArrow >>. IW >>. positions (keywordUndefined <|> variableType) |>> Ast.Mapping <!> "Mapping"
 
 /// <summary>
