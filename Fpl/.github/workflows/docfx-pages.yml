@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pages: write
@@ -26,30 +26,40 @@ jobs:
       - name: Restore
         run: dotnet restore
 
-      - name: Build (Release)
-        run: dotnet build --configuration Release --no-restore
+      # Build only the Fpl project to avoid unrelated build failures
+      - name: Build Fpl (Release)
+        run: dotnet build Fpl/Fpl/Fpl.fsproj --configuration Release --no-restore
 
-      - name: Install DocFX (Chocolatey)
-        run: choco install docfx -y
-        shell: powershell
+      - name: Verify built assembly
+        shell: bash
+        run: |
+          DLL_PATH="Fpl/Fpl/bin/Release/net8.0/Fpl.dll"
+          if [ ! -f "$DLL_PATH" ]; then
+            echo "ERROR: $DLL_PATH not found"
+            echo "Listing Fpl/Fpl/bin/Release/net8.0:"
+            ls -la Fpl/Fpl/bin/Release/net8.0 || true
+            exit 1
+          fi
+          echo "Found: $DLL_PATH"
+
+      - name: Install DocFX (Linux)
+        run: |
+          DOCFX_VER="v2.61.0"
+          wget "https://github.com/dotnet/docfx/releases/download/${DOCFX_VER}/docfx-linux-x64.zip" -O docfx.zip
+          unzip docfx.zip -d docfx
+          chmod +x docfx/docfx
+          ./docfx/docfx --version
 
       - name: Generate DocFX metadata and site
         run: |
-          docfx metadata docfx.json
-          docfx build docfx.json -o _site
+          ./docfx/docfx metadata docfx.json
+          ./docfx/docfx build docfx.json -o _site
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v1
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          path: _site
-
-  deploy:
-    needs: build-and-deploy
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      contents: read
-
-    steps:
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v1
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          publish_branch: gh-pages
+          user_name: "github-actions[bot]"
+          user_email: "41898282+github-actions[bot]@users.noreply.github.com"
