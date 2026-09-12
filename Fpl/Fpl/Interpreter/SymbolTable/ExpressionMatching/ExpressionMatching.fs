@@ -1,5 +1,3 @@
-/// This module contains functions for matching and instantiating expressions during proof inference.
-
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -9,8 +7,22 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
 *)
+
+/// <summary>
+/// Module providing utilities to match and instantiate expressions during proof
+/// inference and justification processing.
+/// </summary>
+/// <remarks>
+/// The module implements:
+/// - Expression pattern matching with support for quantifiers, transparent references,
+///   parameterized variables and delegate-equality unwrapping.
+/// - Recording and verifying consistent pattern-variable usages across matches.
+/// - Helpers to collect matching results across multiple pattern candidates and to
+///   pretty-print mismatch diagnostics for error reporting.
+/// Matching routines return optional diagnostic messages (None on success) and populate
+/// substitution dictionaries used for instantiation.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.ExpressionMatching
 open System
 open System.Collections.Generic
@@ -546,7 +558,7 @@ let issuePR022SpecialReasonAndSetDefault (fv:FplGenericHasValue) reason =
 
 
 /// <summary>
-/// Abstract base class representing an infering construct that can yield inferred expression candidates.
+/// Abstract base class representing an inferring construct that can yield inferred expression candidates.
 /// </summary>
 [<AbstractClass>]
 type FplGenericInfering(positions: Positions, parent: FplGenericNode) =
@@ -640,7 +652,7 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpre
     /// (Inner recursive helper) Walks the lists of justification items with inferred expressions and
     /// premise patterns to perform the matching and emit diagnostics on mismatches.
     /// </summary>
-    /// <param name="iJeLists">Remaining justification-item-with-exprs pairs to process.</param>
+    /// <param name="iJeLists">Remaining justification-item-with-expression pairs to process.</param>
     /// <param name="preList">Remaining premise patterns to match.</param>
     let rec matchJustItemsExpressionsAgainstPremiseListRec (iJeLists:(FplGenericJustificationItem * FplGenericNode list) list) (preList:FplGenericNode list) =
         match iJeLists, preList with

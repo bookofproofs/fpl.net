@@ -694,7 +694,7 @@ let representationSep sep (coordinates:FplGenericNode seq) =
 /// </summary>
 /// <param name="FplGenericNode">Node to describe.</param>
 /// <returns>Single-line description.</returns>
-let toString (FplGenericNode:FplGenericNode) = $"{FplGenericNode.ShortName} {FplGenericNode.Type(SignatureType.Name)}"
+let toString (node:FplGenericNode) = $"{node.ShortName} {node.Type(SignatureType.Name)}"
 
 /// <summary>
 /// Interface for nodes that expose a dotted child reference used by dotted-notation lookups.

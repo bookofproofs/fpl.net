@@ -1,6 +1,15 @@
-/// This module contains all symbol table nodes used by the FplInterpreter
-/// to interpret proofs.
-
+/// <summary>
+/// Module containing symbol-table nodes used by the FPL interpreter to model and
+/// evaluate proof-related constructs and justification items.
+/// </summary>
+/// <remarks>
+/// This module implements concrete justification-item kinds that extract candidate
+/// predicative expressions from axioms, definitions, variables and conjectures.
+/// These items are used by the inference engine to collect expressions that can
+/// satisfy premises during proof checking. Diagnostic helpers such as
+/// <c>issuePR022AndSetDefault</c> are used when referenced definitions lack
+/// predicative expressions required for argument inference.
+/// </remarks>
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -32,20 +41,50 @@ open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.ExpressionMatching
 
+/// <summary>
+/// Justification item that sources inferred expressions from an axiom reference.
+/// </summary>
+/// <param name="positions">Source start/end positions for diagnostic reporting.</param>
+/// <param name="parent">Parent justification node.</param>
+/// <returns>Instance of <c>FplJustificationItemByAx</c>.</returns>
+/// <remarks>
+/// When the referenced axiom contains predicative expressions, the last argument of the axiom
+/// is treated as the candidate expression. If the axiom reference is missing or contains no
+/// predicative expressions, PR022 diagnostics are emitted and an undetermined predicate
+/// placeholder is returned.
+/// </remarks>
 type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByAx
 
+    /// <summary>
+    /// Create a shallow clone of this justification item preserving parts and positions.
+    /// </summary>
+    /// <returns>Cloned <c>FplJustificationItemByAx</c> instance.</returns>
     override this.Clone () =
         let ret = new FplJustificationItemByAx((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
+    /// <summary>
+    /// Parent justification container cast helper.
+    /// </summary>
+    /// <returns>The parent node cast to <c>FplJustification</c>.</returns>
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
+    /// <summary>
+    /// Collect candidate expressions inferred by this justification item.
+    /// </summary>
+    /// <returns>
+    /// A list with the candidate expression (the axiom's last argument) on success,
+    /// or a single <c>FplUndetermined</c> placeholder when no suitable expressions are found.
+    /// </returns>
+    /// <remarks>
+    /// Emits PR022 diagnostics when the axiom reference
+    /// is absent or contains no predicative expressions.
+    /// </remarks>
     override this.InferredExprCandidates
-        // prepare candidate expressions that may be used for proof argument inference
         with get (): FplGenericNode list =
             match this.RefersTo with
             | Some ax ->
@@ -58,20 +97,50 @@ type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
                 issuePR022AndSetDefault this None None
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
+/// <summary>
+/// Justification item that extracts inferred expressions from a referenced definition.
+/// </summary>
+/// <param name="positions">Source start/end positions for diagnostic reporting.</param>
+/// <param name="parent">Parent justification node.</param>
+/// <returns>Instance of <c>FplJustificationItemByDef</c>.</returns>
+/// <remarks>
+/// The item gathers predicate definitions, assertion expressions and predicative properties
+/// contained in the referenced definition. If none are found, PR022 diagnostics are emitted
+/// and an undetermined predicate placeholder is returned.
+/// </remarks>
 and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByDef
 
+    /// <summary>
+    /// Create a shallow clone of this justification item preserving parts and positions.
+    /// </summary>
+    /// <returns>Cloned <c>FplJustificationItemByDef</c> instance.</returns>
     override this.Clone () =
         let ret = new FplJustificationItemByDef((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
+    /// <summary>
+    /// Parent justification container cast helper.
+    /// </summary>
+    /// <returns>The parent node cast to <c>FplJustification</c>.</returns>
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
+    /// <summary>
+    /// Collect candidate expressions by extracting predicative content from the referred definition.
+    /// </summary>
+    /// <returns>
+    /// List of predicative expressions extracted from the definition on success,
+    /// otherwise a single undetermined predicate placeholder.
+    /// </returns>
+    /// <remarks>
+    /// Uses helper extractors: <c>extractPredicateDefinitionExpressions</c>,
+    /// <c>extractAssertionExpressions</c>, and <c>extractPredicativePropertiesExpressions</c>.
+    /// Emits PR022 diagnostics when no suitable expressions are discovered.
+    /// </remarks>
     override this.InferredExprCandidates
-        // identify the expressions contained in the definition
         with get (): FplGenericNode list =
             match this.RefersTo with
             | Some def ->
@@ -89,20 +158,48 @@ and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
                 issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
+/// <summary>
+/// Justification item that sources inferred expressions from the definition of a variable reference.
+/// </summary>
+/// <param name="positions">Source start/end positions for diagnostic reporting.</param>
+/// <param name="parent">Parent justification node.</param>
+/// <returns>Instance of <c>FplJustificationItemByDefVar</c>.</returns>
+/// <remarks>
+/// If the referred variable points to a definition, its predicative contents are extracted similarly
+/// to <c>FplJustificationItemByDef</c>. PR022 diagnostics are emitted when the variable or its
+/// definition lacks predicative expressions.
+/// </remarks>
 and FplJustificationItemByDefVar(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByDefVar
 
+    /// <summary>
+    /// Create a shallow clone of this justification item preserving parts and positions.
+    /// </summary>
+    /// <returns>Cloned <c>FplJustificationItemByDefVar</c> instance.</returns>
     override this.Clone () =
         let ret = new FplJustificationItemByDefVar((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
+    /// <summary>
+    /// Parent justification container cast helper.
+    /// </summary>
+    /// <returns>The parent node cast to <c>FplJustification</c>.</returns>
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
+    /// <summary>
+    /// Collect candidate expressions from the variable's referenced definition.
+    /// </summary>
+    /// <returns>
+    /// List of predicative expressions extracted from the variable's definition on success,
+    /// otherwise a single undetermined predicate placeholder.
+    /// </returns>
+    /// <remarks>
+    /// Emits PR022 diagnostics with both definition and variable context when extraction fails.
+    /// </remarks>
     override this.InferredExprCandidates 
-        // identify the expressions contained in the variable definition
         with get (): FplGenericNode list =
             match this.RefersTo with
             | Some var ->
@@ -125,21 +222,46 @@ and FplJustificationItemByDefVar(positions: Positions, parent: FplGenericNode) =
                 issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
+/// <summary>
+/// Justification item that sources an inferred expression from a referenced conjecture.
+/// </summary>
+/// <param name="positions">Source start/end positions for diagnostic reporting.</param>
+/// <param name="parent">Parent justification node.</param>
+/// <returns>Instance of <c>FplJustificationItemByConj</c>.</returns>
+/// <remarks>
+/// When the referenced conjecture contains an expression, the last argument is used as the
+/// candidate expression. PR022 diagnostics are emitted when the reference is missing or empty.
+/// </remarks>
 and FplJustificationItemByConj(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByConj
 
+    /// <summary>
+    /// Create a shallow clone of this justification item preserving parts and positions.
+    /// </summary>
+    /// <returns>Cloned <c>FplJustificationItemByConj</c> instance.</returns>
     override this.Clone () =
         let ret = new FplJustificationItemByConj((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
+    /// <summary>
+    /// Parent justification container cast helper.
+    /// </summary>
+    /// <returns>The parent node cast to <c>FplJustification</c>.</returns>
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
+    /// <summary>
+    /// Collect candidate expressions inferred by this justification item from the referenced conjecture.
+    /// </summary>
+    /// <returns>
+    /// List with the conjecture's last argument when present, otherwise a single undetermined placeholder.
+    /// </returns>
+    /// <remarks>
+    /// Emits PR022 diagnostics via <c>issuePR022AndSetDefault</c> on failure to resolve a usable candidate.
+    /// </remarks>
     override this.InferredExprCandidates
-        // identify the expression contained in the conjecture
-        // referred by this "byconj" justification in a proof
         with get (): FplGenericNode list =
             match this.RefersTo with
             | Some conj ->
