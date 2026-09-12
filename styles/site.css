@@ -1,0 +1,69 @@
+/* Minimal style for DocFX-generated site */
+:root {
+    --bg: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+    --accent: #0b5fff;
+    --container: 900px;
+    --mono: "Consolas", "Courier New", monospace;
+    --ui-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--ui-font);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.docfx-content, .main {
+    max-width: var(--container);
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+h1, h2, h3 {
+    color: var(--text);
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+p.lead {
+    color: var(--muted);
+    margin-bottom: 1rem;
+}
+
+/* Code blocks */
+pre, code {
+    font-family: var(--mono);
+    font-size: 0.95em;
+    background: #f3f4f6;
+    color: #0f172a;
+    border-radius: 4px;
+}
+
+pre {
+    padding: 1rem;
+    overflow: auto;
+}
+
+/* Simple responsive helpers */
+@media (max-width: 720px) {
+    .docfx-content {
+        margin: 1rem;
+        padding: 0;
+    }
+}
