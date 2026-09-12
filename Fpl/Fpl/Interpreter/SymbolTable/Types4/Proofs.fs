@@ -481,7 +481,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                 | _, _ ->
                     this.SetDefaultValue()
         | None, Some argInference -> // Case B: no justification was given. An argument inference stands alone in the proof argument.
-            // The behavior of the FplInterpreter will on purpose assume the "correctness" of the proof argument in this case.
+            // The behavior of the FPL interpreter will on purpose assume the "correctness" of the proof argument in this case.
             // This is because checking the "correctness" of a proof argument (Case A) is experimental, can be very tricky, and will almost always produce some diagnostics.
             // Case B provides a way for a user that he/she can be used as "default" to avoid unjustified diagnostics in Case A produced by the experimental FplInterpreter engine.
             // As the engine gets more and more sophisticated, users can gradually replace arguments without justification by those with a justification,

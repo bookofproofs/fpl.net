@@ -1,5 +1,4 @@
-/// This module contains functions helping the FplInterpreter
-/// to embed nodes into the symbol table 
+/// This module contains functions to embed nodes into the symbol table.
 
 (* MIT License
 

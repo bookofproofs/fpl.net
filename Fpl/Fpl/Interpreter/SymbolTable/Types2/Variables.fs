@@ -1,4 +1,4 @@
-/// This module contains all types of the FplInterpreter related to variables
+/// This module contains all types in the Fpl.Interpreter namespace related to variables
 
 (* MIT License
 

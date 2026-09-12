@@ -1,4 +1,6 @@
-/// This module contains helper variables used by the FplInterpreter.
+/// <summary>
+/// This module contains helpers used in the Fpl.Interpreter.
+/// </summary>
 
 (* MIT License
 
@@ -23,7 +25,9 @@ open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 
-/// A type with helper variables storing some context during the creation process of the symbol table
+/// <summary>
+/// Helper container holding contextual state used during symbol-table construction and interpretation.
+/// </summary>
 type Helper() =
     let mutable _inSignatureEvaluation = false
     let mutable _inReferenceToProofOrCorollary = false
@@ -34,45 +38,53 @@ type Helper() =
 
     let mutable _nextRunOrder = 0
     
-    /// Indicates if a signature on a FPL building block is being evaluted
+    /// <summary>
+    /// Indicates whether a signature on a building block is currently being evaluated.
+    /// </summary>
     member this.InSignatureEvaluation
         with get () = _inSignatureEvaluation
         and set (value) = _inSignatureEvaluation <- value
 
-
-    /// Current language choice of all localizations
+    /// <summary>
+    /// Current language identifier used when rendering localizations (e.g. "tex").
+    /// </summary>
     member this.CurrentLanguage
         with get () = _language
         and set (value) = _language <- value
 
-    /// Starting position of the caller
+    /// <summary>
+    /// Starting position of the caller used to adjust diagnostic positions.
+    /// </summary>
     member this.CallerStartPos
         with get () = _callerStartPos
         and set (value) = _callerStartPos <- value
 
-    /// End position of the caller 
+    /// <summary>
+    /// Ending position of the caller used to adjust diagnostic positions.
+    /// </summary>
     member this.CallerEndPos
         with get () = _callerEndPos
         and set (value) = _callerEndPos <- value
 
-
-    /// Returns the next available RunOrder to be stored, when inserting an FplValue into its parent.
-    /// The need for this functionality is that sometimes, the block is inserted into the parent's scope, which is a dictionary.
-    /// When running the nodes in the dictionary, their run order will ensure that they are being run in the order they have bin inserted.
-    /// This order is incremented and stored when specific FplValue when they are created.
-    /// All FplValues can have either Some or None RunOrder.
-    /// Those with Some RunOrder include e.g. the following building blocks: axioms, theorems, lemmas, propositions, proofs, corollaries, arguments in proofs.
-    /// Those with None include all other types of FplValues. They do not run by their own. They are "called" by those with Some RunOrder.
+    /// <summary>
+    /// Return the next available run-order integer used to schedule FPL building block execution.
+    /// </summary>
+    /// <returns>Monotonically increasing run-order identifier.</returns>
     member this.GetNextAvailableFplBlockRunOrder = 
         _nextRunOrder <- _nextRunOrder + 1
         _nextRunOrder
 
-    /// Indicates if this EvalStack is evaluating a ReferenceToProofOrCorollary
+    /// <summary>
+    /// Indicates whether the current evaluation stack is processing a reference to a proof or corollary.
+    /// </summary>
     member this.InReferenceToProofOrCorollary
         with get () = _inReferenceToProofOrCorollary
         and set (value) = _inReferenceToProofOrCorollary <- value
 
-// Adds an expression to Parent's argument list
+/// <summary>
+/// Append an expression node to its parent's argument list (or adjust parent fields for localizations).
+/// </summary>
+/// <param name="fplValue">Expression node to add to its parent.</param>
 let addExpressionToParentArgList (fplValue:FplGenericNode) =
     let parent = fplValue.Parent.Value
     match parent.Name with 
@@ -83,7 +95,10 @@ let addExpressionToParentArgList (fplValue:FplGenericNode) =
     | _ -> ()
     parent.ArgList.Add fplValue
 
-// Add an expression to a reference
+/// <summary>
+/// Attach an expression to a referencing node or update the reference target when appropriate.
+/// </summary>
+/// <param name="fplValue">Expression node to add to a reference.</param>
 let addExpressionToReference (fplValue:FplGenericNode) =
     let nextOpt = fplValue.Parent
     match box nextOpt with 
@@ -117,7 +132,10 @@ let addExpressionToReference (fplValue:FplGenericNode) =
             next.ErrorOccurred <- fplValue.ErrorOccurred
         | _ -> addExpressionToParentArgList fplValue 
 
-// Tries to add for statement's domain or entity to its parent's for statement
+/// <summary>
+/// Try to add a for-statement domain/entity to its parent's for-statement argument list, emitting diagnostics if needed.
+/// </summary>
+/// <param name="fplValue">Node representing the for-statement domain or entity.</param>
 let tryAddToParentForInStmt (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Name
     let parent = fplValue.Parent.Value
@@ -131,7 +149,11 @@ let tryAddToParentForInStmt (fplValue:FplGenericNode) =
     else
         parent.ArgList.Add fplValue
 
-// Tries to add a template to the ultimate block's scope, inside which it was used.
+/// <summary>
+/// Attempt to insert a template node into the ultimate block's scope where it is used.
+/// If a duplicate exists the existing template is reused and diagnostics may be emitted.
+/// </summary>
+/// <param name="templateNode">Template node to add.</param>
 let tryAddTemplateToParent (templateNode:FplGenericNode) =
     let identifier = templateNode.FplId
     let nextOpt = templateNode.UltimateBlockNode // the scope of all templates ís inside the ultimate block
@@ -156,7 +178,6 @@ let tryAddTemplateToParent (templateNode:FplGenericNode) =
         // does not allow template without UltimateBlocks
         ()
 
-// Tries to add a constructor or property to it's parent FPL block's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
 let tryAddSubBlockToFplBlock (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Mixed
     let parent = fplValue.Parent.Value
@@ -169,7 +190,12 @@ let tryAddSubBlockToFplBlock (fplValue:FplGenericNode) =
     else
         parent.Scope.Add(identifier, fplValue)
 
-/// Generates a string of parameters based on SignatureType
+/// <summary>
+/// Create a comma-separated parameter tuple string for `fv` based on its signature variables and the requested signature type.
+/// </summary>
+/// <param name="fv">Node whose parameters are to be listed.</param>
+/// <param name="signatureType">Requested form of the signature (Name/Type/Mixed).</param>
+/// <returns>Comma-separated parameter list string.</returns>
 let getParamTuple (fv:FplGenericNode) (signatureType:SignatureType) =
         let propagate = propagateSignatureType signatureType
         fv.Scope
@@ -180,6 +206,11 @@ let getParamTuple (fv:FplGenericNode) (signatureType:SignatureType) =
         |> Seq.map (fun (kvp: KeyValuePair<string, FplGenericNode>) -> kvp.Value.Type(propagate))
         |> String.concat ", "
 
+/// <summary>
+/// Produce a string representation of a node's signature including its signature variables.
+/// </summary>
+/// <param name="fv">Node whose signature will be represented.</param>
+/// <returns>Signature representation string.</returns>
 let signatureRepresent (fv:FplGenericNode) = 
     let signatureVarRepresentations = 
         fv.GetVariables()
@@ -188,6 +219,12 @@ let signatureRepresent (fv:FplGenericNode) =
         |> String.concat ", "
     $"{fv.FplId}({signatureVarRepresentations})"
 
+/// <summary>
+/// Search for a named symbol in upper scopes, ascending until a theory boundary is reached.
+/// </summary>
+/// <param name="fv1">Starting node to search from.</param>
+/// <param name="name">Name to locate.</param>
+/// <returns>ScopeSearchResult describing the lookup outcome.</returns>
 let rec searchInUpperScopeByName (fv1: FplGenericNode) name =
     if fv1.Name = PrimTheoryL then 
         ScopeSearchResult.NotFound
@@ -196,8 +233,13 @@ let rec searchInUpperScopeByName (fv1: FplGenericNode) name =
     else
         searchInUpperScopeByName fv1.Parent.Value name
 
-/// Tries to find a theorem-like statement, an axiom or a corollary
-/// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
+/// <summary>
+/// Given a justification item and candidate targets, attempt to resolve the associated building block and
+/// return detailed scope-search results describing success or semantic mismatches.
+/// </summary>
+/// <param name="fvJi">Justification item node.</param>
+/// <param name="candidates">Candidate nodes to consider.</param>
+/// <returns>ScopeSearchResult describing the best match or error case.</returns>
 let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericNode) (candidates:FplGenericNode list) =
     match candidates.Length with
     | 1 ->  // exactly one candidate found
@@ -227,8 +269,11 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericNode) (candidate
             |> numbered
         )
 
-/// Tries to find a theorem-like statement, a conjecture, or an axiom for a corollary
-/// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
+/// <summary>
+/// Resolve the block (theorem/axiom/conjecture) associated with a corollary using its parent theory scope.
+/// </summary>
+/// <param name="fplValue">Corollary node to resolve.</param>
+/// <returns>ScopeSearchResult describing the associated block or error condition.</returns>
 let tryFindAssociatedBlockForCorollary (fplValue: FplGenericNode) =
     match fplValue.Parent with
     | Some theory ->
@@ -275,8 +320,11 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplGenericNode) =
             ScopeSearchResult.NotFound
     | None -> ScopeSearchResult.NotApplicable
 
-/// Tries to find a theorem-like statement for a proof
-/// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
+/// <summary>
+/// Resolve the provable block associated with a proof node by searching the enclosing theory scope.
+/// </summary>
+/// <param name="fplValue">Proof node to resolve.</param>
+/// <returns>ScopeSearchResult describing the associated provable block or error condition.</returns>
 let tryFindAssociatedBlockForProof (fplValue: FplGenericNode) =
     match fplValue.Parent with
     | Some theory ->
@@ -319,8 +367,14 @@ let tryFindAssociatedBlockForProof (fplValue: FplGenericNode) =
             ScopeSearchResult.NotFound
     | None -> ScopeSearchResult.NotApplicable
 
-
-
+/// <summary>
+/// Filter a list of candidate nodes to those matching the requested identifier and produce a human-readable
+/// numbered list of candidate names for diagnostics.
+/// </summary>
+/// <param name="candidatesPre">Unfiltered candidate list.</param>
+/// <param name="identifier">Identifier string to match against candidate FplId.</param>
+/// <param name="qualified">When true produce qualified names in the returned listing.</param>
+/// <returns>Tuple of (filteredCandidates, numberedCandidateNames).</returns>
 let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
     let candidates =
         candidatesPre
@@ -338,8 +392,11 @@ let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
         |> numbered
     (candidates, candidatesNames)
 
-
-/// helper to escape JSON string content
+/// <summary>
+/// Escape a string for safe JSON embedding (quotes, backslashes, control chars).
+/// </summary>
+/// <param name="s">Input string to escape.</param>
+/// <returns>Escaped string suitable for JSON string content.</returns>
 let escape (s: string) =
     if isNull s then String.Empty
     else
@@ -357,6 +414,14 @@ let escape (s: string) =
             | _    -> sb.Append(c) |> ignore
         sb.ToString()
 
+/// <summary>
+/// Produce an infix notation string for two-argument expressions, adding parentheses when elements are not simple.
+/// </summary>
+/// <param name="fv">Node whose arguments will be rendered.</param>
+/// <param name="symbol">Infix symbol to use between the two arguments.</param>
+/// <param name="signatureType">Signature form requested (Type/Name/Mixed).</param>
+/// <param name="defaultVal">Default value to return when <c>SignatureType.Type</c> is requested.</param>
+/// <returns>Rendered notation string.</returns>
 let getNotationTwoArgs (fv:FplGenericNode) symbol signatureType defaultVal = 
     let separator = $" {symbol} "
     match signatureType with
@@ -371,7 +436,12 @@ let getNotationTwoArgs (fv:FplGenericNode) symbol signatureType defaultVal =
         )
         |> String.concat separator
 
-/// returns a list of all items before search item (using reference equality).
+/// <summary>
+/// Return all items that occur before the given search item in a list, using reference equality.
+/// </summary>
+/// <param name="searchItem">Item to find.</param>
+/// <param name="xs">List to search.</param>
+/// <returns>List of items preceding <paramref name="searchItem"/> or empty list if not found.</returns>
 let allBefore searchItem xs =
     let rec loop acc = function
         | [] ->

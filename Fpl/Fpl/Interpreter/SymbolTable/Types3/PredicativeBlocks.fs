@@ -1,4 +1,4 @@
-/// This module contains all classes used by the FplInterpreter
+/// This module contains all classes in the Fpl.Interpreter namespace
 /// to model predicative nodes in the symbol table, like axioms, and theorem-like statments
 
 (* MIT License

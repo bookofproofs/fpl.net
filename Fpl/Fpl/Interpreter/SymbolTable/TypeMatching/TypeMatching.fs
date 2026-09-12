@@ -1,4 +1,4 @@
-/// This module contains all functions used by the FplInterpreter
+/// This module contains all functions in the Fpl.Interpreter namespace
 /// to compare / match two FPL types
 
 (* MIT License

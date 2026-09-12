@@ -1,4 +1,4 @@
-/// This module contains all nodes of the symbol table used by the FplInterpreter
+/// This module contains all nodes of the symbol table in the Fpl.Interpreter namespace
 /// to interpret compound predicates
 
 (* MIT License

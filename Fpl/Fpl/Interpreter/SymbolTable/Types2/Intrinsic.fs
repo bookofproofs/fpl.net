@@ -1,4 +1,4 @@
-/// This module contains all intrinsic types used by the FplInterpreter
+/// This module contains all intrinsic types in the Fpl.Interpreter namespace
 
 (* MIT License
 

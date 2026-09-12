@@ -1,4 +1,6 @@
-/// This module contains functions used for debugging purposes (not for production)
+/// <summary>
+/// Lightweight debug utilities used by the interpreter. Intended for development and testing only.
+/// </summary>
 
 (* MIT License
 
@@ -18,29 +20,58 @@ open System.IO
 open TestSharedConfig
 open Fpl.Interpreter.BasicTypes
 
-
+/// <summary>
+/// Tracks a small recursion-depth counter used to indent debug traces.
+/// </summary>
 type Recursion() =
     let mutable _recursionLevel = 0
 
-    /// Recursion level
+    /// <summary>
+    /// Current recursion level.
+    /// </summary>
     member this.RecursionLevel = _recursionLevel
 
-    /// Increment recursion level
+    /// <summary>
+    /// Increment the recursion level by one.
+    /// </summary>
     member this.RecursionInc() = 
         _recursionLevel <- _recursionLevel + 1
 
-    /// Decrement recursion level
+    /// <summary>
+    /// Decrement the recursion level by one.
+    /// </summary>
     member this.RecursionDec() = 
         _recursionLevel <- _recursionLevel - 1
 
 
+/// <summary>
+/// Global recursion tracker used by debug helpers.
+/// </summary>
 let debugRec = Recursion()
+
+/// <summary>
+/// Mode selector for debug tracing.
+/// </summary>
 type Debug =
+    /// <summary>Start of a traced operation.</summary>
     | Start
+    /// <summary>End of a traced operation.</summary>
     | Stop
 
+/// <summary>
+/// Static debug helpers.
+/// </summary>
 type StaticDebug =
-    /// Calls to this static member are omitted when the DEBUG symbol is not defined.
+    /// <summary>
+    /// Emit a debug record for a given node and debug mode. Calls are conditional on the DEBUG compilation symbol.
+    /// </summary>
+    /// <param name="fv">Node being traced.</param>
+    /// <param name="debugMode">Whether this is the start or stop of a traced operation.</param>
+    /// <returns>Unit.</returns>
+    /// <remarks>
+    /// This member is marked with <c>System.Diagnostics.Conditional("DEBUG")</c> so invocations are omitted in release builds.
+    /// It also respects the test configuration flag that enables interpreter debug logging.
+    /// </remarks>
     [<System.Diagnostics.Conditional("DEBUG")>]
     static member Debug(fv: FplGenericNode, debugMode: Debug) : unit =
         if TestSharedConfig.TestConfig.DebugModeInterpreter then
@@ -65,4 +96,7 @@ type StaticDebug =
             let currDir = Directory.GetCurrentDirectory()
             File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
 
+/// <summary>
+/// File-system watcher stub used for offline testing of debug flows.
+/// </summary>
 let offlineWatcher = TestConfig.OfflineWatcher()

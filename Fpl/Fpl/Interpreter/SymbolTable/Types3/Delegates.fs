@@ -1,5 +1,5 @@
-/// This module contains all types used by the FplInterpreter
-/// to model / interpret delagates, including equality 
+/// This module contains all types used by the in the Fpl.Interpreter namespace
+/// to model / interpret delegates, including equality 
 
 (* MIT License
 

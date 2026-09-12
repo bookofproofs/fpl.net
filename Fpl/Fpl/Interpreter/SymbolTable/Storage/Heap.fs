@@ -1,4 +1,5 @@
-/// This module contains a type used as a heap memory of the FplInterpreter
+
+/// This module contains a type used as a heap memory in the Fpl.Interpreter namespace.
 
 (* MIT License
 

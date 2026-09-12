@@ -1,4 +1,4 @@
-/// This module contains all functions and types used by the FplInterpreter
+/// This module contains all functions and types in the Fpl.Interpreter namespace
 /// that are referencing other nodes of the symbol table 
 
 (* MIT License

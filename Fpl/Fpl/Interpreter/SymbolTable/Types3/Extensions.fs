@@ -1,4 +1,4 @@
-/// This module contains all types used by the FplInterpreter
+/// This module contains all types in the Fpl.Interpreter namespace
 /// to model / interpret extensions
 
 (* MIT License

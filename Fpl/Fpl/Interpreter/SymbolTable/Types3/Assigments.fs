@@ -1,4 +1,4 @@
-/// This module contains all symbol table nodes used by the FplInterpreter
+/// This module contains all symbol table nodes in the Fpl.Interpreter namespace
 /// to model assignments.
 
 (* MIT License

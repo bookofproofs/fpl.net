@@ -8,7 +8,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 open TestFplInterpreter.Helpers.Common
-open FplInterpreter.Main
+open Fpl.Interpreter.Main
 
 [<TestClass>]
 type Navigation() =

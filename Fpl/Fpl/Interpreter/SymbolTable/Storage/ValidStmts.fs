@@ -1,4 +1,4 @@
-/// This module contains classes used to store valid statements globally by the FplInterpreter
+/// This module contains classes used to store valid statements globally in the Fpl.Interpreter namespace.
 
 (* MIT License
 

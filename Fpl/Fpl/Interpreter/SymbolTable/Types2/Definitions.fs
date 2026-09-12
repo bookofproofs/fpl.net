@@ -1,4 +1,4 @@
-/// This module contains all classed used by the FplInterpreter
+/// This module contains all classed in the Fpl.Interpreter namespace
 /// to store and interpret definitions in the symbol table
 
 (* MIT License

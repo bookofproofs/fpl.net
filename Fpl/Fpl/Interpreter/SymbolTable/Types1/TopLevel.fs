@@ -1,5 +1,5 @@
 /// This module contains top-level classes of the symbol table,
-/// including root and theories used by the FplInterpreter
+/// including root and theories in the Fpl.Interpreter namespace.
 
 (* MIT License
 
