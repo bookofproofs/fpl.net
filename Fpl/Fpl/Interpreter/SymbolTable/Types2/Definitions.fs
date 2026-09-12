@@ -1,6 +1,3 @@
-/// This module contains all classed in the Fpl.Interpreter namespace
-/// to store and interpret definitions in the symbol table
-
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -12,6 +9,18 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
+
+/// <summary>
+/// Module containing symbol-table node implementations for definitions, classes,
+/// constructors, predicates and functional terms used by the FPL interpreter.
+/// </summary>
+/// <remarks>
+/// This module implements inheritance handling, constructor/instance creation,
+/// predicate and functional term evaluation, default value creation for functions,
+/// and diagnostic emission during symbol-table construction. Diagnostics are emitted
+/// via helper emitter functions; methods generally record diagnostics on nodes rather
+/// than throwing exceptions.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Types2.Definitions
 open System.Collections.Generic
 open FParsec
@@ -27,6 +36,16 @@ open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.Variables
 
+/// <summary>
+/// Abstract base for nodes that inherit variables and properties from other nodes.
+/// </summary>
+/// <param name="positions">Source positions used for diagnostics.</param>
+/// <param name="parent">Parent node in the symbol table.</param>
+/// <remarks>
+/// Provides helpers to track inherited variables and properties so clones preserve
+/// reference identity. Emits diagnostics when inherited members are overridden or
+/// conflict with local declarations.
+/// </remarks>
 [<AbstractClass>]
 type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericHasValue(positions, parent)
@@ -35,9 +54,23 @@ type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
     // used to ensure that every clone of FplGenericInheriting will preserve reference identity of inherited properties
     let _inheritedProperties = Dictionary<string, List<FplGenericNode>>()
 
-    /// Wraps an inherited object in a tuple together with the newFromNode it was from and stores this tuple with the keyOfInheritedObject in mapOfInheritedObjects. 
-    /// Returns (Some oldFromNode, Some newFromNode) if some other tuple existed in the map, where oldFromNode will be the old base node that was overridden by newFromNode
-    /// Returns (None, None) if no other tuple yet existed in the map
+    /// <summary>
+    /// Wraps an inherited object together with the node it was inherited from and stores it
+    /// in a dictionary keyed by the inherited object's identifier.
+    /// </summary>
+    /// <param name="keyOfInheritedObject">Key under which the inherited object is stored.</param>
+    /// <param name="mapOfInheritedObjects">Dictionary that records inherited objects.</param>
+    /// <param name="inheritedObject">The inherited node being wrapped.</param>
+    /// <param name="newFromNode">The node that provides the inherited object.</param>
+    /// <param name="withCloning">If true, clones the inherited object before storing.</param>
+    /// <returns>
+    /// A tuple with (Some oldFromName, Some oldFromType, Some newFromType) when an override occurred,
+    /// or (None, None, None) when the inherited key was newly added.
+    /// </returns>
+    /// <remarks>
+    /// The function optionally clones the inherited object to preserve identity semantics
+    /// when creating overrides in derived nodes.
+    /// </remarks>
     member private this.OverrideInheritedObject keyOfInheritedObject (mapOfInheritedObjects:Dictionary<string, List<FplGenericNode>>) (inheritedObject:FplGenericNode) (newFromNode:FplGenericNode) withCloning =
         let clone = 
             if withCloning then
@@ -58,6 +91,13 @@ type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
             mapOfInheritedObjects.Add(keyOfInheritedObject, tuple)
             (None, None, None)
             
+    /// <summary>
+    /// Import variables from the given base node into this node's inherited variables map.
+    /// </summary>
+    /// <param name="fromBaseNode">Node to inherit variables from.</param>
+    /// <remarks>
+    /// Emits VAR06 diagnostics when an inherited variable conflicts with an existing one.
+    /// </remarks>
     member this.InheritVariables (fromBaseNode:FplGenericNode) = 
         fromBaseNode.GetVariables()
         |> List.iter (fun var ->
@@ -68,6 +108,13 @@ type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
                 ()
         )
 
+    /// <summary>
+    /// Import properties from the given base node into this node's inherited properties map.
+    /// </summary>
+    /// <param name="fromBaseNode">Node to inherit properties from.</param>
+    /// <remarks>
+    /// Emits SIG06 diagnostics on property signature conflicts.
+    /// </remarks>
     member this.InheritProperties (fromBaseNode:FplGenericNode) = 
         fromBaseNode.GetProperties()
         |> List.iter (fun prty ->
@@ -80,6 +127,13 @@ type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
                 ()
         )
 
+    /// <summary>
+    /// Checks inheritance-related consistency: overridden variables/properties and scope population
+    /// with inherited members that are not shadowed by local declarations.
+    /// </summary>
+    /// <remarks>
+    /// Emits diagnostics using emitter helpers; diagnostics are recorded on nodes and not thrown.
+    /// </remarks>
     override this.CheckConsistency() = 
         base.CheckConsistency()
         // check if own declared variables override the inherited ones
@@ -134,6 +188,14 @@ type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
                 this.Scope.Add (kvp.Key, prty)
         )
 
+/// <summary>
+/// Evaluate an intrinsic predicate value for the given node.
+/// </summary>
+/// <param name="fv">Predicate node to evaluate.</param>
+/// <remarks>
+/// If the node implements <c>IConstant</c> its constant name is set and an instance node
+/// is created as the predicate value. Otherwise the default undetermined value is set.
+/// </remarks>
 let runIntrinsicPredicate (fv:FplGenericHasValue) = 
     match box fv with
     | :? IConstant as fvConstant ->
@@ -144,6 +206,13 @@ let runIntrinsicPredicate (fv:FplGenericHasValue) =
     | _ ->
         fv.SetDefaultValue()
 
+/// <summary>
+/// Execute all arguments of <paramref name="fv"/> and set its value to the last argument's value.
+/// </summary>
+/// <param name="fv">Node whose arguments are run and whose value will be set.</param>
+/// <remarks>
+/// If the last argument is missing or not a value-carrying node, the node's value is set to the default.
+/// </remarks>
 let runArgsAndSetWithLastValue (fv:FplGenericHasValue) =
     // run all statements and the last predicate in the FplPredicate
     fv.ArgList |> Seq.iter (fun fv1 -> fv1.Run()) 
@@ -153,6 +222,15 @@ let runArgsAndSetWithLastValue (fv:FplGenericHasValue) =
     | Some (:? FplGenericHasValue as last) -> fv.SetValueOf last
     | _ -> fv.SetDefaultValue()
 
+/// <summary>
+/// Predicate block node that can inherit variables/properties and be evaluated.
+/// </summary>
+/// <param name="positions">Source positions used for diagnostics.</param>
+/// <param name="parent">Parent node in the symbol table.</param>
+/// <param name="runOrder">Execution ordering index for this predicate block.</param>
+/// <remarks>
+/// Supports recursion detection, intrinsic predicate handling and signature validation.
+/// </remarks>
 type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let _runOrder = runOrder
@@ -199,6 +277,9 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
     override this.Name = PrimPredicateL
     override this.ShortName = PrimPredicate
 
+    /// <summary>
+    /// Clone the predicate block preserving its parts.
+    /// </summary>
     override this.Clone () =
         let ret = new FplPredicate((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
@@ -208,6 +289,12 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
 
     override this.IsBlock () = true
 
+    /// <summary>
+    /// Perform signature/arity checks and predicate return type validation.
+    /// </summary>
+    /// <remarks>
+    /// Emits SIG00/SIG02 diagnostics and uses <c>checkPredicateExpressionReturnsPredicate</c> to validate the body.
+    /// </remarks>
     override this.CheckConsistency() = 
         base.CheckConsistency()
         match this.ExpressionType with
@@ -220,6 +307,9 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
         | _ -> ()
         checkPredicateExpressionReturnsPredicate this
 
+    /// <summary>
+    /// Embed the predicate into the parent's symbol table and perform variable-usage diagnostics.
+    /// </summary>
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
@@ -232,6 +322,12 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
 
+    /// <summary>
+    /// Evaluate the predicate block; intrinsic predicates are handled specially.
+    /// </summary>
+    /// <remarks>
+    /// Detects recursion, runs intrinsic handler or runs all args and sets the last value.
+    /// </remarks>
     override this.Run() = 
         StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
@@ -252,6 +348,11 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
 
     override this.RunOrder = Some _runOrder
 
+/// <summary>
+/// Represents a base declaration inside class definitions used for inheritance processing.
+/// </summary>
+/// <param name="positions">Source positions for diagnostics.</param>
+/// <param name="parent">Parent node in the symbol table.</param>
 type FplBase(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericNode(positions, Some parent)
 
@@ -273,6 +374,13 @@ type FplBase(positions: Positions, parent: FplGenericNode) =
 
     override this.RunOrder = None
 
+/// <summary>
+/// Generic constructor abstraction that can create instances of classes and generate instances
+/// as node values.
+/// </summary>
+/// <param name="name">Constructor name (typically derived from the class).</param>
+/// <param name="positions">Source positions for diagnostics.</param>
+/// <param name="parent">Parent node representing the owning class.</param>
 [<AbstractClass>]
 type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasValue(positions, parent)
@@ -305,6 +413,13 @@ type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) a
         with get () = _toBeConstructedClass
         and set (value) = _toBeConstructedClass <- value
 
+    /// <summary>
+    /// Execute the constructor producing an instance value and assigning it to this node.
+    /// </summary>
+    /// <remarks>
+    /// Creates nested instances for base classes and records constant name. If no class
+    /// definition is available, sets the instance to undef.
+    /// </remarks>
     override this.Run() = 
         StaticDebug.Debug(this,Debug.Start)
 
@@ -350,10 +465,9 @@ type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) a
 
     override this.RunOrder = None
 
-/// This constructor is only used for creating instances of classes that have no declared constructors.
-/// In FPL, such classes are "intrinsic". When the default constructor calls the constructor
-/// of some base classes, it is only possible if those classes are also intrinsic or have declared constructors
-/// without parameters. 
+/// <summary>
+/// Default constructor used for classes that declare no constructors explicitly.
+/// </summary>
 type FplDefaultConstructor(name, positions: Positions, parent: FplGenericNode) =
     inherit FplGenericConstructor(name, positions, parent)
 
@@ -372,6 +486,9 @@ type FplDefaultConstructor(name, positions: Positions, parent: FplGenericNode) =
             next.Scope.TryAdd(this.FplId, this) |> ignore
         | _ -> ()
 
+/// <summary>
+/// Concrete constructor node referenced by classes.
+/// </summary>
 type FplConstructor(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericConstructor(parent.FplId, positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -409,6 +526,10 @@ type FplConstructor(positions: Positions, parent: FplGenericNode) as this =
 
     override this.IsBlock () = true
 
+    /// <summary>
+    /// Validate constructor consistency, ensuring required parent constructor calls exist
+    /// and that variables are checked for unused declarations.
+    /// </summary>
     override this.CheckConsistency () = 
         base.CheckConsistency()
         // check if the constructor calls all necessary parent classes
@@ -429,6 +550,12 @@ type FplConstructor(positions: Positions, parent: FplGenericNode) as this =
 
     member this.ParentClass = this.Parent.Value :?> FplClass
 
+/// <summary>
+/// Class definition node supporting inheritance, constructors and properties.
+/// </summary>
+/// <param name="positions">Source positions for diagnostics.</param>
+/// <param name="parent">Parent node in the symbol table.</param>
+/// <param name="runOrder">Execution ordering index for members of this class.</param>
 and FplClass(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let _runOrder = runOrder
@@ -467,7 +594,10 @@ and FplClass(positions: Positions, parent: FplGenericNode, runOrder) as this =
     override this.IsBlock () = true
     override this.IsClass () = true
     
-    /// If this is a class definition, the function will return a list (possibly empty) list of all of its constructors.
+    /// <summary>
+    /// Return the list of constructors declared in this class.
+    /// </summary>
+    /// <returns>List of constructor nodes (possibly empty).</returns>
     member this.GetConstructors() =
         this.Scope
         |> Seq.map (fun kvp -> kvp.Value)
@@ -486,17 +616,31 @@ and FplClass(positions: Positions, parent: FplGenericNode, runOrder) as this =
         base.CheckConsistency()
         checkVAR04Diagnostics this
 
+    /// <summary>
+    /// Embed the class into the parent scope using its FPL identifier.
+    /// </summary>
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
         tryAddToParentUsingFplId this 
 
     override this.RunOrder = Some _runOrder
 
+    /// <summary>
+    /// Add a default constructor to this class when no constructors are declared.
+    /// </summary>
     member this.AddDefaultConstructor () = 
         let defaultConstructor = new FplDefaultConstructor(this.FplId, (this.StartPos, this.EndPos), this)
         defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
         defaultConstructor.ToBeConstructedClass <- Some this
 
+/// <summary>
+/// Return a default instance node for the given function-like node based on its mapping type.
+/// </summary>
+/// <param name="fv">Function-like node to produce a default instance for.</param>
+/// <returns>An instance node representing the default value for the function's return type.</returns>
+/// <remarks>
+/// If the mapping refers to a class with a default constructor, that constructor is used to construct the instance.
+/// </remarks>
 let getDefaultValueOfFunction (fv:FplGenericHasValue) =
     let mapOpt = getMapping fv
     match mapOpt with
@@ -519,6 +663,11 @@ let getDefaultValueOfFunction (fv:FplGenericHasValue) =
     | _ ->
         (new FplInstance(fv.TypeId, (fv.StartPos, fv.EndPos), fv))
 
+/// <summary>
+/// If <paramref name="fv"/> is intrinsic and constant, create and set a default instance value,
+/// otherwise set a function default instance for the node.
+/// </summary>
+/// <param name="fv">Function-like node to initialize.</param>
 let runIntrinsicFunction (fv:FplGenericHasValue) =
     match box fv with
     | :? IConstant as fvConstant ->
@@ -529,6 +678,15 @@ let runIntrinsicFunction (fv:FplGenericHasValue) =
     | _ ->
         fv.SetValue (getDefaultValueOfFunction fv)
 
+/// <summary>
+/// Compute a representation string for a functional term.
+/// </summary>
+/// <param name="fv">Functional term node to represent.</param>
+/// <returns>Representation string for the functional term or its value.</returns>
+/// <remarks>
+/// For intrinsic functional terms without a value, the representation is derived from the declared mapping type.
+/// Otherwise the value's representation is used.
+/// </remarks>
 let getFunctionalTermRepresent (fv:FplGenericHasValue) =
     let defaultReprsentation (fv1:FplGenericHasValue)= 
         match fv1.Value with 
@@ -549,6 +707,12 @@ let getFunctionalTermRepresent (fv:FplGenericHasValue) =
     else
         defaultReprsentation fv
 
+/// <summary>
+/// Functional term block node that can be called and returns values according to its mapping.
+/// </summary>
+/// <param name="positions">Source positions for diagnostics.</param>
+/// <param name="parent">Parent node in the symbol table.</param>
+/// <param name="runOrder">Execution ordering index for this functional term block.</param>
 type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -609,6 +773,9 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
             sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
         | _ -> ""
 
+    /// <summary>
+    /// Perform consistency checks for the functional term, including signature and mapping checks.
+    /// </summary>
     override this.CheckConsistency (): unit = 
         base.CheckConsistency()
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
@@ -629,6 +796,9 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
 
     override this.RunOrder = Some _runOrder
 
+    /// <summary>
+    /// Return a string representation for the functional term or its current value.
+    /// </summary>
     override this.Represent() = // done
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002Diagnostics (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
@@ -639,6 +809,12 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
             _callCounter <- _callCounter - 1
             result
 
+    /// <summary>
+    /// Evaluate the functional term, creating a default instance for the return type when needed.
+    /// </summary>
+    /// <remarks>
+    /// Handles recursion detection, intrinsic function initialization and runs the block body when not intrinsic.
+    /// </remarks>
     override this.Run() = 
         StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
