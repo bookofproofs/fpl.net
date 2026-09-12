@@ -1,18 +1,15 @@
-/// This module provides some functionality to emit error diagnostics in FPL.
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
-(* MIT License
-
-Copyright (c) 2023 bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
+/// <summary>
+/// Diagnostics support types and helpers used by the parser and interpreter.
+/// </summary>
+/// <remarks>
+/// Contains a normalized URI wrapper, the diagnostic code enumeration,
+/// formatting helpers that extract and simplify FParsec messages for
+/// presentation, and a shared diagnostics collector used across the system.
+/// </remarks>
 module Fpl.Errors.Diagnostics
+
 open System
 open System.IO
 open System.Text.RegularExpressions
@@ -22,7 +19,7 @@ open System.Text
 open FParsec
 open Fpl.Errors.Messages
 
-/// <summary>
+ /// <summary>
 /// URI wrapper that normalizes path separators and exposes a stable comparison semantics
 /// for file/stream identifiers used as keys in diagnostics collections.
 /// </summary>
@@ -397,18 +394,24 @@ let computeMD5Checksum (input: string) =
 /// Emitter source for diagnostics: either the parser or the interpreter.
 /// </summary>
 type DiagnosticEmitter =
-    // replace your language-specific emitters here
+    /// <summary>Diagnostics produced by the FPL parser.</summary>
     | FplParser
+    /// <summary>Diagnostics produced by the FPL interpreter/runtime.</summary>
     | FplInterpreter
 
 /// <summary>
 /// Categorization of diagnostic severity levels.
 /// </summary>
 type DiagnosticSeverity =
+    /// <summary>An error that should be addressed; highest severity.</summary>
     | Error
+    /// <summary>A warning that indicates suspicious code but does not block execution.</summary>
     | Warning
+    /// <summary>A hint for the developer (lowest severity).</summary>
     | Hint
+    /// <summary>Informational message not representing a problem.</summary>
     | Information
+
 
 /// <summary>
 /// Detailed diagnostic instance with location, code and emitter metadata.
@@ -664,7 +667,6 @@ let private getLastSubstringAfterSeparator (input:string) (sep:string) =
         substrings.[substrings.Length - 1].Trim()
     else
         ""
-
 
 /// <summary>
 /// If the parsed error contains a backtracking message, extract a more intuitive error message

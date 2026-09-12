@@ -1,8 +1,17 @@
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
+
+/// <summary>
+/// Primitive identifiers, keyword and string constants used by the parser and
+/// the error-recovery subsystem.
+/// </summary>
+/// <remarks>
+/// This module centralizes all literal keyword names and human-readable
+/// primitive descriptions so other modules (parser, diagnostics, recovery)
+/// can reference a single canonical source.
+/// </remarks>
 module Fpl.Primitives
 
 open System.Collections.Generic
-
-(* This module contains information needed by both, the error recovery module and the parser *)
 
 (* Keyword constants *)
 [<Literal>]
@@ -210,6 +219,13 @@ let LiteralXor = "xor"
 [<Literal>]
 let LiteralXorSymbol = "⩡"
 
+/// <summary>
+/// Set of recognized FPL keywords used for fast membership checks.
+/// </summary>
+/// <remarks>
+/// Populated from the literal keyword constants above; used by the lexer/parser
+/// and by error recovery logic to decide whether an identifier is a reserved word.
+/// </remarks>
 let keyWordSet =
     HashSet<_>(
         [| LiteralAlias
