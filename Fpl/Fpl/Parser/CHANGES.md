@@ -1,4 +1,12 @@
-﻿## 4.0.0
+## 4.2.0
+* Simplification of infix-operators (infix expressions do not have to be put into parentheses to be parsed correctly).
+
+## 4.1.0
+* Add error recovery capabilities. 
+* Syntax errors are now localized inside each FPL building block. 
+* Recovery starts after each FPL block that has a syntax error.
+
+## 4.0.0
 * Syntax simplifications
 	* remove parameters from theorem-like statements, axioms, and reference rules
 	* remove templates to be used as class type declarations
