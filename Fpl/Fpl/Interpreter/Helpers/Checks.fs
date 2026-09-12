@@ -1,17 +1,9 @@
-/// This module contains all functions used by the FplInterpreter
-/// for type and consistency checking
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
+/// <summary>
+/// This module contains all functions used in the Fpl.Interpreter namespace
+/// for type and consistency checking.
+/// </summary>
 module Fpl.Interpreter.Helpers.Checks
 open System
 open Fpl.Errors.Messages
@@ -19,12 +11,23 @@ open Fpl.Errors.Emitter
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
 
-/// Returns a tuple of a string representation of arg's type and a bool, which is true only if arg is a predicate.
+/// <summary>
+/// Return a pair consisting of the argument's type string and a boolean indicating whether the argument is a predicate.
+/// </summary>
+/// <param name="arg">Node representing the argument to inspect.</param>
+/// <returns>Tuple of (typeString, isPredicate).</returns>
 let isArgPred (arg:FplGenericNode) = 
     let argType = arg.Type SignatureType.Type
     (argType, argType.StartsWith(LiteralPred))
 
-/// Checks if an argument of an FplValue is a predicate and issues LG001Diagnostics if its not.
+/// <summary>
+/// Verify that an argument is a predicate and emit LG001 diagnostics on failure.
+/// </summary>
+/// <param name="fv">The enclosing FPL node that will receive diagnostics.</param>
+/// <param name="arg">Argument node to check.</param>
+/// <remarks>
+/// Localizations are skipped by this check.
+/// </remarks>
 let checkArgPred (fv:FplGenericNode) (arg:FplGenericNode)  = 
     match fv.UltimateBlockNode with 
     | Some node when node.Name = LiteralLocL -> () // skip this check for localizations
@@ -36,6 +39,11 @@ let checkArgPred (fv:FplGenericNode) (arg:FplGenericNode)  =
             let argName = arg.Type SignatureType.Name
             fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.StartPos
 
+/// <summary>
+/// Determine whether the given node represents a quantifier.
+/// </summary>
+/// <param name="arg">Node to test.</param>
+/// <returns>True when the node is a quantifier.</returns>
 let isQuantifier (arg:FplGenericNode) =
     match arg.Name with 
     | PrimQuantifierAll
@@ -43,6 +51,11 @@ let isQuantifier (arg:FplGenericNode) =
     | PrimQuantifierExistsN -> true
     | _ -> false
 
+/// <summary>
+/// Determine whether the given node is a compound predicate operator.
+/// </summary>
+/// <param name="arg">Node to test.</param>
+/// <returns>True when the node is a compound predicate.</returns>
 let isCompoundPredicate (arg:FplGenericNode) =
     match arg.Name with 
     | PrimExclusiveOr
@@ -57,15 +70,21 @@ let isCompoundPredicate (arg:FplGenericNode) =
     | PrimIsOperator -> true
     | _ -> false
 
-
-/// Checks if a predicate expression is actually being interpreted as an predicate
+/// <summary>
+/// Ensure the last argument of a node that should be a predicate indeed returns a predicate.
+/// </summary>
+/// <param name="fv">Node whose last argument will be validated.</param>
 let checkPredicateExpressionReturnsPredicate (fv:FplGenericNode) =
     let exprOpt = fv.ArgList |> Seq.tryLast
     match exprOpt with 
     | Some expr -> checkArgPred fv expr
     | None -> ()
 
-/// Indicates if fv is an FplGenericNode that is callable with parameters.
+/// <summary>
+/// Indicates whether a node is callable with parameters (expects argument list invocation).
+/// </summary>
+/// <param name="fv">Node to query.</param>
+/// <returns>True if the node is callable with parameters.</returns>
 let isCallableWithParams (fv:FplGenericNode) =
     match fv.Name with
     | LiteralCtorL
@@ -78,7 +97,11 @@ let isCallableWithParams (fv:FplGenericNode) =
     | PrimMandatoryPredicateL -> true
     | _ -> false
 
-/// Indicates if fv is an FplGenericNode that is callable without parameters.
+/// <summary>
+/// Indicates whether a node represents a building block callable without parameters.
+/// </summary>
+/// <param name="fv">Node to query.</param>
+/// <returns>True if the node is callable without parameters.</returns>
 let isCallableWithoutParams (fv:FplGenericNode) =
     match fv.Name with
     | LiteralAxL
@@ -90,18 +113,31 @@ let isCallableWithoutParams (fv:FplGenericNode) =
     | LiteralThmL -> true
     | _ -> false
 
-/// Indicates if an FplValue is the root of the SymbolTable.
+/// <summary>
+/// Test whether the node is the root of the symbol table.
+/// </summary>
+/// <param name="fv">Node to test.</param>
+/// <returns>True for the root node.</returns>
 let isRoot (fv:FplGenericNode) = 
     match fv.Name with
     | PrimRoot -> true
     | _ -> false
 
-/// Indicates if an FplValue is the root of the SymbolTable.
+/// <summary>
+/// Test whether the node represents a theory.
+/// </summary>
+/// <param name="fv">Node to test.</param>
+/// <returns>True for theory nodes.</returns>
 let isTheory (fv:FplGenericNode) = 
     match fv.Name with
     | PrimTheoryL -> true
     | _ -> false
 
+/// <summary>
+/// Determine whether the node denotes a definition-like construct (class, predicate, or functional term).
+/// </summary>
+/// <param name="fv1">Node to test.</param>
+/// <returns>True for definition nodes.</returns>
 let isDefinition (fv1:FplGenericNode) =
     match fv1.Name with
     | PrimClassL
@@ -109,8 +145,11 @@ let isDefinition (fv1:FplGenericNode) =
     | PrimFunctionalTermL -> true
     | _ -> false
 
-/// Checks if an fv is provable. This will only be true if
-/// it is a theorem, a lemma, a proposition, or a corollary
+/// <summary>
+/// Check whether the node represents a provable building block (theorem, lemma, proposition, corollary).
+/// </summary>
+/// <param name="fv">Node to test.</param>
+/// <returns>True if the node is provable.</returns>
 let isProvable (fv: FplGenericNode) =
     match fv.Name with
     | LiteralThmL
@@ -119,50 +158,95 @@ let isProvable (fv: FplGenericNode) =
     | LiteralCorL -> true
     | _ -> false
 
-/// Checks if an fplValue is a conjecture or an axiom. This is used to decide whether or
-/// not it is not provable.
+/// <summary>
+/// Determine whether the node is an axiom or a conjecture.
+/// </summary>
+/// <param name="fv">Node to test.</param>
+/// <returns>True for axiom or conjecture nodes.</returns>
 let isAxiomOrConnjecture (fv:FplGenericNode) = 
     match fv.Name with
     | LiteralConjL 
     | LiteralAxL -> true
     | _ -> false
 
+/// <summary>
+/// Test whether the node represents a language declaration.
+/// </summary>
+/// <param name="fv">Node to test.</param>
+/// <returns>True for language nodes.</returns>
 let isLanguage (fv:FplGenericNode) =
     match fv.Name with
     | PrimLanguageL -> true
     | _ -> false
 
+/// <summary>
+/// Check whether the provided name starts with an uppercase character.
+/// </summary>
+/// <param name="name">Name string to inspect.</param>
+/// <returns>True if the first character is uppercase and the string is non-empty.</returns>
 let isUpper (name:string) =  
     name.Length > 0 && System.Char.IsUpper(name[0])
 
-/// Determines if the FplValue has parentheses and has an upper case FplId
+/// <summary>
+/// Determine whether the node is a call-by-value site (parenthesized and with upper-case FplId).
+/// </summary>
+/// <param name="fv">Node to inspect.</param>
+/// <returns>True for call-by-value nodes.</returns>
 let isCallByValue (fv:FplGenericNode) =
     match fv.ArgType with 
     | ArgType.Parentheses when isUpper fv.FplId -> true
     | _ -> false
 
+/// <summary>
+/// Test whether a node implements signature position information.
+/// </summary>
+/// <param name="fv1">Node to test.</param>
+/// <returns>True when the node implements <c>IHasSignature</c>.</returns>
 let hasSignature (fv1:FplGenericNode) =
     match box fv1 with
     | :? IHasSignature -> true
     | _ -> false
 
+/// <summary>
+/// Check whether the node is a signature variable.
+/// </summary>
+/// <param name="fv1">Node to test.</param>
+/// <returns>True when the node implements <c>IVariable</c> and is marked as a signature variable.</returns>
 let isSignatureVar (fv1:FplGenericNode) = 
     match box fv1 with 
     | :? IVariable as var when var.IsSignatureVariable -> true
     | _ -> false
 
+/// <summary>
+/// Test whether the node represents a variable (simple or array).
+/// </summary>
+/// <param name="fv1">Node to test.</param>
+/// <returns>True for variable nodes.</returns>
 let isVar (fv1:FplGenericNode) =
     match fv1.Name with
     | PrimVariableL
     | PrimVariableArrayL -> true
     | _ -> false
 
+/// <summary>
+/// Determine whether the node is an extension declaration.
+/// </summary>
+/// <param name="fv">Node to test.</param>
+/// <returns>True for extension nodes.</returns>
 let isExtension (fv:FplGenericNode) =
     match fv.Name with
     | PrimExtensionL -> true
     | _ -> false
 
-/// Qualified name of this FplGenericNode
+/// <summary>
+/// Build a qualified dotted name for the provided node.
+/// </summary>
+/// <param name="fv">Node for which to construct the name.</param>
+/// <param name="first">Flag indicating whether this is the top-level call formatting.</param>
+/// <returns>Qualified name string for the node.</returns>
+/// <remarks>
+/// Recursively consults parent nodes and uses the node's signature/type when appropriate.
+/// </remarks>
 let rec getFullName (fv: FplGenericNode) (first: bool) =
     let fplValueType =
         match fv.Name with
@@ -212,15 +296,27 @@ let rec getFullName (fv: FplGenericNode) (first: bool) =
         else
             getFullName fv.Parent.Value false + "." + fplValueType
 
-/// Qualified name of this FplGenericNode
+/// <summary>
+/// Produce a user-facing qualified name with an English article based on the node and determination flag.
+/// </summary>
+/// <param name="fplValue">Node to describe.</param>
+/// <param name="determined">Determined flag used for English wording choices.</param>
+/// <returns>Formatted qualified name.</returns>
 let qualifiedName (fplValue:FplGenericNode) determined =
     $"{getEnglishName fplValue.Name determined} `{getFullName fplValue true}`"
 
-
-/// Qualified name without English article of this FplGenericNode
+/// <summary>
+/// Produce a compact qualified name without English article for the given node.
+/// </summary>
+/// <param name="fplValue">Node to describe.</param>
+/// <returns>Simple qualified name string.</returns>
 let qualifiedNameSimple (fplValue:FplGenericNode) =
     $"{fplValue.Name} `{getFullName fplValue true}`"
 
+/// <summary>
+/// Validate SIG11 constraints on mappings and emit diagnostics when violated.
+/// </summary>
+/// <param name="fv">Mapping node to check.</param>
 let checkSIG11Diagnostics (fv:FplGenericNode) =
     let mapOpt = getMapping fv
     match mapOpt with
@@ -246,7 +342,10 @@ let checkSIG11Diagnostics (fv:FplGenericNode) =
         | _ -> ()
     | _ -> ()
 
-/// Checks if a predicate expected to be true was evaluated to false
+/// <summary>
+/// Emit LG003 diagnostics if a signature-bearing node evaluated to a falsity value.
+/// </summary>
+/// <param name="fv">Node to validate.</param>
 let checkLG003Diagnostics (fv:FplGenericNode) =
     match box fv with
     | :? IHasSignature as hasSignature ->
@@ -255,9 +354,13 @@ let checkLG003Diagnostics (fv:FplGenericNode) =
             fv.ErrorOccurred <- emitLG003Diagnostics (fv.Type(SignatureType.Name)) fv.Name nodeRepr hasSignature.SignStartPos hasSignature.SignEndPos
     | _ -> ()
 
-/// Issue VAR10, if the formula in an FplValue uses 
-/// quantifier(s) and the variables bound by these quantifier(s) are used elsewhere in the same formula
-/// VAR10 => formula should be cleaned up by renaming the bound variables
+/// <summary>
+/// Issue VAR10 diagnostics when bound variables of quantifiers are used elsewhere in the same formula.
+/// </summary>
+/// <param name="fv">Formula node to analyze for unclean bound-variable usage.</param>
+/// <remarks>
+/// This function inspects quantifiers, extracts used variables, and compares their ranges to quantifier ranges.
+/// </remarks>
 let checkCleanedUpFormula (fv:FplGenericNode) =
     let formulaCreationInSymbolTableCompleted (formula:FplGenericNode) =
         match formula.Parent with 
@@ -345,6 +448,11 @@ let checkCleanedUpFormula (fv:FplGenericNode) =
         // here, this reference points to a formula, which is final in the symbol table
         checkQuantifiers fv
 
+/// <summary>
+/// Determines whether the node is nested within a quantifier.
+/// </summary>
+/// <param name="fv">Node to inspect.</param>
+/// <returns>True when the node has a quantifier ancestor.</returns>
 let rec isInQuantifier (fv:FplGenericNode) =
     match fv.Name with 
     | PrimQuantifierAll
@@ -355,8 +463,13 @@ let rec isInQuantifier (fv:FplGenericNode) =
         | Some parent -> isInQuantifier parent
         | _ -> false
 
-/// Checks if a variable is defined in the scope of block, if any
-/// looking for it recursively, up the symbol tree.
+/// <summary>
+/// Search for a variable by name within the nearest enclosing block scope of the given node.
+/// </summary>
+/// <param name="fplValue">Node whose enclosing block scope is searched.</param>
+/// <param name="name">Variable name to find.</param>
+/// <param name="withNestedVariableSearch">When true, also searches nested scopes before ascending.</param>
+/// <returns>A <see cref="ScopeSearchResult"/> describing the outcome of the lookup.</returns>
 let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariableSearch =
     let rec firstBlockParent (fv: FplGenericNode) =
 
@@ -433,8 +546,10 @@ let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariabl
 
     firstBlockParent fplValue
 
-/// Checks if an argument points to a free variable that is not in the signature of the predicate,
-/// and if so, issues VAR09 diagnostics.
+/// <summary>
+/// Emit VAR09 diagnostics for arguments that reference a free variable not declared as a signature variable.
+/// </summary>
+/// <param name="arg">Argument node to inspect.</param>
 let rec checkFreeAndNotSignatureVar (arg:FplGenericNode) = 
     match arg.RefersTo with 
     | Some ref ->
@@ -448,6 +563,11 @@ let rec checkFreeAndNotSignatureVar (arg:FplGenericNode) =
         checkFreeAndNotSignatureVar arg.ArgList[0]
     | _ -> ()
 
+/// <summary>
+/// Heuristic test whether a node is a syntactically simple expression.
+/// </summary>
+/// <param name="fv">Node to test.</param>
+/// <returns>True for simple expressions.</returns>
 let rec isSimpleExpression (fv:FplGenericNode) =
     match fv.Name with
     | PrimExtensionObj
@@ -472,7 +592,11 @@ let rec isSimpleExpression (fv:FplGenericNode) =
     | _ -> false
 
 
-/// Decides whether the argument is or has a determined value.
+/// <summary>
+/// Decide whether the provided argument has a determined value.
+/// </summary>
+/// <param name="arg">Argument node to check.</param>
+/// <returns>True if the argument's value is determined (not undetermined).</returns>
 let isDetermined (arg: FplGenericNode) : bool =
     match arg with
     | :? FplGenericHasValue as argWithValue ->
@@ -484,7 +608,14 @@ let isDetermined (arg: FplGenericNode) : bool =
     | _ ->
         true
 
-/// In a list of FplGenericNode, finds two examples with different node types (by node Name property)
+/// <summary>
+/// In a list of nodes, find two examples with different names and return either a single-name or a pair of differing names.
+/// </summary>
+/// <param name="items">List of nodes to inspect.</param>
+/// <returns>
+/// <c>Choice1Of2 singleName</c> when all names are identical or the list is empty;
+/// <c>Choice2Of2 (nameA, nameB)</c> when two different names are found.
+/// </returns>
 let findTwoDifferentNames (items:FplGenericNode list) =
     match items with
     | [] -> Choice1Of2 ""
@@ -498,6 +629,10 @@ let findTwoDifferentNames (items:FplGenericNode list) =
             | None -> Choice1Of2 first.Name
             | Some pair -> Choice2Of2 pair
 
+/// <summary>
+/// Emit SY010 diagnostics when the provided argument is parenthesized (disallowed form in some contexts).
+/// </summary>
+/// <param name="arg">Argument node to validate.</param>
 let checkSY010 (arg:FplGenericNode) =
     if arg.ExpressionType.IsParen then
         arg.ErrorOccurred <- emitSY010Diagnostics arg.StartPos arg.EndPos

@@ -1,17 +1,9 @@
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
+
+/// <summary>
 /// This module contains top-level classes of the symbol table,
-/// including root and theories used by the FplInterpreter
-
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
+/// including root and theories in the Fpl.Interpreter namespace.
+/// </summary>
 module Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open System
 open System.Text
@@ -21,6 +13,19 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Debug
 open TestSharedConfig
 
+/// <summary>
+/// Represents a theory in the symbol table. A theory is a top-level container for
+/// FPL building blocks (axioms, theorems, lemmas, etc.) and has an associated
+/// execution order used when running the interpreter.
+/// </summary>
+/// <param name="theoryName">Identifier used for the theory (also used for TypeId).</param>
+/// <param name="parent">Parent node in the symbol table hierarchy.</param>
+/// <param name="filePath">Path of the source file where the theory is declared.</param>
+/// <param name="runOrder">Numeric order indicating when the theory is executed.</param>
+/// <remarks>
+/// The theory embeds itself into the root node. Only some kinds of building
+/// blocks inside a theory run independently; others are invoked by those blocks.
+/// </remarks>
 type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) as this =
     inherit FplGenericNode((Position("",0,1,1), Position("",0,1,1)), Some parent)
     let _runOrder = runOrder
@@ -30,29 +35,57 @@ type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) a
         this.FplId <- theoryName
         this.TypeId <- theoryName
 
+    /// <summary>
+    /// Human-readable long name for the node (used by the interpreter).
+    /// </summary>
     override this.Name = PrimTheoryL
+
+    /// <summary>
+    /// Short, symbolic name for the node kind.
+    /// </summary>
     override this.ShortName = PrimTheory
 
+    /// <summary>
+    /// Creates a deep copy of this theory node.
+    /// </summary>
+    /// <returns>A cloned <see cref="FplGenericNode"/> representing the same theory.</returns>
     override this.Clone () =
         let ret = new FplTheory(this.FplId, this.Parent.Value, this.FilePath.Value, _runOrder)
         this.AssignParts(ret)
         ret
 
+    /// <summary>
+    /// Returns the signature representation for the requested <c>SignatureType</c>.
+    /// </summary>
+    /// <param name="signatureType">The signature view to return (e.g. Name, Type).</param>
+    /// <returns>A string representing the requested signature view of the node.</returns>
     override this.Type signatureType = getFplHead this signatureType
 
-    /// The RunOrder in which this theory is to be executed.
+    /// <summary>
+    /// The run order in which this theory should be executed among other theories embedded in the root node.
+    /// </summary>
+    /// <returns>An optional integer; <c>Some</c> contains the order, <c>None</c> otherwise.</returns>
     override this.RunOrder = Some _runOrder
 
+    /// <summary>
+    /// Adds this theory to its parent's scope (root node's scope) in the symbol table.
+    /// </summary>
+    /// <param name="_">Unused parameter; embedding uses the theory's parent.</param>
+    /// <remarks>
+    /// Name conflicts are not expected because file and namespace management guarantees uniqueness.
+    /// </remarks>
     override this.EmbedInSymbolTable _ = 
         let next = this.Parent.Value
         // name conflicts of theories do not occur because of *.fpl file management 
         // and file-names being namespace names
         next.Scope.TryAdd(this.FplId, this) |> ignore
 
-    /// Returns all Fpl Building Blocks that run on their own in this theory ordered by their RunOrder ascending.
-    /// Only some of the building block run on their own in the theory, including axioms, theorems, lemmas, propositions, and conjectures.
-    /// All other building blocks (e.g. rules of inference, definitions of classes, etc.) are run when called by the first type of blocks.
-    /// The RunOrder is set when creating the FplTheory during the parsing of the AST.
+    /// <summary>
+    /// Returns all building blocks in this theory that run independently, ordered by their RunOrder.
+    /// </summary>
+    /// <remarks>
+    /// This member is private and used internally when running a theory.
+    /// </remarks>
     member private this.OrderedBlocksRunningByThemselves =
         this.Scope.Values
         |> Seq.choose (fun block ->
@@ -62,6 +95,9 @@ type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) a
         |> Seq.sortBy (fun block -> block.RunOrder.Value) 
         |> Seq.toList
 
+    /// <summary>
+    /// Execute this theory: runs all independent building blocks in RunOrder ascending.
+    /// </summary>
     override this.Run() = 
         StaticDebug.Debug(this,Debug.Start) 
         let blocks = this.OrderedBlocksRunningByThemselves
@@ -69,19 +105,45 @@ type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) a
         |> Seq.iter (fun block -> block.Run())        
         StaticDebug.Debug(this,Debug.Stop) 
 
+/// <summary>
+/// Represents the root node of the evaluation symbol table. The root contains
+/// all discovered theories and provides top-level operations such as running
+/// all theories in the proper order.
+/// </summary>
 type FplRoot() =
     inherit FplGenericNode((Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+
+    /// <summary>
+    /// Human-readable long name for the root node.
+    /// </summary>
     override this.Name = PrimRoot
+
+    /// <summary>
+    /// Short name for the root node kind.
+    /// </summary>
     override this.ShortName = PrimRoot
 
+    /// <summary>
+    /// Returns a shallow clone of the root.
+    /// </summary>
+    /// <returns>The same root instance (clone returns the root itself).</returns>
     override this.Clone () = this
 
+    /// <summary>
+    /// Returns the signature for the requested signature type for the root node.
+    /// </summary>
+    /// <param name="_">SignatureType parameter (ignored for root).</param>
+    /// <returns>An empty string for the root.</returns>
     override this.Type _ = String.Empty
 
+    /// <summary>
+    /// Embedding the root into a symbol table is a no-op.
+    /// </summary>
     override this.EmbedInSymbolTable _ = () 
 
-    /// Returns all theories in the scope of this root ordered by their discovery time (parsing of the AST).
-    /// This means that the theory with the lowest RunOrder comes first.
+    /// <summary>
+    /// Returns all theories discovered under the root ordered by their RunOrder (discovery order).
+    /// </summary>
     member this.OrderedTheories =
         this.Scope.Values
         |> Seq.choose (fun item ->
@@ -90,38 +152,68 @@ type FplRoot() =
             | _ -> None)
         |> Seq.sortBy (fun th -> th.RunOrder.Value) 
 
+    /// <summary>
+    /// The root has no RunOrder.
+    /// </summary>
     override this.RunOrder = None
 
+    /// <summary>
+    /// Executes all theories registered under the root using their individual run order.
+    /// </summary>
     override this.Run() = 
         StaticDebug.Debug(this,Debug.Start)
         this.OrderedTheories
         |> Seq.iter (fun theory -> theory.Run())        
         StaticDebug.Debug(this,Debug.Stop)
 
+    /// <summary>
+    /// Clears the root's argument list and scope.
+    /// </summary>
     member this.Clear() =
         this.ArgList.Clear()
         this.Scope.Clear()
 
+/// <summary>
+/// Represents the in-memory symbol table used by the interpreter. Holds the root node,
+/// current main theory identifier, and an evaluation counter used for re-evaluations.
+/// </summary>
 type SymbolTable() =
     let mutable _mainTheory = ""
     let mutable _evalCounter = 0
     let _root = new FplRoot()
 
-
-    /// Returns the current main theory.
+    /// <summary>
+    /// Gets or sets the current main theory identifier that is used as a s starting point to create the run order.
+    /// </summary>
+    /// <remarks>
+    /// The main theory is used as the entry point for the FPL interpreter. All other theories imported by the main theory will be interpreted.
+    /// in the order they were imported. This process works by recursion and accounts for the "self-containment" requirement of
+    /// mathematical theories (see Proof-of-Concept paper "Formal Proving Language (FPL)", A. Piotrowski, 2021)
+    /// </remarks>
     member this.MainTheory
         with get () = _mainTheory
         and set (value) = _mainTheory <- value
 
-    /// Returns the current number this symbol table was re-evaluated.
+    /// <summary>
+    /// Gets or sets the number of times this symbol table has been re-evaluated.
+    /// </summary>
     member this.EvalCounter
         with get () = _evalCounter
         and set (value) = _evalCounter <- value
 
+    /// <summary>
     /// Returns the evaluation root node of the symbol table.
+    /// </summary>
     member this.Root = _root
 
-    /// Serializes the symbol table as json
+    /// <summary>
+    /// Serializes the symbol table to a JSON-like representation.
+    /// </summary>
+    /// <returns>A string containing the serialized representation of the symbol table.</returns>
+    /// <remarks>
+    /// The resulting JSON-like string escapes backslashes and double quotes and walks the
+    /// symbol table graph while guarding against infinite cycles.
+    /// </remarks>
     member this.ToJson() =
         let sb = StringBuilder()
         let mutable currentPath = ""
@@ -199,6 +291,9 @@ type SymbolTable() =
         else
             res
 
+    /// <summary>
+    /// Clears the internal root and resets the main theory identifier.
+    /// </summary>
     member this.Clear() =
         _root.Clear() 
         _mainTheory <- ""

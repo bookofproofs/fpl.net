@@ -1,17 +1,9 @@
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
+
+/// <summary>
 /// This module contains types necessary to pre-process AST from the FPL Parser
-/// before it can be further analysed by the FPL interpreter
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
+/// before it can be further analyzed by the FPL interpreter.
+/// </summary>
 module Fpl.Interpreter.SymbolTable.Storage.Asts
 
 open System
@@ -25,7 +17,14 @@ open Fpl.Parser.Main
 open Fpl.Errors.Diagnostics
 open Newtonsoft.Json
 
-
+/// <summary>
+/// Serializes a two-element key/value list into a compact JSON object.
+/// </summary>
+/// <param name="keyValueList">A list containing exactly two strings: [key; value].</param>
+/// <returns>A JSON string representing the single key/value pair.</returns>
+/// <exceptions>
+/// <exception cref="System.Exception">Thrown when the list does not contain exactly two elements.</exception>
+/// </exceptions>
 let toJson (keyValueList: string list) =
     match keyValueList with
     | [key; value] ->
@@ -33,12 +32,17 @@ let toJson (keyValueList: string list) =
         JsonConvert.SerializeObject(dict, Formatting.None)
     | _ -> failwith "List must contain exactly two elements"
 
+/// <summary>
+/// Represents an evaluated alias found in a uses clause: start/end positions and the alias or '*' marker.
+/// </summary>
 type EvalAlias =
     { StartPos: Position
       EndPos: Position
       AliasOrStar: string }
 
-/// A record type to store all the necessary fields for parsed uses clauses in FPL code
+/// <summary>
+/// Stores information produced when evaluating a uses clause (evaluated aliased namespace identifier).
+/// </summary>
 type EvalAliasedNamespaceIdentifier =
     { StartPos: Position
       EndPos: Position
@@ -46,7 +50,15 @@ type EvalAliasedNamespaceIdentifier =
       PascalCaseIdList: string list 
       DebugMode: bool}
 
-    /// Creates an EvalAliasedNamespaceIdentifier with a string, alias or star, and positions.
+    /// <summary>
+    /// Creates an EvalAliasedNamespaceIdentifier from a list of pascal-case identifiers and an EvalAlias.
+    /// </summary>
+    /// <param name="pascalCaseIdList">List of pascal-case identifiers.</param>
+    /// <param name="evalAlias">An <see cref="EvalAlias"/> value.</param>
+    /// <param name="startPos">Start position in the source.</param>
+    /// <param name="endPos">End position in the source.</param>
+    /// <param name="debugMode">Whether debug mode is enabled for this EANI.</param>
+    /// <returns>A new <see cref="EvalAliasedNamespaceIdentifier"/> instance.</returns>
     static member CreateEani(pascalCaseId: string, aliasOrStar: string, startPos, endPos, debugMode) =
         let evalAlias =
             { EvalAlias.StartPos = startPos
@@ -59,7 +71,12 @@ type EvalAliasedNamespaceIdentifier =
           EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascalCaseId ] 
           EvalAliasedNamespaceIdentifier.DebugMode = debugMode}
 
-    /// Creates an EvalAliasedNamespaceIdentifier with a string list and a given EvalAlias and positions.
+    /// <summary>
+    /// Creates an EvalAliasedNamespaceIdentifier from a PathEquivalentUri (uses the theory name).
+    /// </summary>
+    /// <param name="uri">The source URI of the theory.</param>
+    /// <param name="debugMode">Whether debug mode is enabled for this EANI.</param>
+    /// <returns>A new <see cref="EvalAliasedNamespaceIdentifier"/> instance.</returns>
     static member CreateEani(pascalCaseIdList: string list, evalAlias: EvalAlias, startPos, endPos, debugMode) =
         { EvalAliasedNamespaceIdentifier.StartPos = startPos
           EvalAliasedNamespaceIdentifier.EndPos = endPos
@@ -73,6 +90,9 @@ type EvalAliasedNamespaceIdentifier =
         let pos = Position("", 0, 1, 1)
         EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseId, "*", pos, pos, debugMode)
 
+    /// <summary>
+    /// Pattern used to match filenames for this EANI (supports '*' wildcard when alias is '*').
+    /// </summary>
     member this.FileNamePattern =
         let pascalCaseIdList = String.concat "." this.PascalCaseIdList
 
@@ -80,6 +100,9 @@ type EvalAliasedNamespaceIdentifier =
         | "*" -> sprintf "%s*.fpl" pascalCaseIdList
         | _ -> sprintf "%s.fpl" pascalCaseIdList
 
+    /// <summary>
+    /// The effective name for this EANI: either the alias, the concatenated identifiers or the wildcard namespace.
+    /// </summary>
     member this.Name =
         let concatenatedPascalCaseIds = String.concat "." this.PascalCaseIdList
 
@@ -88,52 +111,83 @@ type EvalAliasedNamespaceIdentifier =
         | _ when this.EvalAlias.AliasOrStar <> "*" && this.EvalAlias.AliasOrStar <> "" -> this.EvalAlias.AliasOrStar
         | _ -> concatenatedPascalCaseIds
 
+/// <summary>
+/// Status of a parsed AST during the preprocessing/evaluation pipeline.
+/// </summary>
 type ParsedAstStatus =
     | Loaded
     | UsesClausesEvaluated
     | Evaluated
 
-
+/// <summary>
+/// Sorting related metadata used to topologically order parsed ASTs and to track uses-clause relationships.
+/// </summary>
 type SortingProperties =
     { mutable TopologicalSorting: int // an order in which the ParsedAsts have to be interpreted to avoid undeclared identifiers (undefined if a circle was caused by uses clauses)
       mutable ReferencingAsts: string list // list of asts "referencing" this one with a uses clause
       mutable ReferencedAsts: string list // list of asts "referenced" by this one in a uses clause
       mutable EANIList: EvalAliasedNamespaceIdentifier list } // evaluated uses clauses found in the Ast
 
+    /// <summary>
+    /// Reset sorting properties to their initial state.
+    /// </summary>
     member this.Reset() =
         this.TopologicalSorting <- 0
         this.ReferencingAsts <- []
         this.ReferencedAsts <- []
         this.EANIList <- []
 
+    /// <summary>
+    /// Factory creating a fresh <see cref="SortingProperties"/> instance with default values.
+    /// </summary>
     static member Create() =
         { SortingProperties.TopologicalSorting = 0
           SortingProperties.ReferencingAsts = []
           SortingProperties.ReferencedAsts = []
           SortingProperties.EANIList = [] }
 
-/// A type that encapsulates the sources found for a uses clause
-/// and provides members to filter those from the file system and those from
-/// the web.
+/// <summary>
+/// Encapsulates discovered sources for a uses clause and provides utilities to filter and prefer local sources.
+/// </summary>
+/// <param name="paths">List of candidate <see cref="PathEquivalentUri"/> values found for a uses clause.</param>
+/// <param name="pathToLocalRegistry">Path to the local registry used when preferring local copies.</param>
 type FplSources(paths: PathEquivalentUri list, pathToLocalRegistry: string) =
     let _pathToLocalRegistry = pathToLocalRegistry
     /// All found paths for a uses clause, including those from the web.
     member this.Paths = paths
 
-    /// Path to local copies of the registry.
+    /// <summary>
+    /// Path to the local registry directory used to prefer local copies over remote (Internet) registry originals.
+    /// </summary>
     member this.PathToLocalRegistry = pathToLocalRegistry
 
-    /// Returns all loaded FPL theories loaded by a uses clause grouped by name with lists of potential locations
+    /// <summary>
+    /// Groups found FPL theories by filename returning the grouped data structure for further processing.
+    /// </summary>
+    /// <returns>
+    /// A list of tuples where the first element is the filename and the second element is the list of
+    /// tuples (filename, PathEquivalentUri) that produced that group.
+    /// </returns>
     member this.Grouped =
         let fplTheories =
             this.Paths |> List.map (fun fp -> (Path.GetFileName fp.AbsolutePath, fp))
 
         fplTheories |> List.groupBy fst
 
+    /// <summary>
+    /// Returns true if the given URI appears to be an HTTP/HTTPS URL.
+    /// </summary>
+    /// <param name="uri">The URI to inspect.</param>
+    /// <returns>True when the URI is a web URL.</returns>
     static member IsUrl(uri: PathEquivalentUri) =
         let pattern = "^https?:\/\/"
         Regex.IsMatch(uri.AbsoluteUri, pattern)
 
+    /// <summary>
+    /// Returns true if the given URI appears to be a local file path.
+    /// </summary>
+    /// <param name="uri">The URI to inspect.</param>
+    /// <returns>True when the URI is a local file path.</returns>
     static member IsFilePath(uri: PathEquivalentUri) =
         try
             Path.GetFullPath(uri.AbsoluteUri) |> ignore
@@ -142,10 +196,27 @@ type FplSources(paths: PathEquivalentUri list, pathToLocalRegistry: string) =
         with :? ArgumentException ->
             false
 
+    /// <summary>
+    /// Returns only the web URLs from the collected paths.
+    /// </summary>
     member this.Urls = List.filter FplSources.IsUrl this.Paths
+
+    /// <summary>
+    /// Returns only the file paths from the collected paths.
+    /// </summary>
     member this.FilePaths = List.filter FplSources.IsFilePath this.Paths
+
+    /// <summary>
+    /// Number of collected candidate paths.
+    /// </summary>
     member this.Length = this.Paths.Length
 
+    /// <summary>
+    /// Returns grouped candidates with an explicitly chosen/preferred source for each theory.
+    /// </summary>
+    /// <returns>
+    /// A list of tuples: (fileName, chosenPath, chosenPathType, allPathTypes, theoryName).
+    /// </returns>
     member this.GroupedWithPreferedSource =
         let result =
             let grouped = this.Grouped
@@ -206,7 +277,12 @@ type FplSources(paths: PathEquivalentUri list, pathToLocalRegistry: string) =
 
         result
 
-    /// Checks if a filename has a pattern.
+    /// <summary>
+    /// Tests whether a filename matches a wildcard pattern (supports '*' and '?').
+    /// </summary>
+    /// <param name="fileName">Filename to test.</param>
+    /// <param name="pattern">Wildcard pattern.</param>
+    /// <returns>True when the filename matches the pattern.</returns>
     static member HasPattern(fileName: string, pattern) =
         let wildcardToRegex (wildcard: string) =
             "^" + Regex.Escape(wildcard).Replace("\\*", ".*").Replace("\\?", ".") + "$"
@@ -215,18 +291,32 @@ type FplSources(paths: PathEquivalentUri list, pathToLocalRegistry: string) =
         let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
         regex.IsMatch(fileName)
 
-    /// Finds all filenames in sources with a given pattern.
+    /// <summary>
+    /// Finds all grouped entries whose filename matches the provided pattern.
+    /// </summary>
+    /// <param name="pattern">Wildcard pattern to match against filenames.</param>
+    /// <returns>Filtered list with the same tuple shape as <see cref="GroupedWithPreferedSource"/>.</returns>
     member this.FindWithPattern(pattern: string) =
         this.GroupedWithPreferedSource
         |> List.filter (fun (fileName, _, _, _, _) -> FplSources.HasPattern(fileName, pattern))
 
+/// <summary>
+/// Parsing properties attached to a parsed AST: source URI, original source code, parsed building-block ASTs and checksum.
+/// </summary>
 type ParsingProperties =
     { mutable Uri: PathEquivalentUri // source of the ast
       mutable FplSourceCode: string // source code of the ast
       mutable BuildingBlockAsts: Ast list // parsed asts of all building blocks
       mutable Checksum: string } // checksum of the parsed ast
 
-    /// Reset this ParsingProperties to its new location
+    /// <summary>
+    /// Reset this ParsingProperties with new source code and URI; reparses when checksum differs.
+    /// </summary>
+    /// <param name="fplCode">Source code to parse.</param>
+    /// <param name="uri">Source URI of the code.</param>
+    /// <returns>
+    /// True when the parsing produced updated content (checksum changed), false when unchanged.
+    /// </returns>
     member this.Reset (fplCode: string) (uri: PathEquivalentUri) =
         let checksum = computeMD5Checksum fplCode
 
@@ -235,7 +325,7 @@ type ParsingProperties =
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, source code, the
             this.Uri <- uri
-            ad.ResetStream(uri)
+            diagnosticsContainer.ResetStream(uri)
             let buildingBlocks, success = fplParser fplCode
             this.BuildingBlockAsts <- buildingBlocks
             this.FplSourceCode <- fplCode
@@ -244,20 +334,31 @@ type ParsingProperties =
         else
             false
 
+    /// <summary>
+    /// Create a new ParsingProperties instance by parsing <c>fplCode</c> for the given <c>uri</c>.
+    /// </summary>
+    /// <param name="fplCode">Source code to parse.</param>
+    /// <param name="uri">Source URI of the code.</param>
+    /// <returns>A fresh <see cref="ParsingProperties"/> instance containing parsed ASTs and a checksum.</returns>
     static member Create (fplCode: string) (uri: PathEquivalentUri) =
-        ad.ResetStream(uri)
+        diagnosticsContainer.ResetStream(uri)
         let buildingBlockAsts, success = fplParser fplCode
         { ParsingProperties.Uri = uri
           ParsingProperties.FplSourceCode = fplCode
           ParsingProperties.BuildingBlockAsts = buildingBlockAsts
           ParsingProperties.Checksum = computeMD5Checksum fplCode }
 
+/// <summary>
+/// Holds mapping counters for building block identifiers within a parsed AST.
+/// </summary>
 type FplBlockProperties =
     { FplBlockIds: Dictionary<string, int> }
 
     member this.Reset() = this.FplBlockIds.Clear()
 
-/// A record type to store all the necessary fields for parsed namespaces in FPL code
+/// <summary>
+/// Container for all data computed for a parsed FPL namespace/source (checksum, parsed blocks, sorting info, etc.).
+/// </summary>
 type ParsedAst =
     { Id: string // id of this ast giving the order in which it was parsed with other asts
       Parsing: ParsingProperties
@@ -265,12 +366,17 @@ type ParsedAst =
       FplBlocks: FplBlockProperties
       mutable Status: ParsedAstStatus }
 
-/// A reference type to store a list of ParsedAsts
+/// <summary>
+/// Reference type storing a mutable list of <see cref="ParsedAst"/> with convenience lookup and reporting helpers.
+/// </summary>
 type ParsedAstList() =
     inherit System.Collections.Generic.List<ParsedAst>()
     let this = List<ParsedAst>()
 
-    /// Finds some ParsedAst by identifier. Returns None if none was found.
+    /// <summary>
+    /// Attempts to find any ParsedAst in the list that has status <c>Loaded</c>.
+    /// </summary>
+    /// <returns>Some(<see cref="ParsedAst"/>) if a loaded AST exists, otherwise None.</returns>
     member this.TryFindAstById(identifier: string) =
         if this.Exists(fun pa -> pa.Id = identifier) then
             Some(this.Find(fun pa -> pa.Id = identifier))
@@ -284,7 +390,10 @@ type ParsedAstList() =
         else
             None
 
-    /// Returns a dictionary of <PathEquivalentUri,SourceCode> of all ParsedAsts in the list
+    /// <summary>
+    /// Builds a dictionary mapping each parsed AST URI to its source code.
+    /// </summary>
+    /// <returns>A <see cref="System.Collections.Generic.Dictionary{PathEquivalentUri,string}"/> of sources.</returns>
     member this.DictionaryOfSUri2FplSourceCode() =
         let ret = System.Collections.Generic.Dictionary<PathEquivalentUri, string>()
 
@@ -293,7 +402,9 @@ type ParsedAstList() =
 
         ret
 
-    /// Returns the string representation of all asts .
+    /// <summary>
+    /// Returns a combined string representation of all parsed ASTs in the list (debugging only)
+    /// </summary>
     member this.AstsToString =
         let res =
             this
@@ -302,19 +413,23 @@ type ParsedAstList() =
             |> String.concat Environment.NewLine
         res
 
-    /// If there is a valid topological sorting, order the list descending by this ordering.
+    /// <summary>
+    /// Orders stored ASTs according to computed topological sorting (descending).
+    /// </summary>
     member this.OrderAsts() =
         this.Sort(
             Comparer<ParsedAst>.Create(fun b a -> compare a.Sorting.TopologicalSorting b.Sorting.TopologicalSorting)
         )
 
-    /// Creates trace statistics (not for production, use only for debugging purposes in the FPL language server.)
+    /// <summary>
+    /// Creates a diagnostic trace summary for debugging (language server logging use only).
+    /// </summary>
     member this.TraceStatistics =
         let sb = StringBuilder()
 
         this
         |> Seq.iter (fun pa ->
-            let paDiagnostics = ad.GetStreamDiagnostics(pa.Parsing.Uri)
+            let paDiagnostics = diagnosticsContainer.GetStreamDiagnostics(pa.Parsing.Uri)
 
             let statsDiags =
                 paDiagnostics.Values
@@ -327,7 +442,10 @@ type ParsedAstList() =
 
         sb.ToString()
 
-    /// Enriches the `uses` dependencies (not for production, use only for debugging purposes in the FPL language server).
+    /// <summary>
+    /// Appends an enriched textual view of uses-dependencies into the provided StringBuilder (debugging helper).
+    /// </summary>
+    /// <param name="sb">StringBuilder to append enriched dependency lines to.</param>
     member this.EnrichDependencies (sb: StringBuilder) =
         this
         |> Seq.map (fun pa ->

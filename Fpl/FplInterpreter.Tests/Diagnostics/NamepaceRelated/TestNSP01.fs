@@ -20,7 +20,7 @@ type TestNSP01() =
     [<TestInitialize>]
     member this.Initialize () =
         // ensure no diagnostics from previous tests remain
-        ad.Clear()
+        diagnosticsContainer.Clear()
     
     [<DataRow("01", "nonexistent.filename.txt", 1)>]
     [<TestMethod>]
@@ -44,7 +44,7 @@ type TestNSP01() =
         loadFile filename (eval:EvalAliasedNamespaceIdentifier) |> ignore
 
 
-        let result = filterByErrorCode ad code.Code
+        let result = filterByErrorCode diagnosticsContainer code.Code
         Assert.AreEqual<int>(expected, result.Length) 
 
     [<DataRow("01", "filename.txt", 0)>]
@@ -71,6 +71,6 @@ type TestNSP01() =
         // use absolute path to avoid flaky resolution of relative paths during test runs
         loadFile path (eval:EvalAliasedNamespaceIdentifier) |> ignore
 
-        let result = filterByErrorCode ad code.Code
+        let result = filterByErrorCode diagnosticsContainer code.Code
         File.Delete(path)
         Assert.AreEqual<int>(expected, result.Length) 

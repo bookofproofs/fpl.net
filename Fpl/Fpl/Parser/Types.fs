@@ -1,25 +1,34 @@
-/// This modules provides AST types and helper types for the FPL grammar.
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
+/// <summary>
+/// AST types and helper types for the FPL grammar.
+/// This module exposes the core abstract-syntax-node representations used by the parser
+/// and consumed by the interpreter and diagnostics subsystems.
+/// </summary>
+/// <remarks>
+/// The module intentionally carries position information in each AST node so that
+/// diagnostics emitted later retain precise source locations.
+/// </remarks>
 module Fpl.Parser.Types
 open FParsec
 
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
-/// Provides starting and ending position for each Ast node since we
-/// will need these information for the diagnostics of the interpreter even after the 
-/// parsing was done
+/// <summary>
+/// Tuple of start and end <see cref="Position"/> values that annotate AST nodes.
+/// </summary>
+/// <remarks>
+/// Positions are 1-based line/column pairs as provided by FParsec's <c>Position</c>.
+/// </remarks>
 type Positions = Position * Position 
 
+/// <summary>
+/// Discriminated union representing every AST node kind produced by the FPL parser.
+/// Each case encodes the syntactic form and carries position information where relevant.
+/// </summary>
+/// <remarks>
+/// The union contains lexical tokens, identifiers, type constructs, predicates, expressions,
+/// commands, symbol declarations, definitions, rules of inference, statements, proof constructs,
+/// special references, localization constructs and top-level wrappers.
+/// </remarks>
 type Ast = 
     // Lexical / Leaf tokens
     | Alias of Positions * string

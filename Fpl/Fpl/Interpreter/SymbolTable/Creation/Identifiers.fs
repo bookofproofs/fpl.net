@@ -1,18 +1,16 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL identifiers and identifier dispatchers.
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
-
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
+/// <summary>
+/// Specialized evaluators for AST nodes that represent identifiers and identifier dispatchers.
+/// </summary>
+/// <remarks>
+/// This module inspects identifier-related AST nodes and updates the interpreter evaluation
+/// stack and nodes (top of stack) accordingly. It resolves candidates for predicates and types,
+/// sets identifier and type information on the relevant evaluation nodes, and emits project
+/// diagnostics (IDxxx, PRxxx) through the emitter helpers when ambiguities or errors are detected.
+/// The function performs side-effects on the global interpreter <c>heap</c> and may call other
+/// evaluator modules via <c>evalRef.Value</c>.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Identifiers
 open System
 open Fpl.Primitives
@@ -34,6 +32,23 @@ open Fpl.Interpreter.SymbolTable.ExpressionMatching
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
+/// <summary>
+/// Evaluate an identifier or identifier-dispatcher AST node and apply its semantics to the current evaluation context.
+/// </summary>
+/// <param name="ast">An AST node expected to represent an identifier or identifier dispatcher (for example
+/// <c>PascalCaseId</c>, <c>PredicateIdentifier</c>, <c>ArgumentIdentifier</c>, etc.).</param>
+/// <returns>Unit. The function updates the top evaluation node on the interpreter stack and performs side effects
+/// such as setting <c>FplId</c>, <c>TypeId</c>, linking references, or pushing auxiliary nodes.</returns>
+/// <remarks>
+/// - The evaluator mutates global interpreter state via <c>heap</c> and uses diagnostic emitters such as
+///   <c>emitID008Diagnostics</c>, <c>emitID010Diagnostics</c>, <c>emitID017Diagnostics</c>, <c>emitPR005Diagnostics</c>.
+/// - Candidate resolution uses helpers like <c>findCandidatesByName</c>, <c>findPropertyCandidatesByNameInBlock</c>
+///   and <c>filterCandidates</c>. For ambiguous or missing candidates appropriate diagnostics are emitted.
+/// - Some AST cases call into the main evaluator via <c>evalRef.Value</c> for nested AST evaluation.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Thrown via <c>failwith</c> when the supplied <paramref name="ast"/> is not recognized as an identifier node.
+/// </exception>
 let evalIdentifiers ast =
     match ast with
     | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) ->

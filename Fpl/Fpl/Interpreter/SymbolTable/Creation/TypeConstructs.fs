@@ -1,18 +1,15 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL types and FPL type related constructs.
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
-
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
+/// <summary>
+/// Evaluators for AST nodes that denote FPL type constructs (keywords, templates, array types,
+/// inherited types and compound type forms).
+/// </summary>
+/// <remarks>
+/// This module updates the interpreter evaluation context (top of the eval stack) according to
+/// the parsed type construct. It sets type identifiers on variables/mappings, creates intrinsic
+/// template nodes, resolves inherited base classes and emits diagnostics through the project's
+/// emitter helpers when types or inheritance relations are invalid or ambiguous.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.TypeConstructs
 open Fpl.Primitives
 open Fpl.Parser.Types
@@ -26,6 +23,18 @@ open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.TypeMatching
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
+/// <summary>
+/// Assign a keyword-derived type to the top evaluation node or to specific container nodes.
+/// </summary>
+/// <param name="keywordType">The type literal or identifier to assign (for example <c>LiteralInd</c>, template id, etc.).</param>
+/// <param name="pos1">Start position of the type construct in the source.</param>
+/// <param name="pos2">End position of the type construct in the source.</param>
+/// <returns>Unit. Side effects: updates the top-of-stack node's <c>TypeId</c> or calls container-specific setters.</returns>
+/// <remarks>
+/// If the top-of-stack node is an <c>FplVariableArray</c> or an <c>FplMapping</c>, the function uses their
+/// specific <c>SetType</c> logic which accepts optional candidate resolution and position parameters.
+/// For other node kinds it performs a simple assignment to <c>TypeId</c>.
+/// </remarks>
 let private setKeywordType keywordType pos1 pos2 = 
     let fv = heap.Eval.PeekEvalStack()
     match fv with
@@ -33,6 +42,24 @@ let private setKeywordType keywordType pos1 pos2 =
     | :? FplMapping as map -> map.SetType keywordType None pos1 pos2
     | _ ->  fv.TypeId <- keywordType
 
+/// <summary>
+/// Evaluate a type-construct AST node and apply its semantics to the interpreter evaluation context.
+/// </summary>
+/// <param name="ast">An AST node representing a type construct (index, predicate, object, template, array, inherited types, compound forms, ...).</param>
+/// <returns>Unit. Side effects include updating the top-of-stack node's type, creating and attaching template or base nodes,
+/// invoking the main evaluator for nested type ASTs, resolving candidate types and emitting diagnostics.</returns>
+/// <remarks>
+/// Supported AST cases include:
+/// - Keyword types: index, functional term, object, predicate.
+/// - Template types: creates a <c>FplIntrinsicTpl</c> node and attaches it when appropriate.
+/// - Array types: marks mapping nodes as arrays and evaluates element/index type ASTs.
+/// - Inherited types and lists: resolves base classes, updates inheritance relationships, collects variables/properties from bases,
+///   and emits diagnostics for missing bases, self-inheritance, or incompatible base types.
+/// - Compound predicate/functional-term types and other nested constructs delegate evaluation to <c>evalRef.Value</c>.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Thrown via <c>failwith</c> when the supplied <paramref name="ast"/> is not recognized as a supported type construct.
+/// </exception>
 let evalTypeConstructs ast =
     match ast with
     | Ast.IndexType((pos1, pos2),()) -> 

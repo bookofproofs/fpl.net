@@ -1,6 +1,14 @@
-/// This module contains the formatting functions and helpers to re-format
-/// FParsec-based syntax error messages to make them more suitable for diagnostics
-/// error messages in language servers and IDEs.
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
+
+/// <summary>
+/// Helpers to reformat and sanitize FParsec error messages so they become
+/// more suitable for diagnostics shown in IDEs and language servers.
+/// </summary>
+/// <remarks>
+/// Functions in this module preserve line structure where appropriate so that
+/// computed positions remain valid for diagnostics emission.
+/// </remarks>
+
 module Fpl.Parser.Formatting
 open System
 open System.Text.RegularExpressions
@@ -9,24 +17,16 @@ open Fpl.Errors.Messages
 open Fpl.Errors.Diagnostics
 open FParsec
 
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
-//------------
-
-
-
-
-/// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
+/// <summary>
+/// Replaces in the <paramref name="input"/> all regex <paramref name="pattern"/> matches by spaces
+/// while preserving newline characters. Useful to remove tokens while keeping source offsets stable.
+/// </summary>
+/// <param name="input">Input text to process.</param>
+/// <param name="pattern">Regular expression pattern whose matches will be replaced by spaces.</param>
+/// <returns>
+/// A new string where each matched substring is replaced with whitespace of the same length,
+/// but newline characters are preserved.
+/// </returns>
 let replaceLinesWithSpaces (input: string) (pattern: string) =
     let regex = new Regex(pattern, RegexOptions.Multiline)
     let evaluator = MatchEvaluator(fun (m: Match) -> 
@@ -36,13 +36,23 @@ let replaceLinesWithSpaces (input: string) (pattern: string) =
     )
     regex.Replace(input, evaluator)
 
-/// Replaces in the `input` all FPL comments by spaces while preserving new lines
+/// <summary>
+/// Replaces all FPL-style inline and block comments in <paramref name="input"/> with spaces,
+/// preserving newline characters so positions remain stable for diagnostics.
+/// </summary>
+/// <param name="input">FPL source text possibly containing comments.</param>
+/// <returns>Sanitized input with comments blanked out while line structure is preserved.</returns>
 let removeFplComments (input:string) = 
     let r1 = replaceLinesWithSpaces input $"\/\/[^{Environment.NewLine}]*" // replace inline comments
     replaceLinesWithSpaces r1 $"\/\*((?:.|\n)*?)\*\/" // replace block comments
 
 
-/// Splits an FParsec error message to sub-errors (if it contains many)
+/// <summary>
+/// Splits an FParsec error message that contains backtracking information into sub-errors.
+/// Each returned entry is a human-friendly chunk describing a single syntax error or backtracking error.
+/// </summary>
+/// <param name="input">The raw FParsec error message to split.</param>
+/// <returns>List of extracted sub-error strings.</returns>
 let private splitByBacktrackMarker (input: string) =
     let pattern = @"\s*The parser backtracked after:\s*Error"
     let split = Regex.Split(input, pattern, RegexOptions.Multiline)
@@ -55,7 +65,15 @@ let private splitByBacktrackMarker (input: string) =
         |> Array.toList
     result 
 
-/// Takes the string list output of splitByBacktrackMarker and extracts FParsec positions from the error messages producing a list of tuples (Position, error string).
+/// <summary>
+/// Parses a list of error message strings (typically produced by <c>splitByBacktrackMarker</c>)
+/// and extracts FParsec <c>Position</c> objects where possible.
+/// </summary>
+/// <param name="lines">List of error message lines to inspect.</param>
+/// <returns>
+/// A list of tuples where each tuple contains the parsed <c>Position</c> and the original error string.
+/// If a line does not contain position information a default position is used.
+/// </returns>
 let private extractPositions (lines: string list) =
     let pattern = @"syntax error in Ln:\s*(\d+)\s*Col:\s*(\d+)\s*"
 
@@ -73,9 +91,12 @@ let private extractPositions (lines: string list) =
             pos, line
     )
 
-/// Groups the output list of tuples from the extractPositions function
-/// by identical Position, but only aggregates those whose message ends with an 'Expecting:' clause,
-/// and then merges all the expectation‑tails into one combined message.
+/// <summary>
+/// Groups and aggregates multiple error messages that share the same <see cref="Position"/>.
+/// When messages contain an "Expecting:" clause the expectation tails are merged into one combined clause.
+/// </summary>
+/// <param name="items">List of (Position * message) tuples to aggregate.</param>
+/// <returns>Aggregated list of (Position * message) tuples with merged expectation tails where applicable.</returns>
 let private aggregateExpecting (items: (Position * string) list) =
     let expectingKey = "Expecting:"
 
@@ -114,6 +135,13 @@ let private aggregateExpecting (items: (Position * string) list) =
             let combined = prefix + " " + tails
             [pos, combined])
 
+/// <summary>
+/// Distinguishes between direct FPL syntax errors and backtracking errors, normalizes their
+/// prefixes (SY000, SY001) and when both kinds are present replaces them by SY002 for a mixed result.
+/// Also normalizes some textual fragments to produce more user-friendly messages.
+/// </summary>
+/// <param name="items">List of (Position * message) tuples to normalize.</param>
+/// <returns>Normalized list of (Position * message) tuples suitable for downstream formatting.</returns>
 let private distinguishSyntaxFromBacktrickingErrors (items: (Position * string) list) =
     let hasFPL = items |> List.exists (fun (_, errMsg) -> errMsg.Contains("FPL syntax error"))    
     let hasBacktracking = items |> List.exists (fun (_, errMsg) -> errMsg.Contains("Backtracking syntax error"))    
@@ -155,9 +183,16 @@ let private distinguishSyntaxFromBacktrickingErrors (items: (Position * string) 
         pos, errNummbersChangedToSY002IfMixedSY000andSY001
     )
 
-/// Scans input line‑by‑line, detecting a line that trims to "^",
-/// and inserts ⚡ into the preceding line at the same column,
-/// skipping the caret‑line, and preserving all other lines unchanged.
+/// <summary>
+/// Scans input line-by-line and when a line consisting only of a caret '^' is found inserts
+/// a lightning symbol (⚡) at the same column in the previous line and removes the caret line.
+/// This produces compact, single-line error markers suitable for display.
+/// </summary>
+/// <param name="input">The multi-line error message to transform.</param>
+/// <returns>
+/// Transformed error message where caret-marker lines have been replaced by inline lightning markers
+/// on the preceding line. Other lines are preserved unchanged.
+/// </returns>
 let private insertLightning (input: string) =
     let lines = input.Split(Environment.NewLine) |> Array.toList
 
@@ -190,7 +225,10 @@ let private insertLightning (input: string) =
     loop [] lines
 
 let private lengthNewLine = Environment.NewLine.Length
+
+/// <summary>
 /// Computes FParsec’s Position.Index based on Line and Column in an input string.
+/// </summary>
 let private computeIndex (pos: Position) (lines: string array) inputLength =
     // FParsec Position.Line and Column are 1-based
     let lineIdx  = int pos.Line - 1
@@ -212,7 +250,9 @@ let private computeIndex (pos: Position) (lines: string array) inputLength =
     else
         int64 inputLength
 
+/// <summary>
 /// Removes from an FParsec error message line substrings in the process of preparing a line of an FPL diagnostic message.
+/// </summary>
 let private removeFParsecErrorStringsFromFplDiagnostics (line:string) =
     line
         .Trim() // trim the line 
@@ -223,8 +263,10 @@ let private removeFParsecErrorStringsFromFplDiagnostics (line:string) =
         .Replace("end of input", "<end of input>")
         .Replace("Note: The error occurred at the end of the input stream.", "")
 
+/// <summary>
 /// Transforms an error message of FParserc preserving the first two lines, and if the third line starts with "Expecting:",
 /// then flattening all remaining lines into that third line by concatenating them without line breaks.
+/// </summary>
 let private collapseExpectingBlock (input: string) : string =
     let lines = input.Split(Environment.NewLine) |> Array.toList
 
@@ -246,23 +288,29 @@ let private collapseExpectingBlock (input: string) : string =
                 String.concat Environment.NewLine lines
     res.Substring(6).Trim()
 
+/// <summary>
 /// Calculates the index Position based on line and column and replaces Positions missing index
 /// with some having them.
+/// </summary>
 let private correctPositionIndexBasedOnLineAndColumn (lines:string array) length (items: (Position * string) list) =
     items
     |> List.map (fun (pos, errMsg) ->
         (Position("", computeIndex pos lines length, pos.Line, pos.Column), errMsg)
     )
 
+/// <summary>
 /// Masks an input, replacing all non-whitespace characters with spaces, preserving line braeks and line lengths.
+/// </summary>
 let masked (input:String) =
     input
     |> Seq.map (fun ch -> if Char.IsWhiteSpace(ch) then ch else ' ')
     |> Seq.toArray
     |> fun arr -> System.String(arr)
 
+/// <summary>
 /// Transforms an FParsec syntax error message (including the complex ones with parser backtracking)
 /// into a list of BuildingBlockError ast nodes that are aggregated by error position they occur.
+/// </summary>
 let getErrorNodes (errorMsg:string) origLines origLength = 
     let firstResult = 
         errorMsg
@@ -276,7 +324,7 @@ let getErrorNodes (errorMsg:string) origLines origLength =
 
     let chainId =
         if firstResult.Length > 1 then
-            sprintf "%0*d" 3 (ad.NextChainId)
+            sprintf "%0*d" 3 (diagnosticsContainer.NextChainId)
         else
             ""
 

@@ -1,18 +1,14 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL lexical and leaf tokens.
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
-
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
+/// <summary>
+/// Module that provides specialized evaluators for AST nodes representing lexical and leaf tokens
+/// of the FPL language.
+/// </summary>
+/// <remarks>
+/// The evaluator inspects lexical AST nodes (digits, symbols, object names, dollar-digit quantifiers, etc.)
+/// and mutates the interpreter evaluation stack and the current evaluation node (top of the stack).
+/// It also emits diagnostics for invalid or ambiguous token usages via the project's diagnostics emitters.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.LeafTokens
 open System
 open Fpl.Primitives
@@ -26,6 +22,26 @@ open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types3.Quantifiers
 
 
+/// <summary>
+/// Evaluate a leaf AST node and apply its lexical meaning to the current evaluation context.
+/// </summary>
+/// <param name="ast">An AST node that is expected to be a leaf/lexical token.</param>
+/// <returns>Unit. The function performs side effects on the interpreter heap and evaluation stack.</returns>
+/// <remarks>
+/// Behavior by AST case:
+/// - <c>Ast.Digits</c>: sets <c>FplId</c> and <c>TypeId</c> of the top evaluation node.
+/// - <c>Ast.DollarDigits</c>: handles indexed intrinsic identifiers and quantified existentials, emits
+///   diagnostics for invalid quantifier values and updates <c>FplId</c>/<c>TypeId</c> appropriately.
+/// - Symbol forms (<c>ObjectSymbolWithPos</c>, <c>InfixSymbolWithPos</c>, <c>PostFixSymbolWithPos</c>,
+///   <c>PrefixSymbolWithPos</c>) assign identifier, type and position, and update expression fixing type.
+/// - Other leaf ASTs that are syntactically allowed but semantically ignored (alias, dot, star) are no-ops.
+/// The function calls diagnostic helpers such as <c>checkSIG01Diagnostics</c> and <c>emitSY011Diagnostics</c>
+/// where appropriate.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Thrown when <paramref name="ast"/> is not recognized as a leaf token. The function uses <c>failwith</c>
+/// in that case with a message describing the offending AST node.
+/// </exception>
 let evalLeafTokens ast =
     match ast with
     | Ast.Alias((_, _), _) -> ()

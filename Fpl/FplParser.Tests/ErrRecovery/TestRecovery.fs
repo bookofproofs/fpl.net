@@ -27,7 +27,7 @@ type TestRecovery() =
     [<DataRow("bb12", """def pred T() {}""")>]
     [<TestMethod>]
     member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, success = fplParser fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -47,7 +47,7 @@ def pred T() {}""", 2L, 14L)>]
   def pred T() {}""", 3L, 16L)>]
     [<TestMethod>]
     member this.TestErrorRecoveryPositions(no:string, fplCode:string, errLin: int64, errCol: int64) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, _ = fplParser fplCode
         let errBlock = result.Head
         match errBlock with
@@ -68,7 +68,7 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("04a", """ def pred T() {true} yyyyy""", 2)>]
     [<TestMethod>]
     member this.TestErrorRecoveryBeforeOrAfterCode(no:string, fplCode:string, numbOfBlocks: int) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, success = fplParser fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -108,7 +108,7 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("base03", """def cl S                       def cl T {ctor T() {dec base. (); }}""")>]
     [<TestMethod>]
     member this.TestMissingPascalCaseId(no:string, fplCode) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, success = fplParser fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -129,7 +129,7 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("prf01", "prf T$1 1: trivial }")>]
     [<TestMethod>]
     member this.TestMissingOpeningBrace(no:string, fplCode) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, success = fplParser fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -153,7 +153,7 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("prf01", "prf T$1 {1: trivial ")>]
     [<TestMethod>]
     member this.TestMissingClosingBrace(no:string, fplCode) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, success = fplParser fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -168,7 +168,7 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("base01", """def cl S def cl T {ctor T() {dec base.T); }}""")>]
     [<TestMethod>]
     member this.TestMissingOpeningParen(no:string, fplCode) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, success = fplParser fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -184,7 +184,7 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("ref01", """def pred T() {S(}""")>]
     [<TestMethod>]
     member this.TestMissingClosingParen(no:string, fplCode) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, success = fplParser fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -196,7 +196,7 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("arrType04", """def pred T() {dec a:*ind obj; true}""")>]
     [<TestMethod>]
     member this.TestMissingOpeningBracket(no:string, fplCode) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, success = fplParser fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -209,7 +209,7 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("arrUsage01", """def pred T() {dec a:=x[b; true}""")>]
     [<TestMethod>]
     member this.TestMissingClosingBracket(no:string, fplCode) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, success = fplParser fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -221,7 +221,7 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("dec02", """def pred T() {dec x:obj true}""")>]
     [<TestMethod>]
     member this.TestMissingSemicolon(no:string, fplCode) =
-        ad.Clear()
+        diagnosticsContainer.Clear()
         let result, success = fplParser fplCode
         let actual = sprintf "%O" result
         printf "%O" actual

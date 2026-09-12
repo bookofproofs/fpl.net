@@ -1,17 +1,15 @@
-/// This module contains all functions and types used by the FplInterpreter
-/// that are referencing other nodes of the symbol table 
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
+/// <summary>
+/// Module containing helper functions and reference node implementations that resolve
+/// and evaluate references to other nodes in the symbol table.
+/// </summary>
+/// <remarks>
+/// The reference semantics include resolving dotted names, delegated evaluation for
+/// callable nodes, variable replacement using the heap state, and special handling
+/// for extension objects. Diagnostics are emitted via the emitter helpers; methods
+/// typically do not throw for semantic diagnostics.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Types2.References
 open System
 open Fpl.Parser.Types
@@ -24,8 +22,20 @@ open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Variables
 
-/// Searches for a references in node symbol table. 
-/// Will work properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
+/// <summary>
+/// Resolve the ultimate referenced node for a given node by following <c>RefersTo</c>,
+/// dotted-child chains and certain intrinsic node kinds.
+/// </summary>
+/// <param name="fv">Node to search from.</param>
+/// <returns>
+/// Optionally the resolved target node. Returns <c>None</c> when no reference target exists.
+/// </returns>
+/// <remarks>
+/// Works correctly for node types that utilize their scope (for example
+/// <c>FplReference</c>, <c>FplSelf</c>, <c>FplParent</c>, <c>FplForInStmtDomain</c>,
+/// <c>FplForInStmtEntity</c>, <c>FplVariable</c>).
+/// Special handling unwraps <c>self</c> and <c>parent</c> indirections.
+/// </remarks>
 let rec referencedNodeOpt (fv:FplGenericNode) = 
     
     let refNodeOpt = 
@@ -42,12 +52,34 @@ let rec referencedNodeOpt (fv:FplGenericNode) =
     | Some refNode when refNode.Name = LiteralParent -> refNode.RefersTo
     | _ -> refNodeOpt
 
+/// <summary>
+/// Abstract base for reference nodes that represent a reference to another symbol-table node.
+/// </summary>
+/// <param name="positions">Source positions used for diagnostics.</param>
+/// <param name="parent">Parent node in the symbol table.</param>
+/// <remarks>
+/// This type implements evaluation semantics that handle callable references (with variable
+/// replacement via the heap), extension objects and plain value references. It intentionally
+/// avoids cloning to prevent stack overflow for recursive reference graphs.
+/// </remarks>
 [<AbstractClass>]
 type FplGenericReference(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericHasValue(positions, parent)
     
+    /// <summary>
+    /// Do not clone references to prevent recursion / stack overflow.
+    /// </summary>
     override this.Clone () = this // do not clone references to prevent stack overflow 
 
+    /// <summary>
+    /// Invoke <paramref name="called"/> with variable replacement from this reference's arguments.
+    /// </summary>
+    /// <param name="called">Target routine or callable value to invoke.</param>
+    /// <remarks>
+    /// Uses the heap state to save/replace variables, stores caller positions for debugging,
+    /// runs the called node and restores heap state. If arguments are not determined,
+    /// the called node is treated as undetermined.
+    /// </remarks>
     member private this.RunWithVariableReplacement (called:FplGenericHasValue) =
         match box called, this.NextBlockNode with
         | :? ICanBeCalledRecusively as calledRecursively, Some blockNodeOfThis when 
@@ -89,6 +121,15 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 called.SetDefaultValue()
                 this.SetValueOf called
 
+    /// <summary>
+    /// Evaluate an extension object in the context of this reference, performing variable replacement.
+    /// </summary>
+    /// <param name="extensionObj">Extension object node to evaluate or copy as a value.</param>
+    /// <remarks>
+    /// If the extension object is being evaluated outside its own extension block this delegates
+    /// evaluation to the extension's callable representation; otherwise the extension object is
+    /// treated as a value and stored directly to the reference.
+    /// </remarks>
     member private this.RunExtensionWithVariableReplacement (extensionObj:FplGenericNode)=
         match extensionObj.UltimateBlockNode, extensionObj.RefersTo with
         | Some enclosingNode, Some (:? FplGenericHasValue as calledExtension) when not (Object.ReferenceEquals(enclosingNode, calledExtension)) ->
@@ -109,6 +150,17 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             // treat the extensionObj as a value and store this value to the reference
             this.SetValue extensionObj
 
+    /// <summary>
+    /// Evaluate the reference and set its value according to the resolved target semantics.
+    /// </summary>
+    /// <remarks>
+    /// Handles:
+    /// - callable nodes (with or without parameters),
+    /// - variables and arrays,
+    /// - extension objects,
+    /// - parenthesized expressions delegated to the child argument.
+    /// The method uses heap-based variable replacement when invoking callables.
+    /// </remarks>
     override this.Run() =
         StaticDebug.Debug(this,Debug.Start)
         let calledOpt = referencedNodeOpt this
@@ -146,8 +198,16 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
         | _ -> ()
         StaticDebug.Debug(this,Debug.Stop)
 
+    /// <summary>
+    /// References do not participate in a separate run ordering.
+    /// </summary>
     override this.RunOrder = None
 
+/// <summary>
+/// Concrete reference node used to represent ordinary references in the symbol table.
+/// </summary>
+/// <param name="positions">Source positions for diagnostics.</param>
+/// <param name="parent">Parent AST/symbol table node.</param>
 type FplReference(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericReference(positions, parent)
     let mutable _callCounter = 0 
@@ -157,7 +217,9 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
     override this.Name = PrimRefL
     override this.ShortName = PrimRef
 
-    /// The optional dotted child set when parsing a dotted reference 
+    /// <summary>
+    /// Optional dotted child set during parsing for dotted-qualified references.
+    /// </summary>
     member this.DottedChild
         with get() = _dottedChild
         and set (value:FplGenericNode option) = _dottedChild <- value
@@ -167,6 +229,10 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             with get () = this.DottedChild
             and set (value) = this.DottedChild <- value
 
+    /// <summary>
+    /// When the reference points to a variable, propagate the set to the variable as well.
+    /// </summary>
+    /// <param name="fv">Value to assign to the referenced target.</param>
     override this.SetValue fv = 
         match this.RefersTo with
         | Some (:? FplGenericVariable as var) when var.Name = PrimVariableL ->
@@ -175,6 +241,14 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
         | _ ->
             base.SetValue fv
 
+    /// <summary>
+    /// Compute the type/head rendering for this reference according to requested signature form.
+    /// </summary>
+    /// <param name="signatureType">Requested signature rendering mode.</param>
+    /// <returns>Rendered head/type string for the reference.</returns>
+    /// <remarks>
+    /// Takes account of dotted qualifications, mapping fallbacks, fixed notation (prefix/suffix/infix), and special-case nodes.
+    /// </remarks>
     override this.Type signatureType =
         let headObj = 
             match this.RefersTo with
@@ -286,6 +360,15 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             prefixNotation()
 
 
+    /// <summary>
+    /// Compute a representation for the reference. This method guards against infinite recursion.
+    /// </summary>
+    /// <returns>String representation for the reference's current value or name.</returns>
+    /// <remarks>
+    /// Uses an internal call counter to detect recursion and emits LG002 diagnostics when a
+    /// recursion limit is exceeded. It delegates representation to dotted child, referred-to nodes,
+    /// or the node's Type as fallback.
+    /// </remarks>
     override this.Represent() = // done
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002Diagnostics (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
@@ -331,10 +414,25 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             _callCounter <- _callCounter - 1
             result
 
+    /// <summary>
+    /// Run basic consistency checks for reference nodes.
+    /// </summary>
+    /// <remarks>
+    /// Delegates to base checks and applies <c>checkCleanedUpFormula</c>.
+    /// Diagnostics (if any) are recorded on the node and emitted via helper emitters.
+    /// </remarks>
     override this.CheckConsistency () = 
         base.CheckConsistency()
         checkCleanedUpFormula this
 
+    /// <summary>
+    /// Embed the reference into the symbol table according to the context node.
+    /// </summary>
+    /// <param name="nextOpt">The context node that follows this reference.</param>
+    /// <remarks>
+    /// Handles block insertion, for-in domain referencing, dotted child end position
+    /// propagation and map case context. Adjusts <c>EndPos</c> where appropriate.
+    /// </remarks>
     override this.EmbedInSymbolTable nextOpt = 
         this.CheckConsistency()
         match nextOpt with 
@@ -353,6 +451,10 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             next.EndPos <- this.EndPos
         | _ -> ()
 
+    /// <summary>
+    /// Return variables contained in the referenced node, if the reference points to a variable or variable array.
+    /// </summary>
+    /// <returns>List of variable nodes collected from the referred-to target; empty list otherwise.</returns>
     override this.GetVariables () =
         match this.RefersTo with
         | Some ref when ref.Name = PrimVariableL -> ref.GetVariables()
@@ -360,7 +462,18 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
         //| Some ref -> getSignatureVars ref
         | _ -> []
 
-
+/// <summary>
+/// Find candidate nodes by name when a dotted qualification exists.
+/// </summary>
+/// <param name="fv">Starting node (typically a reference) to search from.</param>
+/// <param name="name">Name of the candidate to find.</param>
+/// <returns>
+/// A list of candidate nodes whose name matches and are accessible via the dotted qualification.
+/// </returns>
+/// <remarks>
+/// For dotted-qualified references this attempts to locate the qualified entity and,
+/// when it is a variable, returns its value or referred type node preferring the variable value.
+/// </remarks>
 let findCandidatesByNameInDotted (fv: FplGenericNode) (name: string) =
     let rec findQualifiedEntity (fv1: FplGenericNode) =
         match fv1 with

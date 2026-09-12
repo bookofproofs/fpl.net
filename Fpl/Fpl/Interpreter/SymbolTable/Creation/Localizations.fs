@@ -1,18 +1,17 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL localizations of mathematical language.
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
-
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
+/// <summary>
+/// Provides specialized evaluators for AST nodes that represent localizations of
+/// mathematical language in FPL (translation terms, languages, and localization strings).
+/// </summary>
+/// <remarks>
+/// The evaluator registers localization-related frames on the global interpreter symbol-table
+/// <c>heap</c>, evaluates nested ASTs by delegating to <c>evalRef.Value</c>, and emits
+/// diagnostics for unused variables found inside translations. It relies on types defined
+/// in <c>Fpl.Interpreter.SymbolTable.Types3.Localization</c> and helper functions such as
+/// <c>emitVAR04Diagnostics</c> and <c>isLanguage</c>.
+/// </remarks>
+/// <exception cref="System.Exception">Thrown when an unsupported AST node is supplied to the top-level evaluator.</exception>
 module Fpl.Interpreter.SymbolTable.Creation.Localizations
 open System
 open System.Collections.Generic
@@ -24,11 +23,46 @@ open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types3.Localization
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
+/// <summary>
+/// Choose a random element from a non-empty list of AST nodes.
+/// </summary>
+/// <param name="lst">A non-empty list of AST nodes to sample from.</param>
+/// <returns>
+/// One element randomly selected from <paramref name="lst"/>. Selection uses a new
+/// <c>System.Random</c> instance per call.
+/// </returns>
+/// <remarks>
+/// This helper is intentionally local and non-deterministic; callers that require stable
+/// behavior should provide a deterministic selection mechanism instead.
+/// </remarks>
+/// <exception cref="System.ArgumentOutOfRangeException">Thrown when <paramref name="lst"/> is empty.</exception>
 let private chooseRandomMember (lst: Ast list) =
     let rnd = Random()
     let index = rnd.Next(lst.Length)
     lst.[index]
 
+/// <summary>
+/// Evaluate AST nodes related to localization constructs and register them in the symbol table.
+/// </summary>
+/// <param name="ast">The AST node to evaluate. Expected node shapes include:
+/// <c>Ast.Localization</c>, <c>Ast.TranslationTerm</c>, <c>Ast.TranslationTermList</c>,
+/// <c>Ast.Language</c>, <c>Ast.LanguageCode</c>, and <c>Ast.LocalizationString</c>.</param>
+/// <returns>Unit. The function has side effects on the global evaluation <c>heap</c>
+/// (pushing/popping frames, setting identifiers and types, and emitting diagnostics).</returns>
+/// <remarks>
+/// - <c>Ast.Localization</c>: creates an <c>FplLocalization</c> frame, evaluates the predicate
+///   signature while in signature-evaluation mode, evaluates translation entries, collects
+///   unused variables (to emit VAR04 diagnostics), and sets the localization <c>FplId</c>
+///   and <c>TypeId</c> based on its argument list.
+/// - <c>Ast.TranslationTerm</c>: creates an <c>FplTranslation</c> frame per subterm and evaluates it.
+/// - <c>Ast.TranslationTermList</c>: delegates to <c>chooseRandomMember</c> to pick a single
+///   alternative translation term to evaluate (non-deterministic selection).
+/// - <c>Ast.Language</c>: creates an <c>FplLanguage</c> frame, evaluates the language code
+///   and the corresponding EBNF AST, then removes the temporary language frame.
+/// - <c>Ast.LanguageCode</c> and <c>Ast.LocalizationString</c>: assign string identifiers to the
+///   current frame (<c>FplId</c>, <c>TypeId</c>, and positions where applicable).
+/// </remarks>
+/// <exception cref="System.Exception">Thrown when <paramref name="ast"/> is not a localization or related node.</exception>
 let evalLocalizations ast =
     match ast with
     | Ast.Localization(((pos1, pos2), predicateAst), translationListAsts) ->
@@ -95,4 +129,4 @@ let evalLocalizations ast =
         fv.FplId <- s
         fv.TypeId <- s
     | _ ->
-        failwith (sprintf "{%O} is not a localization or a related node" ast) 
+        failwith (sprintf "{%O} is not a localization or a related node" ast)

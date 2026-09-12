@@ -51,7 +51,7 @@ type TestSIG12() =
 
     [<TestInitialize>]
     member _.Initialize() =
-        ad.Clear()
+        diagnosticsContainer.Clear()
 
     [<DataRow("p00a", """def pred T(x:tpl) {dec x:=$1 x:=true; x}""", 32L, 36L)>]
     [<DataRow("p01a", """def pred Equal(x,y: tpl) { del.Equal(x,y) } def pred T() {dec x:ind y:pred x:=$1 y:=true; Equal(x,y)}""", 84L, 88L)>]
@@ -68,7 +68,7 @@ type TestSIG12() =
                 prepareFplCode (filename, fplCode, false) |> ignore
                 checkForUnexpectedErrors filename fplCode
 
-                let result = filterByErrorCode ad code.Code
+                let result = filterByErrorCode diagnosticsContainer code.Code
                 Assert.AreEqual<int>(1, result.Length)
 
                 let diagnostic = result.Head

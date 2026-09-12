@@ -8,7 +8,7 @@ open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open FplInterpreter.Main
+open Fpl.Interpreter.Main
 open Fpl.Interpreter.SymbolTable.Creation.UsesClauses
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
@@ -102,7 +102,7 @@ type EvalAliasedNamespaceIdentifier() =
     member this.TestDownloadLibMap01() =
         if not TestConfig.IsOffline then 
             let url = "https://github.com/bookofproofs/fpl.net/blob/main/theories/lib"
-            ad.Clear()
+            diagnosticsContainer.Clear()
             let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
             let evalAlias = {
                     EvalAlias.StartPos = pos
@@ -117,7 +117,7 @@ type EvalAliasedNamespaceIdentifier() =
     member this.TestDownloadLibMap02() =
         if not TestConfig.IsOffline then 
             let url = "https://github.com/bookofproofs/fpl.net/blob/main/theories/lib"
-            ad.Clear()
+            diagnosticsContainer.Clear()
             let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
             let evalAlias = {
                     EvalAlias.StartPos = pos
@@ -126,7 +126,7 @@ type EvalAliasedNamespaceIdentifier() =
                 }
             let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos, false)
             let libMap = downloadLibMap (PathEquivalentUri(url)) url e.DebugMode
-            Assert.AreEqual<int>(0, ad.CountDiagnostics)
+            Assert.AreEqual<int>(0, diagnosticsContainer.CountDiagnostics)
 
     [<DataRow("Fpl *", 4)>]
     [<DataRow("Fpl.Test *", 0)>]
@@ -572,7 +572,7 @@ type EvalAliasedNamespaceIdentifier() =
             // initial counts of parsed ast and theories in root
             let parsedAstsFirstTime = heap.ParsedAsts.Count
             let scopeCountFirstTime = heap.Root.Scope.Count
-            let errorCountfirstTime = ad.CountDiagnostics
+            let errorCountfirstTime = diagnosticsContainer.CountDiagnostics
 
             let currDir = Directory.GetCurrentDirectory()
             let uri = PathEquivalentUri(Path.Combine(currDir, filename))
@@ -581,7 +581,7 @@ type EvalAliasedNamespaceIdentifier() =
             fplInterpreter (fplCode + " ") uri fplLibUrl
             Assert.AreEqual<int>(parsedAstsFirstTime, heap.ParsedAsts.Count)
             Assert.AreEqual<int>(scopeCountFirstTime, heap.Root.Scope.Count)
-            Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)
+            Assert.AreEqual<int>(errorCountfirstTime, diagnosticsContainer.CountDiagnostics)
 
 
     [<TestMethod>]
@@ -593,7 +593,7 @@ type EvalAliasedNamespaceIdentifier() =
             prepareFplCode(filename, fplCode, false) 
             // initial counts of parsed ast and theories in root
             let scopeCountFirstTime = heap.Root.Scope["Fpl.Commons"].Scope.Count
-            let errorsfirstTime = ad.Collection |> Seq.filter (fun d -> d.Uri.AbsolutePath.EndsWith("Fpl.Commons.fpl")) |> Seq.toList
+            let errorsfirstTime = diagnosticsContainer.Collection |> Seq.filter (fun d -> d.Uri.AbsolutePath.EndsWith("Fpl.Commons.fpl")) |> Seq.toList
 
             let currDir = Directory.GetCurrentDirectory()
             // now, we change the uri and the source code to some referenced FPL theory
@@ -603,7 +603,7 @@ type EvalAliasedNamespaceIdentifier() =
             // reparse the Test.fpl after slightly modifying the uses clause
             fplInterpreter fplCode uri fplLibUrl
             Assert.AreEqual<int>(scopeCountFirstTime, heap.Root.Scope.["Fpl.Commons"].Scope.Count)
-            Assert.AreEqual<int>(errorsfirstTime.Length, ad.CountDiagnostics)
+            Assert.AreEqual<int>(errorsfirstTime.Length, diagnosticsContainer.CountDiagnostics)
 
 
 module TestModule2 =

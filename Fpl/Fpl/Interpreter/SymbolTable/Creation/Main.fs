@@ -1,17 +1,18 @@
-/// This module evaluates the abstract syntax tree (AST) and interprets its semantics./// This module evaluates the abstract syntax tree (AST) and interprets its semantics.
-/// It produces a SymbolTable object containing a current semantical representation of the AST.
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
+/// <summary>
+/// Entry point for symbol-table construction: evaluates the parsed AST and produces
+/// the runtime semantic representation used by the interpreter.
+/// </summary>
+/// <remarks>
+/// This module wires the forward evaluator (<c>evalRef</c>) to a recursive dispatcher
+/// (<c>eval</c>) that delegates AST node processing to specialized creation modules
+/// (identifiers, types, variables, predicates, definitions, proofs, localizations, etc.).
+/// The evaluator performs significant side effects: it mutates the global <c>heap</c>,
+/// pushes and pops evaluation frames, emits diagnostics, and registers top-level FPL
+/// blocks in the symbol table.
+/// </remarks>
+/// <exceptions cref="System.Exception">Propagates exceptions emitted by lower-level evaluators for unsupported or invalid AST nodes.</exceptions>
 module Fpl.Interpreter.SymbolTable.Creation.Main
 open Fpl.Errors.Diagnostics
 open Fpl.Parser.Types
@@ -36,8 +37,22 @@ open Fpl.Interpreter.SymbolTable.Creation.SpecialReferences
 open Fpl.Interpreter.SymbolTable.Creation.Localizations
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
 
-/// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
-/// for each occurrence of the uses clause in the FPL code.
+/// <summary>
+/// Recursively dispatches AST nodes to the appropriate specialized evaluator.
+/// </summary>
+/// <params name="ast">The AST node to evaluate. The dispatcher recognizes all parser-produced AST cases
+/// and delegates to the corresponding creation modules.</params>
+/// <returns>Unit. The function performs side effects on the global interpreter state (<c>heap</c>).</returns>
+/// <remarks>
+/// - This function is the central entry point used by <c>evalRef</c>. It pattern-matches on the
+///   F# discriminated union <c>Ast</c> and routes nodes to functions such as <c>evalIdentifiers</c>,
+///   <c>evalTypeConstructs</c>, <c>evalDefinitions</c>, <c>evalProofs</c>, <c>evalLocalizations</c>, etc.
+/// - Side effects include pushing/popping evaluation frames, setting identifiers and types,
+///   and emitting diagnostics via the diagnostics emitter helpers.
+/// - The concrete behavior for each AST case is implemented in the specialized modules that this
+///   dispatcher references; this function is intentionally minimal and focused on routing.
+/// </remarks>
+/// <exceptions cref="System.Exception">May be thrown by underlying evaluators if an AST case is invalid or not supported.</exceptions>
 let rec eval ast =
     match ast with
     // Lexical / leaf tokens
@@ -256,7 +271,20 @@ let rec eval ast =
         ->
         evalTopLevel ast
 
-
+/// <summary>
+/// Create and populate the global symbol table by evaluating parsed ASTs.
+/// </summary>
+/// <returns>Unit. The function mutates global interpreter state: it orders and evaluates parsed ASTs,
+/// registers top-level theories in <c>heap.Root</c>, runs their semantic initialization, and emits diagnostics.</returns>
+/// <remarks>
+/// - The function sets <c>evalRef.Value</c> to the local <c>eval</c> dispatcher and iterates over
+///   parsed ASTs until no pending uses-clauses remain. For each parsed AST it clears working memory,
+///   constructs an <c>FplTheory</c> frame, evaluates its building blocks, marks the parsed AST as evaluated,
+///   and invokes <c>Run</c> on the created theory frame.
+/// - Side effects include multiple heap and diagnostics updates; callers should ensure the parsing
+///   stage completed successfully before invoking this function.
+/// </remarks>
+/// <exceptions cref="System.Exception">May propagate exceptions from the evaluator or diagnostics emitter.</exceptions>
 let createSymbolTable () =
     heap.ParsedAsts.OrderAsts()
 
@@ -277,7 +305,7 @@ let createSymbolTable () =
             else
                 heap.Root.Scope[pa.Id] <- theoryValue
             heap.Eval.PushEvalStack(theoryValue)
-            ad.CurrentUri <- pa.Parsing.Uri
+            diagnosticsContainer.CurrentUri <- pa.Parsing.Uri
             pa.Parsing.BuildingBlockAsts
             |> List.map (fun buildinBlockAst -> evalRef.Value buildinBlockAst) |> ignore
             pa.Status <- ParsedAstStatus.Evaluated

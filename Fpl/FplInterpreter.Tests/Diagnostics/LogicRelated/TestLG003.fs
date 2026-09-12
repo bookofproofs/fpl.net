@@ -46,6 +46,6 @@ type TestLG003() =
         prepareFplCode (filename, fplCode, false) |> ignore
         checkForUnexpectedErrors filename fplCode
 
-        let result = filterByErrorCode ad code.Code
+        let result = filterByErrorCode diagnosticsContainer code.Code
         Assert.AreEqual<int>(1, result.Length)
         Assert.AreEqual<string>(expected, result.Head.Message)

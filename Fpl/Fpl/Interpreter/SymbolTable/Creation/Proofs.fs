@@ -1,18 +1,19 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL proofs and related nodes.
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
-
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
+/// <summary>
+/// Provides specialized evaluators for AST nodes that represent proofs and related
+/// constructs in FPL (proof signatures, proof blocks, arguments, justifications, and
+/// justification items).
+/// </summary>
+/// <remarks>
+/// The evaluator updates the interpreter symbol-table heap state, creates and manipulates
+/// FPL node frames (pushing and popping them on the evaluation stack), delegates nested
+/// evaluation to <c>evalRef.Value</c>, and emits diagnostics via the emitter helpers.
+/// Side effects include mutations of <c>heap</c>, setting helper flags (for signature or
+/// reference evaluation), and creating/attaching proof-related objects declared in
+/// <c>Fpl.Interpreter.SymbolTable.Types4.Proofs</c>.
+/// </remarks>
+/// <exception cref="System.Exception">Thrown when an unsupported AST node is supplied to the top-level evaluator.</exception>
 module Fpl.Interpreter.SymbolTable.Creation.Proofs
 open Fpl.Primitives
 open Fpl.Parser.Types
@@ -25,6 +26,31 @@ open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
+
+/// <summary>
+/// Evaluate AST nodes that belong to proofs and their substructures.
+/// </summary>
+/// <param name="ast">An AST node representing a proof or a node related to proofs
+/// (e.g. <c>Ast.Proof</c>, <c>Ast.ProofSignature</c>, <c>Ast.Argument</c>,
+/// <c>Ast.Justification</c>, justification items, inference forms, <c>Ast.Qed</c>, etc.).</param>
+/// <returns>Unit. The function performs side effects on the global evaluation <c>heap</c>
+/// and may emit diagnostics.</returns>
+/// <remarks>
+/// - For a top-level <c>Ast.Proof</c> node, a new <c>FplProof</c> frame is created,
+///   pushed to the evaluation stack to register the signature, popped to attach the
+///   proof to any enclosing theorem-like statement, pushed again to process the proof
+///   body, checked for consistency via <c>CheckConsistency</c>, and finally popped.
+/// - For signature nodes <c>Ast.ProofSignature</c> the function sets
+///   <c>heap.Helper.InSignatureEvaluation</c> while evaluating nested signature nodes and
+///   records signature positions with <c>setSignaturePositions</c>.
+/// - For arguments, justification items and inference forms the evaluator creates the
+///   appropriate <c>Fpl*</c> nodes, pushes them on the evaluation stack, delegates
+///   nested evaluation to <c>evalRef.Value</c>, and then pops the frames.
+/// - The function relies on helper methods that search symbol tables and emit diagnostics
+///   (e.g. <c>findCandidatesByName</c>, <c>emitPR...Diagnostics</c>), and thus can set
+///   error flags on created frames (such as <c>ErrorOccurred</c> and <c>RefersTo</c>).
+/// </remarks>
+/// <exception cref="System.Exception">Thrown when <paramref name="ast"/> is not a recognized proof or related node.</exception>
 let evalProofs ast =
     match ast with
     | Ast.Proof((pos1, pos2), (proofSignatureAst, proofBlockAst)) ->
@@ -90,6 +116,20 @@ let evalProofs ast =
     | Ast.JustificationIdentifier((pos1, pos2), (((byModifierOption, predicateIdentifierAst), dollarDigitListAsts), refArgumentIdentifierAst)) ->
         let parent = heap.Eval.PeekEvalStack()
 
+        /// <summary>
+        /// Validate and resolve candidate bindings for a justification item and emit appropriate diagnostics.
+        /// </summary>
+        /// <param name="fvJi">The justification item frame to be resolved. Side effects: may set <c>RefersTo</c>
+        /// and <c>ErrorOccurred</c> on <c>fvJi</c>.</param>
+        /// <param name="candidates">A list of candidate frames returned by name lookup to be inspected.</param>
+        /// <returns>Unit. Side effects: updates <c>fvJi</c> and emits diagnostics through emitter helpers.</returns>
+        /// <remarks>
+        /// This helper inspects the scope search results returned by
+        /// <c>tryFindAssociatedBlockForJustificationItem</c>, refines references for proof-argument
+        /// cases (PR006), and issues diagnostics for incorrect block types (PR001) or multiple matches (ID023).
+        /// It is intended to be a local, side-effecting helper used during evaluation of
+        /// <c>Ast.JustificationIdentifier</c> nodes.
+        /// </remarks>
         let checkPR001_PR006Diagnostics (fvJi:FplGenericNode) candidates = 
             match tryFindAssociatedBlockForJustificationItem fvJi candidates with
             | ScopeSearchResult.FoundAssociate potentialCandidate ->
@@ -282,4 +322,4 @@ let evalProofs ast =
         heap.Eval.PopEvalStack()
     | Ast.Qed((pos1, pos2), _) -> ()
     | _ ->
-        failwith (sprintf "{%O} is not a proof or related node" ast) 
+        failwith (sprintf "{%O} is not a proof or related node" ast)

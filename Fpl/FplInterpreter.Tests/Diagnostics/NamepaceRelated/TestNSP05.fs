@@ -3,7 +3,7 @@ namespace Diagnostics.NamespaceRelated
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
-open FplInterpreter.Main
+open Fpl.Interpreter.Main
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 
@@ -70,7 +70,7 @@ type TestNSP05() =
             let code = NSP05 ( ["./"; "https"], "Fpl.Commons", "./")
             printf "Trying %s" code.Message
             this.PrepareTestNSP05(false) |> ignore
-            let result = filterByErrorCode ad code.Code
+            let result = filterByErrorCode diagnosticsContainer code.Code
             Assert.AreEqual<int>(1, result.Length)
             this.PrepareTestNSP05(true) |> ignore
 
@@ -79,7 +79,7 @@ type TestNSP05() =
         let code = NSP05 (["./"; "./lib"; "https"], "Fpl.Commons", "./")
         printf "Trying %s" code.Message
         this.PrepareTestNSP05a(false) |> ignore
-        let result = filterByErrorCode ad code.Code
+        let result = filterByErrorCode diagnosticsContainer code.Code
         Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP05a(true) |> ignore
 
@@ -89,12 +89,12 @@ type TestNSP05() =
         let code = NSP05 (["./"], "Test", "./")
         printf "Trying %s" code.Message
         this.PrepareTestNSP05CrossCheck(false) |> ignore
-        Assert.AreEqual<int>(0, ad.CountDiagnostics)
+        Assert.AreEqual<int>(0, diagnosticsContainer.CountDiagnostics)
         this.PrepareTestNSP05CrossCheck(true) |> ignore
 
     [<TestInitialize>]
     member _.Initialize() =
-        ad.Clear()
+        diagnosticsContainer.Clear()
 
     member private _.RunNSP05Test
         (
@@ -122,7 +122,7 @@ type TestNSP05() =
             let uri = PathEquivalentUri(rootPath)
             fplInterpreter input uri fplLibUrl |> ignore
 
-            let result = filterByErrorCode ad "NSP05"
+            let result = filterByErrorCode diagnosticsContainer "NSP05"
             Assert.AreEqual<int>(expected, result.Length)
         finally
             let cleanupPaths =

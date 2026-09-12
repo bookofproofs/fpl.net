@@ -1,17 +1,14 @@
-/// This module contains all symbol table nodes used by the FplInterpreter
-/// to model assignments.
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
 
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
+/// <summary>
+/// Module housing symbol-table nodes that model the FPL assignment statement.
+/// </summary>
+/// <remarks>
+/// The assignment node validates target and source compatibility, records initialization
+/// for variables and arrays, and performs runtime assignment semantics. Diagnostics for
+/// signature/typing and illegal assignment forms are emitted via the emitter helpers
+/// (SIG05, SIG07, LG005 and related diagnostics).
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.Assignments
 open Fpl.Primitives
 open Fpl.Parser.Types
@@ -27,7 +24,16 @@ open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.TypeMatching
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 
-/// Implements the assignment statement in FPL.
+/// <summary>
+/// Symbol-table node that implements the FPL assignment statement.
+/// </summary>
+/// <param name="positions">Source start/end positions used for diagnostics.</param>
+/// <param name="parent">Parent AST node in the symbol table.</param>
+/// <remarks>
+/// The node supports assigning to references, variables, array elements and handles
+/// special forms such as call-by-value functional-term assignments. It runs consistency
+/// checks to ensure types/signatures are compatible and emits diagnostics where appropriate.
+/// </remarks>
 type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
 
@@ -37,14 +43,31 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
 
     override this.Name = PrimAssignmentL
 
+    /// <summary>
+    /// Create a shallow clone of this assignment node preserving parts and positions.
+    /// </summary>
+    /// <returns>New <c>FplAssignment</c> instance with parts copied.</returns>
     override this.Clone () =
         let ret = new FplAssignment((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
+    /// <summary>
+    /// Resolve the textual type head for this node according to requested signature format.
+    /// </summary>
+    /// <param name="signatureType">Requested signature type used for formatting.</param>
+    /// <returns>Type head as produced by <c>getFplHead</c>.</returns>
     override this.Type signatureType = 
         getFplHead this signatureType
 
+    /// <summary>
+    /// Internal helper to resolve the effective node used for assignment at argument index <paramref name="no"/>.
+    /// </summary>
+    /// <param name="no">Index into <c>ArgList</c> (0 for assignee, 1 for assigned value).</param>
+    /// <returns>
+    /// Optionally the resolved node to be treated as assignee/assigned value. When encountering
+    /// dotted references the referenced child is preferred.
+    /// </returns>
     member private this.GetAssignmentArg no =
         if this.ArgList.Count > 1 then 
             let candidate = this.ArgList[no]
@@ -59,8 +82,17 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
         else
             None
 
+    /// <summary>
+    /// The resolved assignee node, if present.
+    /// </summary>
+    /// <returns>Option containing the assignee node or <c>None</c> when unavailable.</returns>
     member this.Assignee:FplGenericNode option = this.GetAssignmentArg 0
 
+    /// <summary>
+    /// The resolved assigned value node. For array-index assignments the actual value at
+    /// the target coordinates is returned.
+    /// </summary>
+    /// <returns>Option containing the assigned value node, or an <c>FplIntrinsicUndef</c> when missing.</returns>
     member this.AssignedValue = 
         let assignedValueOpt = this.GetAssignmentArg 1
         match assignedValueOpt with 
@@ -71,6 +103,23 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
         | Some _ -> assignedValueOpt
         | None -> Some (new FplIntrinsicUndef((this.StartPos, this.EndPos), this))
 
+    /// <summary>
+    /// Perform consistency checks for the assignment statement, including type/signature validation
+    /// and legality of the assignment target.
+    /// </summary>
+    /// <remarks>
+    /// Checks performed:
+    /// - Self-assignment detection (LG005).
+    /// - Parameter/argument matching using <c>FplTypeMatcher.MatchPwA</c> (SIG05).
+    /// - Illegal assignment forms such as assigning to <c>self</c> or <c>parent</c> or attempting
+    ///   to assign a reference used as a function call (SIG07).
+    /// Diagnostics are attached to <c>this.ErrorOccurred</c> when violations are found.
+    /// </remarks>
+    /// <exceptions>
+    /// <exception>Emits <c>LG005</c> when assigning a value to itself or assigning the same type.</exception>
+    /// <exception>Emits <c>SIG05</c> when argument/parameter matching fails.</exception>
+    /// <exception>Emits <c>SIG07</c> for illegal reference assignment forms.</exception>
+    /// </exceptions>
     override this.CheckConsistency () = 
         base.CheckConsistency()
         let checkTypes (assignee:FplGenericNode) (assignedValue:FplGenericNode) =
@@ -130,10 +179,24 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
             this.ErrorOccurred <- emitSIG07diagnostics (assignee.Type SignatureType.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | _ -> ()
 
+    /// <summary>
+    /// Embed the assignment expression into its parent's argument list after running checks.
+    /// </summary>
+    /// <param name="_">Unused conventional parameter.</param>
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
         addExpressionToParentArgList this
 
+    /// <summary>
+    /// Set the resolved assignee to the provided value at runtime.
+    /// </summary>
+    /// <param name="fv">Value node to set into the assignee.</param>
+    /// <param name="assignedExpression">The original assigned expression node (keeps reference info).</param>
+    /// <remarks>
+    /// - For variables the value is set and the variable's reference is recorded.
+    /// - For variable arrays the value is assigned at coordinates computed from the lhs index list.
+    /// - For template targets the template usage is attempted (SIG12).
+    /// </remarks>
     member private this.SetAssignee (fv:FplGenericNode) assignedExpression = 
         match this.Assignee with
         | Some (:? FplVariable as assignee) ->
@@ -151,6 +214,14 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
             assignee.AssignValueToCoordinates coordinatesKey fv // set value of array
         | _ -> ()
 
+    /// <summary>
+    /// Execute the assignment at runtime: evaluate right-hand side as necessary and store
+    /// the computed value into the assignee.
+    /// </summary>
+    /// <remarks>
+    /// If pre-existing errors are present the assignment is skipped. The method handles direct
+    /// value assignments, references that must be evaluated, and array-to-array assignments.
+    /// </remarks>
     override this.Run() =
         StaticDebug.Debug(this,Debug.Start)
 
