@@ -1,0 +1,25 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [ "Fpl/Fpl/bin/Release/net8.0/Fpl.dll" ]
+        }
+      ],
+      "dest": "api"
+    }
+  ],
+  "build": {
+    "content": [
+      { "files": [ "api/**.yml" ] },
+      { "files": [ "articles/**.md" ], "cwd": "." }
+    ],
+    "resource": [
+      { "files": [ "styles/**" ] }
+    ],
+    "globalMetadata": {
+      "_appTitle": "FPL API Documentation"
+    },
+    "dest": "_site"
+  }
+}
