@@ -1,25 +1,25 @@
 {
-  "metadata": [
-    {
-      "src": [
+    "metadata": [
         {
-          "files": [ "Fpl/Fpl/bin/Release/net8.0/Fpl.dll" ]
+            "src": [
+                {
+                    "files": [ "Fpl/Fpl/bin/Release/net8.0/Fpl.dll" ]
+                }
+            ],
+            "dest": "api"
         }
-      ],
-      "dest": "api"
+    ],
+    "build": {
+        "content": [
+            { "files": [ "api/**.yml" ] },
+            { "files": [ "articles/**.md" ] }
+        ],
+        "resource": [
+            { "files": [ "styles/**" ] }
+        ],
+        "globalMetadata": {
+            "_appTitle": "FPL API Documentation"
+        },
+        "dest": "_site/api"
     }
-  ],
-  "build": {
-    "content": [
-      { "files": [ "api/**.yml" ] },
-      { "files": [ "articles/**.md" ], "cwd": "." }
-    ],
-    "resource": [
-      { "files": [ "styles/**" ] }
-    ],
-    "globalMetadata": {
-      "_appTitle": "FPL API Documentation"
-    },
-    "dest": "_site"
-  }
 }

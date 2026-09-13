@@ -53,13 +53,13 @@ jobs:
       - name: Generate DocFX metadata and site
         run: |
           ./docfx/docfx metadata docfx.json
-          ./docfx/docfx build docfx.json -o _site
+          ./docfx/docfx build docfx.json -o _site/api
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_site
+          publish_dir: ./Fpl/_site
           publish_branch: gh-pages
           user_name: "github-actions[bot]"
           user_email: "41898282+github-actions[bot]@users.noreply.github.com"
