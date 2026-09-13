@@ -47,7 +47,7 @@ jobs:
 
       - name: Generate DocFX site
         working-directory: Fpl
-        run: |
+        run: | 
           ../docfx/docfx metadata docfx.json
           ../docfx/docfx build docfx.json -o _site/docs
 
