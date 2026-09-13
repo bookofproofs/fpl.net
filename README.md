@@ -2,7 +2,7 @@ FPL, the Formal Proving Language, is a language to formulate
 mathematical definitions, theorems, and proofs independently of 
 local natural languages. 
 
-> API documentation: [FPL API Docs](https://bookofproofs.github.io/fpl.net/api/index.html)
+> API documentation: [FPL API Docs](https://bookofproofs.github.io/fpl.net/docs/index.html)
 
 # Proof of Concept (Work-in-Progress)
 
