@@ -10,7 +10,7 @@ How to build locally
 1. Ensure the project is built in Release so the assembly and XML docs exist:
 2. Generate the site with DocFX:
 3. Serve the site locally:
-
+ 
 Notes
 - Add more articles under `articles/` to extend documentation.
 - To customize appearance, edit `styles/site.css`.
