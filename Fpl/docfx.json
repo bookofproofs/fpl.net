@@ -20,6 +20,6 @@
         "globalMetadata": {
             "_appTitle": "FPL API Documentation"
         },
-        "dest": "_site/api"
+        "dest": "_site"
     }
 }

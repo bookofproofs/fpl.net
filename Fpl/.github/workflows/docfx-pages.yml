@@ -51,9 +51,10 @@ jobs:
           ./docfx/docfx --version
 
       - name: Generate DocFX metadata and site
+        working-directory: Fpl
         run: |
-          ./docfx/docfx metadata docfx.json
-          ./docfx/docfx build docfx.json -o _site/api
+          ../docfx/docfx metadata docfx.json
+          ../docfx/docfx build docfx.json -o _site/api
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
