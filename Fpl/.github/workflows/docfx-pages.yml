@@ -26,21 +26,8 @@ jobs:
       - name: Restore
         run: dotnet restore
 
-      # Build only the Fpl project to avoid unrelated build failures
       - name: Build Fpl (Release)
         run: dotnet build Fpl/Fpl/Fpl.fsproj --configuration Release --no-restore
-
-      - name: Verify built assembly
-        shell: bash
-        run: |
-          DLL_PATH="Fpl/Fpl/bin/Release/net8.0/Fpl.dll"
-          if [ ! -f "$DLL_PATH" ]; then
-            echo "ERROR: $DLL_PATH not found"
-            echo "Listing Fpl/Fpl/bin/Release/net8.0:"
-            ls -la Fpl/Fpl/bin/Release/net8.0 || true
-            exit 1
-          fi
-          echo "Found: $DLL_PATH"
 
       - name: Install DocFX (Linux)
         run: |
@@ -50,17 +37,26 @@ jobs:
           chmod +x docfx/docfx
           ./docfx/docfx --version
 
-      - name: Generate DocFX metadata and site
+      - name: Generate DocFX site
         working-directory: Fpl
         run: |
           ../docfx/docfx metadata docfx.json
           ../docfx/docfx build docfx.json -o _site/api
 
-      - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./Fpl/_site
-          publish_branch: gh-pages
-          user_name: "github-actions[bot]"
-          user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          path: Fpl/_site
+
+  deploy:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
