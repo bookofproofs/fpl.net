@@ -28,9 +28,11 @@ jobs:
 
       - name: Restore
         run: dotnet restore
+        working-directory: Fpl
 
       - name: Build (Release)
         run: dotnet build --configuration Release --no-restore
+        working-directory: Fpl
 
       - name: Install DocFX (Chocolatey)
         run: choco install docfx -y
@@ -40,6 +42,7 @@ jobs:
         run: |
           docfx metadata docfx.json
           docfx build docfx.json -o _site
+        working-directory: Fpl
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
