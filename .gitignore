@@ -47,3 +47,5 @@
 /Fpl/TestResults
 /theories/lib/Debug.txt
 *.user
+/Fpl/obj/.cache/build
+/Fpl/tmp/watch
