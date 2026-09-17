@@ -36,13 +36,13 @@ jobs:
         working-directory: Fpl
         run: >
 
-          fsdocs watch 
-          --input docs 
-          --output ../_site/api 
-          --sourcefolder ${{ github.workspace }} 
-          --sourcerepo https://github.com/bookofproofs/fpl.net/tree/main/ 
-          --parameters 
-            root https://bookofproofs.github.io/fpl.net/api/ 
+          fsdocs watch `
+          --input docs `
+          --output ../_site/api `
+          --sourcefolder ${{ github.workspace }} `
+          --sourcerepo https://github.com/bookofproofs/fpl.net/tree/main/ `
+          --parameters `
+            root https://bookofproofs.github.io/fpl.net/api/ `
             fsdocs-license-link https://github.com/bookofproofs/fpl.net/blob/main/LICENSE.md
 
       - name: Assemble root site content
