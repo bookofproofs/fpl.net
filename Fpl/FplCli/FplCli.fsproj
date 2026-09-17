@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateProgramFile>false</GenerateProgramFile>
+        <PublishSingleFile>true</PublishSingleFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Program.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FParsec" Version="1.1.1" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Update="FSharp.Core" Version="10.1.301" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Fpl\Fpl.fsproj" />
+    </ItemGroup>
+
+</Project>

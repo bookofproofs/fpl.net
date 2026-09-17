@@ -49,3 +49,7 @@
 *.user
 /Fpl/obj/.cache/build
 /Fpl/tmp/watch
+/Fpl/.fsdocs
+/Fpl/FplCli/bin/Debug/net8.0
+/Fpl/FplCli/obj
+/api
