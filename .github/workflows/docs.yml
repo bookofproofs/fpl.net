@@ -1,0 +1,70 @@
+name: Build and Deploy Docs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install fsdocs-tool
+        run: dotnet tool install --global fsdocs-tool
+
+      - name: Restore & build solution (Release)
+        run: dotnet build Fpl/Fpl.sln -c Release
+
+      - name: Generate API docs
+        working-directory: Fpl
+        run: >
+
+          fsdocs watch 
+          --input docs 
+          --output ../_site/api 
+          --sourcefolder ${{ github.workspace }} 
+          --sourcerepo https://github.com/bookofproofs/fpl.net/tree/main/ 
+          --parameters 
+            root https://bookofproofs.github.io/fpl.net/api/ 
+            fsdocs-license-link https://github.com/bookofproofs/fpl.net/blob/main/LICENSE.md
+
+      - name: Assemble root site content
+        run: |
+          mkdir -p _site
+          cp -r articles _site/ 2>/dev/null || true
+          cp -r styles _site/ 2>/dev/null || true
+          cp README.md _site/index.md 2>/dev/null || true
+          # add any other root-site files/converters you currently use for the main Pages site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

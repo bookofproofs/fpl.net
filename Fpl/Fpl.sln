@@ -30,15 +30,13 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestSharedConfig", "TestSharedConfig\TestSharedConfig.fsproj", "{993D5574-DD96-4BF0-A97A-2CC2FBA7AA82}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fsdocs", "fsdocs", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-	ProjectSection(SolutionItems) = preProject
-		fsdocs.json = fsdocs.json
-	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "reference", "reference", "{91CDA605-3016-45B3-951B-63E1AD5FCEDC}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplCli", "FplCli\FplCli.fsproj", "{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E632B8EE-C496-41C1-8DC1-A9F84023624C}"
 	ProjectSection(SolutionItems) = preProject
-		docs\reference\_template.html = docs\reference\_template.html
-		docs\reference\_template.ipynb = docs\reference\_template.ipynb
-		docs\reference\_template.tex = docs\reference\_template.tex
+		docs\DocuFplGrammarParserEvolution.md = docs\DocuFplGrammarParserEvolution.md
+		docs\DocuFplGrammarPocShiftFromPythonToFSharp.md = docs\DocuFplGrammarPocShiftFromPythonToFSharp.md
 	EndProjectSection
 EndProject
 Global
@@ -71,13 +69,17 @@ Global
 		{993D5574-DD96-4BF0-A97A-2CC2FBA7AA82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{993D5574-DD96-4BF0-A97A-2CC2FBA7AA82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{993D5574-DD96-4BF0-A97A-2CC2FBA7AA82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {980CFF4A-DD73-4DA5-A84A-0759F39CB526}
-		{91CDA605-3016-45B3-951B-63E1AD5FCEDC} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{E632B8EE-C496-41C1-8DC1-A9F84023624C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8BC7FD4A-F83C-453F-87E8-D2C2F77ED577}
