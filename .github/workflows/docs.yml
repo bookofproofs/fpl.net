@@ -49,7 +49,7 @@ jobs:
           cp -r articles _site/ 2>/dev/null || true
           cp -r styles _site/ 2>/dev/null || true
           cp README.md _site/index.md 2>/dev/null || true
-          # add any other root-site files/converters you currently use for the main Pages site
+          # add any other root-site files/converters you currently use for the main Pages  site
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
