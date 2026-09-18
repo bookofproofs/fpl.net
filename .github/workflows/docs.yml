@@ -38,18 +38,10 @@ jobs:
 
           fsdocs build 
           --input docs 
-          --output ../_site/api 
+          --output ../_site
           --sourcefolder ${{ github.workspace }} 
           --sourcerepo https://github.com/bookofproofs/fpl.net/tree/main/ 
-          --parameters root https://bookofproofs.github.io/fpl.net/api/ fsdocs-license-link https://github.com/bookofproofs/fpl.net/blob/main/LICENSE.md 
-
-      - name: Assemble root site content
-        run: |
-          mkdir -p _site
-          cp -r articles _site/ 2>/dev/null || true
-          cp -r styles _site/ 2>/dev/null || true
-          cp README.md _site/index.md 2>/dev/null || true
-          # add any other root-site files/converters you currently use for the main Pages  site
+          --parameters root https://bookofproofs.github.io/fpl.net/ fsdocs-license-link https://github.com/bookofproofs/fpl.net/blob/main/LICENSE.md 
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
