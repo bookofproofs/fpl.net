@@ -28,7 +28,7 @@ using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
 using static Fpl.Errors.Diagnostics;
 using static Fpl.Interpreter.SymbolTable.Storage.Heap;
-
+using static FplLsLib.Buffers.BuffMgr;
 
 namespace FplLS
 {

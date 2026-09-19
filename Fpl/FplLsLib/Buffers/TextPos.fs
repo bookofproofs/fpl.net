@@ -1,8 +1,9 @@
-// Ignore Spelling: uri
-/*
+module Fpl.LanguageServer.Buffers.TextPos
+(*
+Derived from https://github.com/tintoy/msbuild-project-tools-server/blob/37f635e4cd2ddcaebb32ad113dad1cbbc331a92e/src/LanguageServer.Common/Utilities/TextPositions.cs
 MIT License
 
-Copyright (c) 2018 Martin Björkström
+Copyright (c) 2017 Adam Friedman
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,38 +21,6 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.  
-*/
-
-using System.Text;
-using System.Collections.Concurrent;
-using static Fpl.Errors.Diagnostics;
-
-namespace FplLS
-{
-
-
-    public class BufferManager
-    {
-
-        public EventHandler<DocumentUpdatedEventArgs>? BufferUpdated;
-
-        private readonly ConcurrentDictionary<PathEquivalentUri, StringBuilder> _buffers = new();
-
-        public void UpdateBuffer(PathEquivalentUri uri, StringBuilder buffer)
-        {
-            _buffers.AddOrUpdate(uri, buffer, (k, v) => buffer);
-            BufferUpdated?.Invoke(this, new DocumentUpdatedEventArgs(uri));
-        }
-
-        public StringBuilder? GetBuffer(PathEquivalentUri uri)
-        {
-            return _buffers.TryGetValue(uri, out var buffer) ? buffer : null;
-        }
-
-        public class DocumentUpdatedEventArgs(Fpl.Errors.Diagnostics.PathEquivalentUri uri) : EventArgs
-        {
-            public PathEquivalentUri Uri { get; } = uri;
-        }
-    }
-}
+SOFTWARE.
+*)
+open System

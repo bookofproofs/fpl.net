@@ -32,6 +32,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol;
 using MediatR;
 using static Fpl.Errors.Diagnostics;
+using static FplLsLib.Buffers.BuffMgr;
 
 
 namespace FplLS

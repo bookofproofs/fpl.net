@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FplLsLib\FplLsLib.fsproj" />
     <ProjectReference Include="..\Fpl\Fpl.fsproj" />
   </ItemGroup>
 
