@@ -29,6 +29,7 @@ using OmniSharp.Extensions.LanguageServer.Server;
 using static Fpl.Errors.Diagnostics;
 using static Fpl.Interpreter.SymbolTable.Storage.Heap;
 using static FplLsLib.Buffers.BuffMgr;
+using static FplLsLib.ServicesDiagnostics.Diags;
 
 namespace FplLS
 {

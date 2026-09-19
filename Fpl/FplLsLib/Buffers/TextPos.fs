@@ -29,12 +29,12 @@ open System.Collections.Generic
 
 
 /// <summary>
-///     An alias for the type OmniSharp.Extensions.LanguageServer.Protocol.Models.Position
+/// An alias for the type OmniSharp.Extensions.LanguageServer.Protocol.Models.Position
 /// </summary>
 type UOPosition = OmniSharp.Extensions.LanguageServer.Protocol.Models.Position
 
 /// <summary>
-///     An alias for the type OmniSharp.Extensions.LanguageServer.Protocol.Models.Range
+/// An alias for the type OmniSharp.Extensions.LanguageServer.Protocol.Models.Range
 /// </summary>
 type UORange = OmniSharp.Extensions.LanguageServer.Protocol.Models.Range
 

@@ -8,6 +8,7 @@
     <ItemGroup>
         <Compile Include="Buffers\BuffMgr.fs" />
         <Compile Include="Buffers\TextPos.fs" />
+        <Compile Include="ServiceDiagnostics\Diags.fs" />
     </ItemGroup>
 
     <ItemGroup>
