@@ -6,8 +6,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Buffers\BuffMgr.fs" />
+        <Compile Include="Buffers\Logging.fs" />
         <Compile Include="Buffers\TextPos.fs" />
+        <Compile Include="Buffers\BuffMgr.fs" />
         <Compile Include="ServiceDiagnostics\Diags.fs" />
     </ItemGroup>
 

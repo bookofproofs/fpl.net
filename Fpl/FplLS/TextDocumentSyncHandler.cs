@@ -32,6 +32,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol;
 using MediatR;
 using static Fpl.Errors.Diagnostics;
+using static FplLsLib.Buffers.Logging;
 using static FplLsLib.Buffers.BuffMgr;
 
 
@@ -65,26 +66,26 @@ namespace FplLS
 
         public TextDocumentAttributes GetTextDocumentAttributes(Uri uri)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, $"{uri.AbsolutePath}", "GetTextDocumentAttributes.GetTextDocumentAttributes");
+            logMsg(_languageServer, $"{uri.AbsolutePath}", "GetTextDocumentAttributes.GetTextDocumentAttributes");
             return new TextDocumentAttributes(uri, "fpl");
         }
 
         public Task<Unit> Handle(DidChangeTextDocumentParams request, CancellationToken cancellationToken)
         {
 
-            FplLsTraceLogger.LogMsg(_languageServer, $"{cancellationToken}", "GetTextDocumentAttributes.Handle");
+            logMsg(_languageServer, $"{cancellationToken}", "GetTextDocumentAttributes.Handle");
             try
             {
                 var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
                 var text = request.ContentChanges.FirstOrDefault()?.Text;
 
-                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer", $"GetTextDocumentAttributes.Handle {uri}");
+                logMsg(_languageServer, $"updating buffer", $"GetTextDocumentAttributes.Handle {uri}");
                 _bufferManager.UpdateBuffer(uri, new StringBuilder(text));
-                FplLsTraceLogger.LogMsg(_languageServer, $"buffer updated", "GetTextDocumentAttributes.Handle");
+                logMsg(_languageServer, $"buffer updated", "GetTextDocumentAttributes.Handle");
             }
             catch (Exception ex)
             {
-                FplLsTraceLogger.LogException(_languageServer, ex, "GetTextDocumentAttributes.Handle (DidChangeTextDocumentParams)");
+                logException(_languageServer, ex, "GetTextDocumentAttributes.Handle (DidChangeTextDocumentParams)");
             }
 
 
@@ -93,36 +94,36 @@ namespace FplLS
 
         public Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, "x(DidOpenTextDocumentParams)", "GetTextDocumentAttributes.Handle");
+            logMsg(_languageServer, "x(DidOpenTextDocumentParams)", "GetTextDocumentAttributes.Handle");
             try
             {
                 var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
-                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer (DidOpenTextDocumentParams)", $"GetTextDocumentAttributes.Handle {uri}");
+                logMsg(_languageServer, $"updating buffer (DidOpenTextDocumentParams)", $"GetTextDocumentAttributes.Handle {uri}");
                 _bufferManager.UpdateBuffer(uri, new StringBuilder(request.TextDocument.Text));
-                FplLsTraceLogger.LogMsg(_languageServer, $"buffer updated (DidOpenTextDocumentParams)", "GetTextDocumentAttributes.Handle");
+                logMsg(_languageServer, $"buffer updated (DidOpenTextDocumentParams)", "GetTextDocumentAttributes.Handle");
             }
             catch (Exception ex)
             {
-                FplLsTraceLogger.LogException(_languageServer, ex, "GetTextDocumentAttributes.Handle (DidOpenTextDocumentParams)");
+                logException(_languageServer, ex, "GetTextDocumentAttributes.Handle (DidOpenTextDocumentParams)");
             }
             return Unit.Task;
         }
 
         public Task<Unit> Handle(DidCloseTextDocumentParams request, CancellationToken cancellationToken)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, $"y(DidCloseTextDocumentParams)", "GetTextDocumentAttributes.Handle");
+            logMsg(_languageServer, $"y(DidCloseTextDocumentParams)", "GetTextDocumentAttributes.Handle");
             return Unit.Task;
         }
 
         public Task<Unit> Handle(DidSaveTextDocumentParams request, CancellationToken cancellationToken)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, $"z(DidSaveTextDocumentParams)", "GetTextDocumentAttributes.Handle");
+            logMsg(_languageServer, $"z(DidSaveTextDocumentParams)", "GetTextDocumentAttributes.Handle");
             return Unit.Task;
         }
 
         public void SetCapability(SynchronizationCapability capability)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, $"", "GetTextDocumentAttributes.SetCapability");
+            logMsg(_languageServer, $"", "GetTextDocumentAttributes.SetCapability");
             _capability = capability;
         }
 

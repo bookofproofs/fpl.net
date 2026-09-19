@@ -29,6 +29,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using static Fpl.Errors.Diagnostics;
+using static FplLsLib.Buffers.Logging;
 using static FplLsLib.Buffers.BuffMgr;
 
 class CompletionHandler(ILanguageServer languageServer, BufferManager bufferManager, FplAutoCompleteService fplAutoCompletionService) : ICompletionHandler
@@ -60,7 +61,7 @@ class CompletionHandler(ILanguageServer languageServer, BufferManager bufferMana
 
     public async Task<CompletionList> Handle(CompletionParams request, CancellationToken cancellationToken)
     {
-        FplLsTraceLogger.LogMsg(_languageServer, "Task<CompletionList>", "CompletionHandler.Handle");
+        logMsg(_languageServer, "Task<CompletionList>", "CompletionHandler.Handle");
         var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
         var buffer = _bufferManager.GetBuffer(uri);
         if (buffer == null)

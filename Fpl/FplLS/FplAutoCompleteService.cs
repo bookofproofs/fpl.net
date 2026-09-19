@@ -1,7 +1,7 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
-
+using static FplLsLib.Buffers.Logging;
 
 namespace FplLS
 {
@@ -43,7 +43,7 @@ namespace FplLS
             }
             catch (Exception ex)
             {
-                FplLsTraceLogger.LogException(languageServer, ex, "GetParserChoices");
+                logException(languageServer, ex, "GetParserChoices");
             }
 
             return new CompletionList(modChoices);

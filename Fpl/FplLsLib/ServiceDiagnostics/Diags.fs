@@ -9,7 +9,7 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.Main
 open FplLsLib.Buffers.TextPos
-
+open FplLsLib.Buffers.Logging
 
 /// <summary>
 /// An alias for the type OmniSharp.Extensions.LanguageServer.Protocol.Models.Diagnostic
@@ -42,31 +42,6 @@ type UODocumentUri = OmniSharp.Extensions.LanguageServer.Protocol.DocumentUri
 /// An alias for the type OmniSharp.Extensions.LanguageServer.Protocol.Models.DiagnosticCode
 /// </summary>
 type UODiagnosticCode = OmniSharp.Extensions.LanguageServer.Protocol.Models.DiagnosticCode
-
-/// <summary>
-/// Prefix used to mark all trace log lines emitted by the FPL language server.
-/// </summary>
-let private tracePrefix = "######### "
-
-/// <summary>
-/// Recursively extracts the innermost exception message, prefixed with "; ".
-/// </summary>
-let rec private extractErrorMsg (ex: exn) =
-    match ex.InnerException with
-    | null -> "; " + ex.Message
-    | inner -> extractErrorMsg inner
-
-/// <summary>
-/// Logs an informational trace message to the language client's Window channel.
-/// </summary>
-let private logMsg (languageServer: ILanguageServer) (message: string) (context: string) =
-    languageServer.Window.LogInfo(tracePrefix + context + ": " + message)
-
-/// <summary>
-/// Logs an exception (innermost message only) to the language client's Window channel.
-/// </summary>
-let private logException (languageServer: ILanguageServer) (ex: exn) (context: string) =
-    languageServer.Window.LogInfo(tracePrefix + context + ": " + (extractErrorMsg ex).Substring(2))
 
 /// <summary>
 /// Collects diagnostics grouped by their (escaped) source URI.
