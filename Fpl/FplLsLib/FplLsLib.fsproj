@@ -13,6 +13,11 @@
     <ItemGroup>
         <ProjectReference Include="..\Fpl\Fpl.fsproj" />
     </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="OmniSharp.Extensions.LanguageServer" Version="0.17.4" />
+    </ItemGroup>
+    
     <ItemGroup>
         <PackageReference Update="FSharp.Core" Version="10.1.301" />
     </ItemGroup>
