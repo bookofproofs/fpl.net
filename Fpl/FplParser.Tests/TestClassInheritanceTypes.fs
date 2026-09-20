@@ -2,7 +2,7 @@ namespace FplParser.Tests
 
 open FParsec
 open Fpl0Base.Primitives
-open Fpl.Parser.Grammar
+open Fpl1Parser.Grammar
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]

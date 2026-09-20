@@ -14,7 +14,7 @@
 /// <exception cref="System.Exception">Thrown when an AST node not recognized as a special reference is supplied.</exception>
 module Fpl.Interpreter.SymbolTable.Creation.SpecialReferences
 open Fpl0Base.Primitives
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic

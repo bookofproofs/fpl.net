@@ -14,7 +14,7 @@
 module Fpl.Interpreter.SymbolTable.Creation.Identifiers
 open System
 open Fpl0Base.Primitives
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl0Base.Errors.Emitter
 open Fpl0Base.Errors.Messages
 open Fpl.Interpreter.BasicTypes

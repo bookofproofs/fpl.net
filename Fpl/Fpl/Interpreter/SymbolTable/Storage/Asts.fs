@@ -13,8 +13,8 @@ open System.IO
 open System.Text
 open FParsec
 open Fpl0Base.Errors.Diagnostics
-open Fpl.Parser.Types
-open Fpl.Parser.Main
+open Fpl1Parser.Types
+open Fpl1Parser.Main
 open Newtonsoft.Json
 
 /// <summary>

@@ -10,7 +10,7 @@
 module Fpl.Interpreter.SymbolTable.Types3.ForStmt
 open Fpl0Base.Primitives
 open Fpl0Base.Errors.Emitter
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug

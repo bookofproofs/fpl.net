@@ -9,12 +9,12 @@
 /// intentionally small and composable to produce rich AST diagnostics and
 /// position information.
 /// </remarks>
-module Fpl.Parser.Basic
+module Fpl1Parser.Basic
 
 open System.Text.RegularExpressions
 open FParsec
-open Fpl.Parser.Types
-open Fpl.Parser.Debug
+open Fpl1Parser.Types
+open Fpl1Parser.Debug
 
 
 // ============================================================================

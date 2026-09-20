@@ -16,7 +16,7 @@
 /// The function <c>evalCommands</c> is the primary entry point for interpreting command/action AST nodes.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Commands
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types3.Extensions

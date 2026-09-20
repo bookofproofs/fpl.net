@@ -12,7 +12,7 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types2.References
 open System
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl0Base.Primitives
 open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes

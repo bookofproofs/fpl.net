@@ -19,12 +19,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="Parser\Debug.fs" />
-        <Compile Include="Parser\Types.fs" />
-        <Compile Include="Parser\Basic.fs" />
-        <Compile Include="Parser\Grammar.fs" />
-        <Compile Include="Parser\Formatting.fs" />
-        <Compile Include="Parser\Main.fs" />
         <Compile Include="Interpreter\BasicTypes.fs" />
         <Compile Include="Interpreter\Helpers\Checks.fs" />
         <Compile Include="Interpreter\Helpers\Basic.fs" />
@@ -88,6 +82,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Fpl0Base\Fpl0Base.fsproj" />
+        <ProjectReference Include="..\Fpl1Parser\Fpl1Parser.fsproj" />
         <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
     </ItemGroup>
 

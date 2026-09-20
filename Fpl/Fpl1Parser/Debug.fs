@@ -4,7 +4,7 @@
 /// Debug helpers for FParsec parsers used during development and tests.
 /// When enabled, the wrappers log parser entry and exit information to a debug file.
 /// </summary>
-module Fpl.Parser.Debug
+module Fpl1Parser.Debug
 
 open System
 open System.IO

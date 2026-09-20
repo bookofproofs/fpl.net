@@ -12,7 +12,7 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types2.CompoundPredicates
 open Fpl0Base.Primitives
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic

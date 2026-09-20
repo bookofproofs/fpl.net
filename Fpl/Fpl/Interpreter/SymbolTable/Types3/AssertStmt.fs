@@ -11,7 +11,7 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.AssertStmt
 open Fpl0Base.Primitives
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap

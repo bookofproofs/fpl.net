@@ -17,7 +17,7 @@
 /// The functions in this module operate via side effects on <c>heap.Eval</c> and related reference types.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Tuples
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.References

@@ -9,12 +9,12 @@
 /// computed positions remain valid for diagnostics emission.
 /// </remarks>
 
-module Fpl.Parser.Formatting
+module Fpl1Parser.Formatting
 open System
 open System.Text.RegularExpressions
 open Fpl0Base.Errors.Messages
 open Fpl0Base.Errors.Diagnostics
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open FParsec
 
 /// <summary>

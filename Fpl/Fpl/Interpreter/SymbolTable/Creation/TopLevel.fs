@@ -12,7 +12,7 @@
 /// <exception cref="System.Exception">Thrown by <c>evalTopLevel</c> when an unexpected AST node is supplied.</exception>
 module Fpl.Interpreter.SymbolTable.Creation.TopLevel
 open System.Collections.Generic
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Creation.Forward

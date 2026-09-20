@@ -15,7 +15,7 @@
 module Fpl.Interpreter.SymbolTable.Types3.MapCases
 open System.Collections.Generic
 open Fpl0Base.Primitives
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl0Base.Errors.Diagnostics
 open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes

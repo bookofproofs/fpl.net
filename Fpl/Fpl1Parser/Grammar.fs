@@ -3,15 +3,15 @@
 /// <summary>
 /// Parser combinators that produce the FPL abstract syntax tree (AST).
 /// This module exposes the concrete-combinator definitions used by the front-end
-/// to parse FPL source code into <c>Fpl.Parser.Types.Ast</c> nodes.
+/// to parse FPL source code into <c>Fpl1Parser.Types.Ast</c> nodes.
 /// </summary>
-module Fpl.Parser.Grammar
+module Fpl1Parser.Grammar
 
 open FParsec
 open Fpl0Base.Primitives
-open Fpl.Parser.Basic
-open Fpl.Parser.Types
-open Fpl.Parser.Debug
+open Fpl1Parser.Basic
+open Fpl1Parser.Types
+open Fpl1Parser.Debug
 
 // -----------------------------------------------------
 (* Identifiers *)

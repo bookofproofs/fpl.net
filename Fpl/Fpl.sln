@@ -43,6 +43,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplLS", "FplLS\FplLS.fsproj
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fpl0Base", "Fpl0Base\Fpl0Base.fsproj", "{56F70BE9-A912-475C-A495-FC8C054F0092}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fpl1Parser", "Fpl1Parser\Fpl1Parser.fsproj", "{791706C7-8925-4412-90DA-C61E02418D19}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +91,10 @@ Global
 		{56F70BE9-A912-475C-A495-FC8C054F0092}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56F70BE9-A912-475C-A495-FC8C054F0092}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56F70BE9-A912-475C-A495-FC8C054F0092}.Release|Any CPU.Build.0 = Release|Any CPU
+		{791706C7-8925-4412-90DA-C61E02418D19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{791706C7-8925-4412-90DA-C61E02418D19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{791706C7-8925-4412-90DA-C61E02418D19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{791706C7-8925-4412-90DA-C61E02418D19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

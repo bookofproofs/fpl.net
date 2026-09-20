@@ -19,7 +19,7 @@ open System
 open FParsec
 open Fpl0Base.Errors.Diagnostics
 open Fpl0Base.Errors.Emitter
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Asts

@@ -4,17 +4,17 @@
 /// This module contains the final FPL parser including error recovery
 /// producing an abstract syntax tree out of a given FPL code.
 /// </summary>
-module Fpl.Parser.Main
+module Fpl1Parser.Main
 open System
 open System.Collections.Generic
 open System.Text
 open System.Text.RegularExpressions
 open Fpl0Base.Primitives
 open Fpl0Base.Errors.Diagnostics
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open FParsec
-open Fpl.Parser.Grammar
-open Fpl.Parser.Formatting
+open Fpl1Parser.Grammar
+open Fpl1Parser.Formatting
 
 /// <summary>
 /// Regex used for the error recovery of FPL blocks. Matches FPL block keywords as whole words

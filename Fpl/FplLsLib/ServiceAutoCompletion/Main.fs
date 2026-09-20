@@ -23,7 +23,7 @@ let getParserChoices (builder: StringBuilder) (index: int) (languageServer: ILan
 
         let modChoices = List<FplCompletionItem>()
         try
-            let choicesTuple = Fpl.Parser.Main.getParserChoicesAtPosition s index
+            let choicesTuple = Fpl1Parser.Main.getParserChoicesAtPosition s index
             let choices = fst choicesTuple
             let uniqueSymbols = HashSet<string>()
             for choice in choices do

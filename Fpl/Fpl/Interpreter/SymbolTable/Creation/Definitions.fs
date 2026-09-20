@@ -19,7 +19,7 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Definitions
 open Fpl0Base.Primitives
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Variables

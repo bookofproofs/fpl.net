@@ -6,7 +6,7 @@ open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open FplLsLib.ServiceAutoCompletion.Item
 open FplLsLib.ServiceAutoCompletion.Extension
 open Fpl0Base.Primitives
-open Fpl.Parser.Main
+open Fpl1Parser.Main
 
 [<TestClass>]
 type TestExtension () =

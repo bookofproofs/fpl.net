@@ -9,7 +9,7 @@
 /// The module intentionally carries position information in each AST node so that
 /// diagnostics emitted later retain precise source locations.
 /// </remarks>
-module Fpl.Parser.Types
+module Fpl1Parser.Types
 open FParsec
 
 /// <summary>

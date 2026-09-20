@@ -12,7 +12,7 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl0Base.Primitives
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic

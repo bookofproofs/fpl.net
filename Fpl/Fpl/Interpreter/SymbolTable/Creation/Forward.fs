@@ -11,7 +11,7 @@
 /// interpreter heap and evaluation stack and that require the evaluator to be invoked.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Forward
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.References

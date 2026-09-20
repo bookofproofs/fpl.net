@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Debug.fs" />
+        <Compile Include="Types.fs" />
+        <Compile Include="Basic.fs" />
+        <Compile Include="Grammar.fs" />
+        <Compile Include="Formatting.fs" />
+        <Compile Include="Main.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Fpl0Base\Fpl0Base.fsproj" />
+        <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Update="FSharp.Core" Version="10.1.301" />
+    </ItemGroup>
+
+</Project>

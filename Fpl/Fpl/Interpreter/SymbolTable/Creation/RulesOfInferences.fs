@@ -11,7 +11,7 @@
 /// </remarks>
 /// <exception cref="System.Exception">Thrown when an unsupported AST node is supplied.</exception>
 module Fpl.Interpreter.SymbolTable.Creation.RulesOfInferences
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Creation.Forward

@@ -12,7 +12,7 @@
 module Fpl.Interpreter.SymbolTable.Types3.Localization
 open System.Collections.Generic
 open Fpl0Base.Primitives
-open Fpl.Parser.Types
+open Fpl1Parser.Types
 open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
