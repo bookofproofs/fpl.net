@@ -41,7 +41,7 @@ open FplLsLib.Buffers.BuffMgr
 /// Handles text document synchronization notifications (open/change/close/save)
 /// from the language client, keeping the in-memory <see cref="BufferManager"/> up to date.
 /// </summary>
-type TextDocumentSyncHandler(router: ILanguageServer, bufferManager: BufferManager) as this =
+type TextDocumentSyncHandler(router: ILanguageServer, bufferManager: BufferManager) =
 
     let documentSelector =
         DocumentSelector(DocumentFilter(Pattern = "**/*.fpl"))

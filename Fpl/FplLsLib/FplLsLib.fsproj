@@ -11,6 +11,42 @@
         <Compile Include="Buffers\BuffMgr.fs" />
         <Compile Include="Buffers\DocSync.fs" />
         <Compile Include="ServiceDiagnostics\Diags.fs" />
+        <Compile Include="ServiceAutoCompletion\Item.fs" />
+        <Compile Include="ServiceAutoCompletion\Choices.fs" />
+        <Compile Include="ServiceAutoCompletion\ArgumentIdentifier.fs" />
+        <Compile Include="ServiceAutoCompletion\Axiom.fs" />
+        <Compile Include="ServiceAutoCompletion\Cases.fs" />
+        <Compile Include="ServiceAutoCompletion\Constructor.fs" />
+        <Compile Include="ServiceAutoCompletion\Corollary.fs" />
+        <Compile Include="ServiceAutoCompletion\Declaration.fs" />
+        <Compile Include="ServiceAutoCompletion\Default.fs" />
+        <Compile Include="ServiceAutoCompletion\Definition.fs" />
+        <Compile Include="ServiceAutoCompletion\Delegate.fs" />
+        <Compile Include="ServiceAutoCompletion\Digits.fs" />
+        <Compile Include="ServiceAutoCompletion\Extension.fs" />
+        <Compile Include="ServiceAutoCompletion\ExtensionString.fs" />
+        <Compile Include="ServiceAutoCompletion\For.fs" />
+        <Compile Include="ServiceAutoCompletion\Iso639.fs" />
+        <Compile Include="ServiceAutoCompletion\IsOperator.fs" />
+        <Compile Include="ServiceAutoCompletion\Keyword.fs" />
+        <Compile Include="ServiceAutoCompletion\Localization.fs" />
+        <Compile Include="ServiceAutoCompletion\MapCases.fs" />
+        <Compile Include="ServiceAutoCompletion\PascalCaseId.fs" />
+        <Compile Include="ServiceAutoCompletion\Predicate.fs" />
+        <Compile Include="ServiceAutoCompletion\Proof.fs" />
+        <Compile Include="ServiceAutoCompletion\Property.fs" />
+        <Compile Include="ServiceAutoCompletion\Quantifier.fs" />
+        <Compile Include="ServiceAutoCompletion\Regex.fs" />
+        <Compile Include="ServiceAutoCompletion\RuleOfInference.fs" />
+        <Compile Include="ServiceAutoCompletion\Self.fs" />
+        <Compile Include="ServiceAutoCompletion\String.fs" />
+        <Compile Include="ServiceAutoCompletion\TheoremLikeStmt.fs" />
+        <Compile Include="ServiceAutoCompletion\Uses.fs" />
+        <Compile Include="ServiceAutoCompletion\Variable.fs" />
+        <Compile Include="ServiceAutoCompletion\Whitespace.fs" />
+        <Compile Include="ServiceAutoCompletion\Word.fs" />
+        <Compile Include="ServiceAutoCompletion\ItemChoices.fs" />
+        <Compile Include="ServiceAutoCompletion\Service.fs" />
     </ItemGroup>
 
     <ItemGroup>
