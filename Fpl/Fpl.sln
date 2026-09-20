@@ -33,8 +33,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E632B8EE-C
 		docs\DocuFplGrammarPocShiftFromPythonToFSharp.md = docs\DocuFplGrammarPocShiftFromPythonToFSharp.md
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplLsLib", "FplLsLib\FplLsLib.fsproj", "{D310DDDF-7239-44F7-A715-AB84E1FC8968}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestFplLsLib", "TestFplLsLib\TestFplLsLib.fsproj", "{1B49BDD0-591A-4682-B528-740D1B20E58D}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplLS", "FplLS\FplLS.fsproj", "{E45713AD-1DC0-4FFF-8FB6-EA67F65F651E}"
@@ -44,6 +42,8 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fpl1Parser", "Fpl1Parser\Fpl1Parser.fsproj", "{791706C7-8925-4412-90DA-C61E02418D19}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fpl2Interpreter", "Fpl2Interpreter\Fpl2Interpreter.fsproj", "{11079A19-17C0-4CD0-A123-5EA98A172670}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fpl3LanguageServer", "Fpl3LanguageServer\Fpl3LanguageServer.fsproj", "{A054DB66-F633-4496-83B4-65A306B71974}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,10 +71,6 @@ Global
 		{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -95,6 +91,10 @@ Global
 		{11079A19-17C0-4CD0-A123-5EA98A172670}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11079A19-17C0-4CD0-A123-5EA98A172670}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11079A19-17C0-4CD0-A123-5EA98A172670}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A054DB66-F633-4496-83B4-65A306B71974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A054DB66-F633-4496-83B4-65A306B71974}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A054DB66-F633-4496-83B4-65A306B71974}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A054DB66-F633-4496-83B4-65A306B71974}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

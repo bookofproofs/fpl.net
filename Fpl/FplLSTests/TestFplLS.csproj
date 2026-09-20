@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FplLsLib\FplLsLib.fsproj" />
+    <ProjectReference Include="..\Fpl3LanguageServer\Fpl3LanguageServer.fsproj" />
     <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
   </ItemGroup>
 

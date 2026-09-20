@@ -31,10 +31,10 @@ open Newtonsoft.Json.Linq
 open OmniSharp.Extensions.LanguageServer.Server
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.SymbolTable.Storage.Heap
-open FplLsLib.Buffers.BuffMgr
-open FplLsLib.Buffers.DocSync
-open FplLsLib.ServicesDiagnostics.Diags
-open FplLsLib.ServiceAutoCompletion.Handler
+open Fpl3LanguageServer.Buffers.BuffMgr
+open Fpl3LanguageServer.Buffers.DocSync
+open Fpl3LanguageServer.ServicesDiagnostics.Diags
+open Fpl3LanguageServer.ServiceAutoCompletion.Handler
 
 let private configureServices (services: IServiceCollection) =
     services.AddSingleton<BufferManager>() |> ignore

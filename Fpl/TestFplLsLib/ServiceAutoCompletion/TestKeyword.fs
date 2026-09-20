@@ -3,8 +3,8 @@ namespace TestFplLsLib.ServiceAutoCompletion
 open System
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
-open FplLsLib.ServiceAutoCompletion.Item
-open FplLsLib.ServiceAutoCompletion.Keyword
+open Fpl3LanguageServer.ServiceAutoCompletion.Item
+open Fpl3LanguageServer.ServiceAutoCompletion.Keyword
 open Fpl0Base.Primitives
 
 [<TestClass>]
