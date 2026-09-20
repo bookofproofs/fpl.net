@@ -23,7 +23,6 @@
         <Compile Include="Errors\Messages.fs" />
         <Compile Include="Errors\Diagnostics.fs" />
         <Compile Include="Errors\Emitter.fs" />
-        <None Include="Parser\CHANGES.md" />
         <Compile Include="Parser\Debug.fs" />
         <Compile Include="Parser\Types.fs" />
         <Compile Include="Parser\Basic.fs" />

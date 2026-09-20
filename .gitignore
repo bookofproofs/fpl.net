@@ -53,3 +53,10 @@
 /Fpl/FplCli/bin/Debug/net8.0
 /Fpl/FplCli/obj
 /api
+/Fpl/FplLSLib/bin/Debug/net8.0
+/Fpl/FplLSLib/obj
+/Fpl/FplCli/bin/Release/net8.0
+/Fpl/FplLsLib/bin/Release/net8.0
+/Fpl/TestFplLsLib/bin/Debug/net8.0
+/Fpl/TestFplLsLib/obj
+/Fpl/TestFplLsLib/bin/Release/net8.0

@@ -7,8 +7,6 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Fpl", "Fpl\Fpl.fsproj", "{8
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "TestFplParser", "FplParser.Tests\TestFplParser.fsproj", "{3CD461BA-7447-452D-8D49-9FBF0AB27CD0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FplLS", "FplLS\FplLS.csproj", "{498A7D8A-1BBD-4438-939D-A2F15667F8EA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestFplLS", "FplLSTests\TestFplLS.csproj", "{B15ADDDD-015A-45CD-8414-49497F54E658}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "TestFplInterpreter", "FplInterpreter.Tests\TestFplInterpreter.fsproj", "{D7B507CD-32E5-4ECD-8E6E-D76F0F0C5318}"
@@ -37,6 +35,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E632B8EE-C
 		docs\DocuFplGrammarPocShiftFromPythonToFSharp.md = docs\DocuFplGrammarPocShiftFromPythonToFSharp.md
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplLsLib", "FplLsLib\FplLsLib.fsproj", "{D310DDDF-7239-44F7-A715-AB84E1FC8968}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestFplLsLib", "TestFplLsLib\TestFplLsLib.fsproj", "{1B49BDD0-591A-4682-B528-740D1B20E58D}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplLS", "FplLS\FplLS.fsproj", "{E45713AD-1DC0-4FFF-8FB6-EA67F65F651E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,10 +55,6 @@ Global
 		{3CD461BA-7447-452D-8D49-9FBF0AB27CD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CD461BA-7447-452D-8D49-9FBF0AB27CD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CD461BA-7447-452D-8D49-9FBF0AB27CD0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{498A7D8A-1BBD-4438-939D-A2F15667F8EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{498A7D8A-1BBD-4438-939D-A2F15667F8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{498A7D8A-1BBD-4438-939D-A2F15667F8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{498A7D8A-1BBD-4438-939D-A2F15667F8EA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B15ADDDD-015A-45CD-8414-49497F54E658}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B15ADDDD-015A-45CD-8414-49497F54E658}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B15ADDDD-015A-45CD-8414-49497F54E658}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -71,6 +71,18 @@ Global
 		{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C2D0BA9-987B-4661-AFDA-C1675FB63C87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E45713AD-1DC0-4FFF-8FB6-EA67F65F651E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E45713AD-1DC0-4FFF-8FB6-EA67F65F651E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E45713AD-1DC0-4FFF-8FB6-EA67F65F651E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E45713AD-1DC0-4FFF-8FB6-EA67F65F651E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
