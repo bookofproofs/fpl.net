@@ -17,12 +17,12 @@ open System.IO
 open System.Collections.Generic
 open System
 open FParsec
+open Fpl0Base.Errors.Diagnostics
+open Fpl0Base.Errors.Emitter
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Asts
-open Fpl.Errors.Diagnostics
 
 /// <summary>
 /// Recursively evaluate an AST tree and collect <c>EvalAliasedNamespaceIdentifier</c> records

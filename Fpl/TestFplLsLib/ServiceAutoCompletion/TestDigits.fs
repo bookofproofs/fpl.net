@@ -5,7 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open FplLsLib.ServiceAutoCompletion.Item
 open FplLsLib.ServiceAutoCompletion.Digits
-open Fpl.Primitives
+open Fpl0Base.Primitives
 
 [<TestClass>]
 type TestDigits () =

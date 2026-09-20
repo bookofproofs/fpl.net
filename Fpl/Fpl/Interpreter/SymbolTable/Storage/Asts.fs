@@ -12,9 +12,9 @@ open System.Collections.Generic
 open System.IO
 open System.Text
 open FParsec
+open Fpl0Base.Errors.Diagnostics
 open Fpl.Parser.Types
 open Fpl.Parser.Main
-open Fpl.Errors.Diagnostics
 open Newtonsoft.Json
 
 /// <summary>

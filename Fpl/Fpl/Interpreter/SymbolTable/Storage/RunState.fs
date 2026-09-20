@@ -6,7 +6,7 @@
 /// </summary>
 module Fpl.Interpreter.SymbolTable.Storage.RunState
 open System.Collections.Generic
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Interpreter.BasicTypes
 
 /// <summary>

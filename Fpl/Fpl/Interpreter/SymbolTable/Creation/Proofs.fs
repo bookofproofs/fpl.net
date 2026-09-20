@@ -15,9 +15,9 @@
 /// </remarks>
 /// <exception cref="System.Exception">Thrown when an unsupported AST node is supplied to the top-level evaluator.</exception>
 module Fpl.Interpreter.SymbolTable.Creation.Proofs
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Checks

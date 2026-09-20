@@ -10,10 +10,10 @@
 /// (SIG05, SIG07, LG005 and related diagnostics).
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.Assignments
-open Fpl.Primitives
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Diagnostics
+open Fpl0Base.Errors.Emitter
 open Fpl.Parser.Types
-open Fpl.Errors.Diagnostics
-open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic

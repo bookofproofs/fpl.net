@@ -2,7 +2,7 @@ module FplLsLib.ServiceAutoCompletion.Default
 
 open System.Collections.Generic
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open FplLsLib.ServiceAutoCompletion.Item
 open FplLsLib.ServiceAutoCompletion.Choices
 

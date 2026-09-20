@@ -1,7 +1,7 @@
 module FplLsLib.ServiceAutoCompletion.ItemChoices
 
 open System.Collections.Generic
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open FplLsLib.ServiceAutoCompletion.Item
 open FplLsLib.ServiceAutoCompletion.ArgumentIdentifier
 open FplLsLib.ServiceAutoCompletion.Axiom

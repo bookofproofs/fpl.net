@@ -2,7 +2,7 @@ module FplLsLib.ServiceAutoCompletion.Axiom
 
 open System
 open System.Collections.Generic
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open FplLsLib.ServiceAutoCompletion.Item
 open FplLsLib.ServiceAutoCompletion.Choices
 

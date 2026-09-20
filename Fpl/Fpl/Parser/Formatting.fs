@@ -12,9 +12,9 @@
 module Fpl.Parser.Formatting
 open System
 open System.Text.RegularExpressions
+open Fpl0Base.Errors.Messages
+open Fpl0Base.Errors.Diagnostics
 open Fpl.Parser.Types
-open Fpl.Errors.Messages
-open Fpl.Errors.Diagnostics
 open FParsec
 
 /// <summary>

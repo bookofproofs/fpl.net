@@ -15,8 +15,8 @@ module Fpl.Interpreter.SymbolTable.Types2.Definitions
 open System.Collections.Generic
 open FParsec
 open Fpl.Parser.Types
-open Fpl.Primitives
-open Fpl.Errors.Emitter
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic

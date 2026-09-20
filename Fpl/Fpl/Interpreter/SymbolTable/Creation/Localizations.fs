@@ -16,7 +16,7 @@ module Fpl.Interpreter.SymbolTable.Creation.Localizations
 open System
 open System.Collections.Generic
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Variables

@@ -10,7 +10,7 @@
 module Fpl.Interpreter.SymbolTable.Storage.ValidStmts
 open System.Collections.Generic
 open System.Text.Json
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Interpreter.BasicTypes
 
 /// <summary>

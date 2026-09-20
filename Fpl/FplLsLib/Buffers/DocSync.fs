@@ -33,7 +33,7 @@ open OmniSharp.Extensions.LanguageServer.Protocol.Document
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open OmniSharp.Extensions.LanguageServer.Protocol.Server
 open OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Errors.Diagnostics
 open FplLsLib.Buffers.Logging
 open FplLsLib.Buffers.BuffMgr
 

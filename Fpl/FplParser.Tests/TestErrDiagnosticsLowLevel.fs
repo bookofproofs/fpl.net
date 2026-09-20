@@ -1,7 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Errors.Diagnostics
 open Fpl.Parser.Formatting
 open Microsoft.VisualStudio.TestTools.UnitTesting
 

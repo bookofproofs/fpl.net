@@ -15,14 +15,13 @@
 /// lightweight because their main purpose is symbol-table semantics and diagnostics.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.SelfParent
-open Fpl.Primitives
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Messages
+open Fpl0Base.Errors.Emitter
 open Fpl.Parser.Types
-open Fpl.Errors.Messages
-open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Checks
-open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.TypeMatching

@@ -3,12 +3,12 @@
 /// <summary>
 /// This module contains all side-effect functions necessary to emit diagnostics for the FPL language server.
 /// </summary>
-module Fpl.Errors.Emitter
+module Fpl0Base.Errors.Emitter
 
 open FParsec
-open Fpl.Primitives
-open Fpl.Errors.Messages
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Messages
+open Fpl0Base.Errors.Diagnostics
 
 /// <summary>
 /// Emit a general unexpected interpreter diagnostic.

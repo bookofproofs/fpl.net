@@ -13,10 +13,10 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Identifiers
 open System
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
-open Fpl.Errors.Messages
+open Fpl0Base.Errors.Emitter
+open Fpl0Base.Errors.Messages
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic

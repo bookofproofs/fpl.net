@@ -2,7 +2,7 @@ namespace Diagnostics.NamespaceRelated
 
 open FParsec
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Errors.Diagnostics
 open TestFplInterpreter.Helpers.Common
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Creation.UsesClauses

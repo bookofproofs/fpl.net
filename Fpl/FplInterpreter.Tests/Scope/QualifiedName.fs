@@ -1,7 +1,7 @@
 namespace Scope
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.Types1.TopLevel

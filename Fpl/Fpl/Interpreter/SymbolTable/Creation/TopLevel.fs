@@ -13,7 +13,7 @@
 module Fpl.Interpreter.SymbolTable.Creation.TopLevel
 open System.Collections.Generic
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 

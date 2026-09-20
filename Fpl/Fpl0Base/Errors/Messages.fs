@@ -8,10 +8,10 @@
 /// This module contains message templates and helper formatting functions
 /// so that diagnostics remain consistent across the codebase.
 /// </remarks>
-module Fpl.Errors.Messages
+module Fpl0Base.Errors.Messages
 
 open System
-open Fpl.Primitives
+open Fpl0Base.Primitives
 
 /// <summary>
 /// Transforms a whole number into its English ordinal representation

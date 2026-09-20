@@ -18,9 +18,9 @@
 /// Position tuples (pos1,pos2) are propagated to newly created objects to improve diagnostics.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Definitions
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.Definitions

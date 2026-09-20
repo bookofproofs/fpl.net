@@ -2,7 +2,7 @@ module FplLsLib.ServiceAutoCompletion.Item
 
 open System.Collections.Generic
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
-open Fpl.Primitives
+open Fpl0Base.Primitives
 
 /// <summary>
 /// Strips surrounding single quotes ('...') or angle brackets (&lt;...&gt;) from a token, if present.

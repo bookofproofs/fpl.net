@@ -8,9 +8,9 @@
 /// The types implement symbol-table embedding, runtime iteration semantics and diagnostics emission.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.ForStmt
-open Fpl.Primitives
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Emitter
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug

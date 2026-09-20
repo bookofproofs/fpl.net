@@ -12,8 +12,8 @@
 module Fpl.Interpreter.Main
 
 open System
-open Fpl.Errors.Diagnostics
-open Fpl.Errors.Emitter
+open Fpl0Base.Errors.Diagnostics
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Creation.UsesClauses
 open Fpl.Interpreter.SymbolTable.Creation.Main

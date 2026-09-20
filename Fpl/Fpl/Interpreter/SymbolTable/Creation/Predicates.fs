@@ -11,7 +11,7 @@
 /// All operations are performed via side effects on the global <c>heap</c>.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Predicates
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.Storage.Heap

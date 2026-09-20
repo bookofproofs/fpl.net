@@ -13,9 +13,9 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open FParsec
-open Fpl.Primitives
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Emitter
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic

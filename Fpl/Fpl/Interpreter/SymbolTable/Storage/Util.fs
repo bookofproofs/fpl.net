@@ -10,8 +10,8 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Storage.Util
 open System.Collections.Generic
-open Fpl.Primitives
-open Fpl.Errors.Emitter
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.Storage.Heap

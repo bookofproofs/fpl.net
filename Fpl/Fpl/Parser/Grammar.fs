@@ -8,8 +8,8 @@
 module Fpl.Parser.Grammar
 
 open FParsec
+open Fpl0Base.Primitives
 open Fpl.Parser.Basic
-open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Parser.Debug
 
@@ -670,7 +670,7 @@ let statement =
         assignmentStatement
     ]) .>> IW
 
-/// Assign the statement-list forward reference value (actual definition resides elsewhere).
+// Assign the statement-list forward reference value (actual definition resides elsewhere).
 statementListRef.Value <- many statement
 
 /// <summary>
@@ -708,10 +708,10 @@ let referencingIdentifier = positions (predicateIdentifier .>>. dollarDigitList)
 /// </summary>
 let referenceToProofOrCorollary = positions referencingIdentifier |>> Ast.ReferenceToProofOrCorollary <!> "ReferenceToProofOrCorollary"
 
-/// Assigns the predicate-with-qualification forward reference.
+// Assigns the predicate-with-qualification forward reference.
 predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification <!> "PredicateWithQualification" 
 
-/// Forwarded prime predicate choices (true, false, delegate, references, etc.).
+// Forwarded prime predicate choices (true, false, delegate, references, etc.).
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
@@ -943,7 +943,7 @@ let pPostfixExpr : Parser<Ast,unit> =
             List.fold (fun acc op -> Ast.PostfixOp(op, acc)) expr postfixes
         ) <!> "pPostfixExpr"
 
-/// Assigns the prefix-expression reference value using a fold of prefix operators over postfix expressions.
+// Assigns the prefix-expression reference value using a fold of prefix operators over postfix expressions.
 pPrefixExprRef.Value <-
     pipe2
         (many (attempt (prefixSymbolWithPos .>> NW)) <?> "<prefix symbol>")
@@ -985,10 +985,10 @@ let pInfixExpr : Parser<Ast,unit> =
 /// </summary>
 let expression = pInfixExpr
 
-/// Assigns the main predicate reference value to the expression parser.
+// Assigns the main predicate reference value to the expression parser.
 predicateRef.Value <- expression
 
-/// Assigns the predicate-list forward reference value to the pExprList implementation.
+// Assigns the predicate-list forward reference value to the pExprList implementation.
 predicateListRef.Value <- pExprList 
 
 // ------------------------------------------------------------
@@ -1205,7 +1205,7 @@ let predicateInstanceSignature = positions (keywordPredicate >>. SW >>. simpleSi
 /// </summary>
 let predicateInstance = positions (keywordProperty >>. predicateInstanceSignature .>>. predicateInstanceBlock) |>> Ast.PredicateInstance <!> "PredicateInstance"
 
-/// Assigns the mapping forward reference value to the arrow/mapping parser.
+// Assigns the mapping forward reference value to the arrow/mapping parser.
 mappingRef.Value <- toArrow >>. IW >>. positions (keywordUndefined <|> variableType) |>> Ast.Mapping <!> "Mapping"
 
 /// <summary>
@@ -1520,9 +1520,7 @@ let ebnfFactor = choice [
 /// </summary>
 let ebnfTerm = positions (sepEndBy1 ebnfFactor SW) |>> Ast.TranslationTerm <!> "TranslationTerm"
 
-/// <summary>
-/// Actual value of the forward-declared parser for extended Backus-Naur forms of translations. 
-/// </summary>
+// Actual value of the forward-declared parser for extended Backus-Naur forms of translations. 
 ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.TranslationTermList <!> "TranslationTermList"
 
 /// <summary>

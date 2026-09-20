@@ -14,7 +14,7 @@
 /// </remarks>
 /// <exceptions cref="System.Exception">Propagates exceptions emitted by lower-level evaluators for unsupported or invalid AST nodes.</exceptions>
 module Fpl.Interpreter.SymbolTable.Creation.Main
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Errors.Diagnostics
 open Fpl.Parser.Types
 open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Asts

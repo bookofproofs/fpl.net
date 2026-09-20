@@ -1,10 +1,10 @@
 namespace Diagnostics.ProofRelated
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
-open Fpl.Primitives
+open Fpl0Base.Primitives
 
 
 (* PR020

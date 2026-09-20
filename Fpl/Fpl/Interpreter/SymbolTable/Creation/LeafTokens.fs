@@ -11,9 +11,9 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.LeafTokens
 open System
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util

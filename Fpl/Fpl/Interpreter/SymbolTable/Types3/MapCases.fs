@@ -14,10 +14,10 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.MapCases
 open System.Collections.Generic
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
-open Fpl.Errors.Diagnostics
-open Fpl.Errors.Emitter
+open Fpl0Base.Errors.Diagnostics
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic

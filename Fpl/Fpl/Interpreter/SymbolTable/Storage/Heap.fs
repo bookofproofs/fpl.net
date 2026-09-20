@@ -11,7 +11,7 @@
 module Fpl.Interpreter.SymbolTable.Storage.Heap
 open System
 open System.Text
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Errors.Diagnostics
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.Helpers.Basic

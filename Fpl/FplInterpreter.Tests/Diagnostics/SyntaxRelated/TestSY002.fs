@@ -2,7 +2,7 @@ namespace Diagnostics.SyntaxRelated
 
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 

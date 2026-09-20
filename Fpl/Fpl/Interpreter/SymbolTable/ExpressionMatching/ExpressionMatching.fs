@@ -17,10 +17,10 @@
 module Fpl.Interpreter.SymbolTable.ExpressionMatching
 open System
 open System.Collections.Generic
-open Fpl.Primitives
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Messages
+open Fpl0Base.Errors.Emitter
 open Fpl.Parser.Types
-open Fpl.Errors.Messages
-open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic

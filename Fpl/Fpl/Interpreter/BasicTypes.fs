@@ -5,7 +5,7 @@
 /// </summary>
 module Fpl.Interpreter.BasicTypes
 open System.Collections.Generic
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
 
 open FParsec

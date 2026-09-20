@@ -1,7 +1,7 @@
 module FplLsLib.ServiceAutoCompletion.Choices
 
 open System.Collections.Generic
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open FplLsLib.ServiceAutoCompletion.Item
 
 /// <summary>

@@ -12,7 +12,7 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open FParsec
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic

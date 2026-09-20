@@ -2,7 +2,7 @@ namespace Fpl.Interpreter.Tests.Proofs
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open System
 open System.Collections.Generic
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util

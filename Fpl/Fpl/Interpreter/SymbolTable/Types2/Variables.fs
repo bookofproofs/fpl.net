@@ -11,10 +11,10 @@
 module Fpl.Interpreter.SymbolTable.Types2.Variables
 open System.Collections.Generic
 open FParsec
-open Fpl.Primitives
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Diagnostics
+open Fpl0Base.Errors.Emitter
 open Fpl.Parser.Types
-open Fpl.Errors.Diagnostics
-open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug

@@ -25,7 +25,7 @@ SOFTWARE.
 open System
 open System.Text
 open System.Collections.Concurrent
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Errors.Diagnostics
 
 /// <summary>
 /// Event args carrying the URI of a document whose buffer has been updated.

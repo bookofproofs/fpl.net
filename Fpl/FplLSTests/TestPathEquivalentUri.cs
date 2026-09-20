@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
-using static Fpl.Errors.Diagnostics;
+using static Fpl0Base.Errors.Diagnostics;
 
 namespace TestFplLS
 {

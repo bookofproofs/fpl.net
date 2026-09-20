@@ -11,7 +11,7 @@
 /// embedding behavior used by the interpreter.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types2.CompoundPredicates
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks

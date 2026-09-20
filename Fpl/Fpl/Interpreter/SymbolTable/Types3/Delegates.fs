@@ -13,9 +13,9 @@
 /// Diagnostics referenced: ID013, ID013, etc. See emitter usages for details.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.Delegates
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic

@@ -8,9 +8,9 @@ open System.Collections.Generic
 open System
 open System.Text
 open FParsec
-open Fpl.Primitives
-open Fpl.Errors.Messages
-open Fpl.Errors.Emitter
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Messages
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 

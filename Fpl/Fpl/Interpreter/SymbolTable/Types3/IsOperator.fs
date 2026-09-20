@@ -10,7 +10,7 @@
 /// Diagnostics are emitted via emitter helpers; runtime evaluation does not throw for semantic diagnostics.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.IsOperator
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic

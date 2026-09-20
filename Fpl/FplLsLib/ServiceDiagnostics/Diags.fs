@@ -5,7 +5,7 @@ open System.Collections.Generic
 open System.Text
 open OmniSharp.Extensions.LanguageServer.Protocol.Server
 open OmniSharp.Extensions.LanguageServer.Protocol.Window
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Errors.Diagnostics
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.Main
 open FplLsLib.Buffers.TextPos

@@ -6,9 +6,9 @@
 /// </summary>
 module Fpl.Interpreter.Helpers.Checks
 open System
-open Fpl.Errors.Messages
-open Fpl.Errors.Emitter
-open Fpl.Primitives
+open Fpl0Base.Errors.Messages
+open Fpl0Base.Errors.Emitter
+open Fpl0Base.Primitives
 open Fpl.Interpreter.BasicTypes
 
 /// <summary>

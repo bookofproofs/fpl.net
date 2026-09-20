@@ -9,9 +9,9 @@ open System
 open System.Collections.Generic
 open System.Text
 open System.Text.RegularExpressions
-open Fpl.Primitives
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Diagnostics
 open Fpl.Parser.Types
-open Fpl.Errors.Diagnostics
 open FParsec
 open Fpl.Parser.Grammar
 open Fpl.Parser.Formatting

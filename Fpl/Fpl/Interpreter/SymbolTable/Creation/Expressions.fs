@@ -12,8 +12,8 @@
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Expressions
 open System
-open Fpl.Primitives
-open Fpl.Errors.Emitter
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Emitter
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic

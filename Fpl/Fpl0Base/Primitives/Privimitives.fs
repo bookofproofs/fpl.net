@@ -9,7 +9,7 @@
 /// primitive descriptions so other modules (parser, diagnostics, recovery)
 /// can reference a single canonical source.
 /// </remarks>
-module Fpl.Primitives
+module Fpl0Base.Primitives
 
 open System.Collections.Generic
 

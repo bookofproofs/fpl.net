@@ -8,7 +8,7 @@
 /// formatting helpers that extract and simplify FParsec messages for
 /// presentation, and a shared diagnostics collector used across the system.
 /// </remarks>
-module Fpl.Errors.Diagnostics
+module Fpl0Base.Errors.Diagnostics
 
 open System
 open System.IO
@@ -17,7 +17,7 @@ open System.Collections.Generic
 open System.Security.Cryptography
 open System.Text
 open FParsec
-open Fpl.Errors.Messages
+open Fpl0Base.Errors.Messages
 
  /// <summary>
 /// URI wrapper that normalizes path separators and exposes a stable comparison semantics

@@ -3,7 +3,7 @@ namespace SymbolTable
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
-open Fpl.Errors.Diagnostics
+open Fpl0Base.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Asts

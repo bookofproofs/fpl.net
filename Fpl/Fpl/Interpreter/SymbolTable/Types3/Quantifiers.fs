@@ -10,9 +10,9 @@
 /// Diagnostics are emitted via emitter helpers and nodes generally do not throw on semantic errors.
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Types3.Quantifiers
-open Fpl.Primitives
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Emitter
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic

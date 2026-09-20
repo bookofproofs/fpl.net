@@ -19,10 +19,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="Primitives\Privimitives.fs" />
-        <Compile Include="Errors\Messages.fs" />
-        <Compile Include="Errors\Diagnostics.fs" />
-        <Compile Include="Errors\Emitter.fs" />
         <Compile Include="Parser\Debug.fs" />
         <Compile Include="Parser\Types.fs" />
         <Compile Include="Parser\Basic.fs" />
@@ -91,6 +87,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Fpl0Base\Fpl0Base.fsproj" />
         <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
     </ItemGroup>
 

@@ -11,9 +11,9 @@
 /// The evaluator has side effects on the global <c>heap</c> (evaluation stack, parsed symbol table, scopes).
 /// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Variables
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
+open Fpl0Base.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Checks

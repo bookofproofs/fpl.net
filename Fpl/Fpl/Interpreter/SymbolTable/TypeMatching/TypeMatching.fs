@@ -13,9 +13,9 @@
 module Fpl.Interpreter.SymbolTable.TypeMatching
 open System
 open System.Collections.Generic
-open Fpl.Errors.Emitter
-open Fpl.Primitives
-open Fpl.Errors.Messages
+open Fpl0Base.Primitives
+open Fpl0Base.Errors.Emitter
+open Fpl0Base.Errors.Messages
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.Types2.Variables

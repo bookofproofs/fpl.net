@@ -8,7 +8,7 @@ module Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open System
 open System.Text
 open FParsec
-open Fpl.Primitives
+open Fpl0Base.Primitives
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Debug
 open TestSharedConfig
