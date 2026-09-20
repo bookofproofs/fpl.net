@@ -31,6 +31,7 @@ using static Fpl.Interpreter.SymbolTable.Storage.Heap;
 using static FplLsLib.Buffers.BuffMgr;
 using static FplLsLib.Buffers.DocSync;
 using static FplLsLib.ServicesDiagnostics.Diags;
+using static FplLsLib.ServiceAutoCompletion.Handler;
 
 namespace FplLS
 {
