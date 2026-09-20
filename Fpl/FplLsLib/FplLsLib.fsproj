@@ -51,11 +51,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Fpl\Fpl.fsproj" />
+        <PackageReference Include="OmniSharp.Extensions.LanguageServer" Version="0.17.4" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="OmniSharp.Extensions.LanguageServer" Version="0.17.4" />
+      <ProjectReference Include="..\Fpl0Base\Fpl0Base.fsproj" />
+      <ProjectReference Include="..\Fpl2Interpreter\Fpl2Interpreter.fsproj" />
     </ItemGroup>
     
     <ItemGroup>

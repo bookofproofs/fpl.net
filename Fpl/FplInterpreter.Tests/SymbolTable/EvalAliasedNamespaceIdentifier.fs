@@ -4,12 +4,12 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open Fpl0Base.Errors.Diagnostics
-open Fpl.Interpreter.Helpers.Debug
-open Fpl.Interpreter.SymbolTable.Types1.TopLevel
-open Fpl.Interpreter.SymbolTable.Storage.Asts
-open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.Main
-open Fpl.Interpreter.SymbolTable.Creation.UsesClauses
+open Fpl2Interpreter.Helpers.Debug
+open Fpl2Interpreter.SymbolTable.Types1.TopLevel
+open Fpl2Interpreter.SymbolTable.Storage.Asts
+open Fpl2Interpreter.SymbolTable.Storage.Heap
+open Fpl2Interpreter.Main
+open Fpl2Interpreter.SymbolTable.Creation.UsesClauses
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 

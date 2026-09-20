@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="BasicTypes.fs" />
+        <Compile Include="Helpers\Checks.fs" />
+        <Compile Include="Helpers\Basic.fs" />
+        <Compile Include="Helpers\Debug.fs" />
+        <Compile Include="SymbolTable\Types1\TopLevel.fs" />
+        <Compile Include="SymbolTable\Storage\Asts.fs" />
+        <Compile Include="SymbolTable\Storage\Eval.fs" />
+        <Compile Include="SymbolTable\Storage\RunState.fs" />
+        <Compile Include="SymbolTable\Storage\ValidStmts.fs" />
+        <Compile Include="SymbolTable\Storage\Heap.fs" />
+        <Compile Include="SymbolTable\Storage\Util.fs" />
+        <Compile Include="SymbolTable\Types2\Intrinsic.fs" />
+        <Compile Include="SymbolTable\Types2\CompoundPredicates.fs" />
+        <Compile Include="SymbolTable\Types2\Variables.fs" />
+        <Compile Include="SymbolTable\Types2\References.fs" />
+        <Compile Include="SymbolTable\Types2\Definitions.fs" />
+        <Compile Include="SymbolTable\TypeMatching\TypeMatching.fs" />
+        <Compile Include="SymbolTable\Types3\ForStmt.fs" />
+        <Compile Include="SymbolTable\Types3\IsOperator.fs" />
+        <Compile Include="SymbolTable\Types3\SelfParent.fs" />
+        <Compile Include="SymbolTable\Types3\PredicativeBlocks.fs" />
+        <Compile Include="SymbolTable\Types3\DefinitionProperties.fs" />
+        <Compile Include="SymbolTable\Types3\Quantifiers.fs" />
+        <Compile Include="SymbolTable\Types3\RulesOfInferences.fs" />
+        <Compile Include="SymbolTable\Types3\MapCases.fs" />
+        <Compile Include="SymbolTable\Types3\Extensions.fs" />
+        <Compile Include="SymbolTable\Types3\Delegates.fs" />
+        <Compile Include="SymbolTable\Types3\Localization.fs" />
+        <Compile Include="SymbolTable\Types3\AssertStmt.fs" />
+        <Compile Include="SymbolTable\Types3\CasesStmt.fs" />
+        <Compile Include="SymbolTable\Types3\Assigments.fs" />
+        <Compile Include="SymbolTable\ExpressionMatching\ExpressionMatching.fs" />
+        <Compile Include="SymbolTable\Types4\Proofs.fs" />
+        <Compile Include="SymbolTable\Creation\UsesClause.fs" />
+        <Compile Include="SymbolTable\Creation\Forward.fs" />
+        <Compile Include="SymbolTable\Creation\LeafTokens.fs" />
+        <Compile Include="SymbolTable\Creation\Identifiers.fs" />
+        <Compile Include="SymbolTable\Creation\TypeConstructs.fs" />
+        <Compile Include="SymbolTable\Creation\Variables.fs" />
+        <Compile Include="SymbolTable\Creation\Predicates.fs" />
+        <Compile Include="SymbolTable\Creation\Expressions.fs" />
+        <Compile Include="SymbolTable\Creation\Tuples.fs" />
+        <Compile Include="SymbolTable\Creation\Commands.fs" />
+        <Compile Include="SymbolTable\Creation\SymbolExtensions.fs" />
+        <Compile Include="SymbolTable\Creation\Definitions.fs" />
+        <Compile Include="SymbolTable\Creation\RulesOfInferences.fs" />
+        <Compile Include="SymbolTable\Creation\StatementBlocks.fs" />
+        <Compile Include="SymbolTable\Creation\Proofs.fs" />
+        <Compile Include="SymbolTable\Creation\SpecialReferences.fs" />
+        <Compile Include="SymbolTable\Creation\Localizations.fs" />
+        <Compile Include="SymbolTable\Creation\TopLevel.fs" />
+        <Compile Include="SymbolTable\Creation\Main.fs" />
+        <Compile Include="Main.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Fpl0Base\Fpl0Base.fsproj" />
+      <ProjectReference Include="..\Fpl1Parser\Fpl1Parser.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <PackageReference Update="FSharp.Core" Version="10.1.301" />
+    </ItemGroup>
+
+
+</Project>

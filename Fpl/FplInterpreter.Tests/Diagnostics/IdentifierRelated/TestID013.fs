@@ -3,8 +3,8 @@ namespace Diagnostics.IdentifierRelated
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Errors.Diagnostics
-open Fpl.Interpreter.Helpers.Debug
-open Fpl.Interpreter.Main
+open Fpl2Interpreter.Helpers.Debug
+open Fpl2Interpreter.Main
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 

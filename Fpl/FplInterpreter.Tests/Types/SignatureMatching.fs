@@ -1,11 +1,11 @@
 namespace Types
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Errors.Diagnostics
-open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.Helpers.Debug
-open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.SymbolTable.TypeMatching
-open Fpl.Interpreter.SymbolTable.Types3.SelfParent
+open Fpl2Interpreter.BasicTypes
+open Fpl2Interpreter.Helpers.Debug
+open Fpl2Interpreter.SymbolTable.Storage.Heap
+open Fpl2Interpreter.SymbolTable.TypeMatching
+open Fpl2Interpreter.SymbolTable.Types3.SelfParent
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]

@@ -1,10 +1,10 @@
-namespace Fpl.Interpreter.Tests.Proofs
+namespace Fpl2Interpreter.Tests.Proofs
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open System.Collections.Generic
-open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.SymbolTable.ExpressionMatching
-open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.SymbolTable.Storage.Util
+open Fpl2Interpreter.BasicTypes
+open Fpl2Interpreter.SymbolTable.ExpressionMatching
+open Fpl2Interpreter.SymbolTable.Storage.Heap
+open Fpl2Interpreter.SymbolTable.Storage.Util
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]

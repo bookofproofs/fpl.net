@@ -30,7 +30,7 @@ open Microsoft.Extensions.Logging
 open Newtonsoft.Json.Linq
 open OmniSharp.Extensions.LanguageServer.Server
 open Fpl0Base.Errors.Diagnostics
-open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl2Interpreter.SymbolTable.Storage.Heap
 open FplLsLib.Buffers.BuffMgr
 open FplLsLib.Buffers.DocSync
 open FplLsLib.ServicesDiagnostics.Diags

@@ -1,6 +1,6 @@
 namespace Validity
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl2Interpreter.SymbolTable.Storage.Heap
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]

@@ -3,7 +3,7 @@ namespace Diagnostics.NamespaceRelated
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Errors.Diagnostics
-open Fpl.Interpreter.Main
+open Fpl2Interpreter.Main
 open TestFplInterpreter.Helpers.Common
 
 (* NSP04

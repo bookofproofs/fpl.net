@@ -2,11 +2,11 @@ namespace Scope
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Primitives
-open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.SymbolTable.Types1.TopLevel
-open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.SymbolTable.Storage.Util
-open Fpl.Interpreter.SymbolTable.Types4.Proofs
+open Fpl2Interpreter.BasicTypes
+open Fpl2Interpreter.SymbolTable.Types1.TopLevel
+open Fpl2Interpreter.SymbolTable.Storage.Heap
+open Fpl2Interpreter.SymbolTable.Storage.Util
+open Fpl2Interpreter.SymbolTable.Types4.Proofs
 open TestFplInterpreter.Helpers.Common
 
 

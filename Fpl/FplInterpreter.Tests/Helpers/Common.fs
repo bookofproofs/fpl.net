@@ -4,9 +4,9 @@ open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Errors.Diagnostics
-open Fpl.Interpreter.Helpers.Debug
-open Fpl.Interpreter.SymbolTable.Types4.Proofs
-open Fpl.Interpreter.Main
+open Fpl2Interpreter.Helpers.Debug
+open Fpl2Interpreter.SymbolTable.Types4.Proofs
+open Fpl2Interpreter.Main
 
 
 let rec deleteDirectory path =

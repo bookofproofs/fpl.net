@@ -2,11 +2,11 @@ namespace Scope
 
 open FParsec
 open TestFplInterpreter.Helpers.Common
-open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.SymbolTable.Types1.TopLevel
-open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
-open Fpl.Interpreter.SymbolTable.Types2.Variables
+open Fpl2Interpreter.BasicTypes
+open Fpl2Interpreter.SymbolTable.Types1.TopLevel
+open Fpl2Interpreter.SymbolTable.Storage.Heap
+open Fpl2Interpreter.SymbolTable.Types2.Intrinsic
+open Fpl2Interpreter.SymbolTable.Types2.Variables
 
 
 type TestCases =

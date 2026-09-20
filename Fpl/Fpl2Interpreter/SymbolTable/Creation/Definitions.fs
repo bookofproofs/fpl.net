@@ -1,0 +1,248 @@
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
+
+/// <summary>
+/// Provides specialized evaluators for AST nodes related to FPL definitions and definition-related
+/// blocks (classes, predicates, functional terms, instances, constructors, mappings and properties).
+/// The evaluator updates interpreter state on the shared <c>heap</c>, manipulates the evaluation
+/// stack and creates or mutates domain-specific symbol-table nodes (for example <c>FplClass</c>,
+/// <c>FplPredicate</c>, <c>FplFunctionalTerm</c>, <c>FplConstructor</c>, etc.).
+/// </summary>
+/// <remarks>
+/// The module contains a single entry point <c>evalDefinitions</c> which matches on parser-produced
+/// AST nodes and performs side-effecting operations on <c>heap.Eval</c> and <c>heap.Helper</c>.
+/// Each matched branch typically:
+/// - Peeks the current evaluation frame as the parent context,
+/// - Constructs a new block/object when needed and pushes it onto the eval stack,
+/// - Invokes <c>evalRef.Value</c> to evaluate nested AST children,
+/// - Pops the constructed block when processing is complete.
+/// Position tuples (pos1,pos2) are propagated to newly created objects to improve diagnostics.
+/// </remarks>
+module Fpl2Interpreter.SymbolTable.Creation.Definitions
+open Fpl0Base.Primitives
+open Fpl1Parser.Types
+open Fpl0Base.Errors.Emitter
+open Fpl2Interpreter.SymbolTable.Storage.Heap
+open Fpl2Interpreter.SymbolTable.Types2.Variables
+open Fpl2Interpreter.SymbolTable.Types2.Definitions
+open Fpl2Interpreter.SymbolTable.Types3.SelfParent
+open Fpl2Interpreter.SymbolTable.Types3.DefinitionProperties
+open Fpl2Interpreter.SymbolTable.Creation.Forward
+
+
+/// <summary>
+/// Evaluate an AST node that represents a top-level definition or a definition-related node.
+/// </summary>
+/// <param name="ast">AST node to evaluate. Expected node forms include class definitions and
+/// related class members, predicate and functional-term definitions and instances, constructors,
+/// mappings and definition properties as produced by the parser (<c>Ast.DefinitionClass</c>,
+/// <c>Ast.DefinitionPredicate</c>, <c>Ast.DefinitionFunctionalTerm</c>, <c>Ast.PredicateInstance</c>,
+/// <c>Ast.FunctionalTermInstance</c>, <c>Ast.Constructor</c>, <c>Ast.Mapping</c>, etc.).</param>
+/// <returns>Unit. This function performs side-effecting updates to the interpreter heap and evaluation stack.</returns>
+/// <remarks>
+/// Behavior highlights by AST shape:
+/// - Class-related nodes:
+///   - <c>Ast.DefinitionClass</c>: creates an <c>FplClass</c> block, evaluates signature, inheritance,
+///     object symbol and class block content, then pops the block.
+///   - <c>Ast.ClassSignature</c>, <c>Ast.ConstructorSignature</c>: evaluate signature nodes inside
+///     signature-evaluation mode (<c>heap.Helper.InSignatureEvaluation</c>) and set signature positions.
+///   - <c>Ast.ClassDefinitionBlock</c>: evaluates class content and property lists, flags intrinsic classes,
+///     and emits diagnostics if the class is empty.
+/// - Predicate-related nodes:
+///   - <c>Ast.DefinitionPredicate</c>: creates an <c>FplPredicate</c>, evaluates signature and optional body,
+///     handles intrinsic predicates and inherited predicate types, and sets signature positions.
+///   - <c>Ast.DefPredicateContent</c>: evaluates local variable declarations and predicate body.
+/// - Functional-term nodes:
+///   - <c>Ast.DefinitionFunctionalTerm</c>: creates an <c>FplFunctionalTerm</c>, evaluates mapping,
+///     signature and body in the correct order, sets signature positions and intrinsic flags.
+/// - Constructors, base constructor calls and mapping nodes create corresponding frames and evaluate children.
+/// - Instance declarations for predicates and functional terms create mandatory-instance frames and evaluate
+///   signatures and optional bodies.
+/// All nested nodes are evaluated by calling <c>evalRef.Value</c>. Newly created blocks obtain run-order
+/// ids via <c>heap.Helper.GetNextAvailableFplBlockRunOrder</c> when applicable.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Thrown via <c>failwith</c> when <paramref name="ast"/> is not recognized as a top definition or related node.
+/// </exception>
+let evalDefinitions ast =
+    match ast with
+    // Definitions of classes
+    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), classBlockAst)) ->
+        let parent = heap.Eval.PeekEvalStack()
+        let fv = new FplClass((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
+        heap.Eval.PushEvalStack(fv)
+        evalRef.Value classSignatureAst
+        optInheritedClassTypeListAst |> Option.map evalRef.Value |> Option.defaultValue ()
+        optUserDefinedObjSymAst |> Option.map evalRef.Value |> Option.defaultValue ()
+        evalRef.Value classBlockAst
+        heap.Eval.PopEvalStack()
+    | Ast.ClassSignature((pos1, pos2), simpleSignatureAst) ->
+        heap.Helper.InSignatureEvaluation <- true
+        evalRef.Value simpleSignatureAst
+        setSignaturePositions pos1 pos2
+        heap.Helper.InSignatureEvaluation <- false
+    | Ast.ClassDefinitionBlock((pos1, pos2), optDefBlock) ->
+        let classBlock = heap.Eval.PeekEvalStack()
+        let cl = classBlock :?> FplClass
+        match optDefBlock with 
+        | Some (classContentAst, optPropertyListAsts) ->
+            evalRef.Value classContentAst
+            optPropertyListAsts |> Option.map (List.map evalRef.Value >> ignore) |> Option.defaultValue ()
+            let properties = cl.GetProperties()
+            let constructors = cl.GetConstructors()
+            let classContent =  cl.ArgList |> Seq.filter (fun node -> node.Name <> LiteralBase) |> Seq.toList
+            if properties.IsEmpty && classContent.Length = 0 && constructors.IsEmpty then
+                classBlock.ErrorOccurred <- emitST001Diagnostics classBlock.Name pos1 pos2
+        | None -> 
+            cl.IsIntrinsic <- true
+            cl.AddDefaultConstructor()
+    | Ast.DefClassCompleteContent(varDeclBlock, constructorListAsts) ->
+
+
+        evalRef.Value varDeclBlock 
+        constructorListAsts |> List.map evalRef.Value |> ignore
+    | Ast.Constructor((pos1, pos2), (signatureAst, constructorBlockAst)) ->
+        let parent = heap.Eval.PeekEvalStack()
+        let fv = new FplConstructor((pos1, pos2), parent)
+        heap.Eval.PushEvalStack(fv)
+        evalRef.Value signatureAst
+        evalRef.Value constructorBlockAst
+        heap.Eval.PopEvalStack()
+    | Ast.ConstructorSignature((pos1, pos2), (simpleSignatureAst, paramTupleAst)) ->
+        heap.Helper.InSignatureEvaluation <- true
+        evalRef.Value simpleSignatureAst
+        evalRef.Value paramTupleAst
+        setSignaturePositions pos1 pos2
+        heap.Helper.InSignatureEvaluation <- false
+    | Ast.ConstructorBlock varDeclBlock ->
+        let parent = heap.Eval.PeekEvalStack()
+        // evaluate the construction block 
+        evalRef.Value varDeclBlock
+        if parent.ArgList.Count = 0 then
+            parent.ErrorOccurred <- emitST002Diagnostics parent.Name parent.StartPos parent.EndPos
+    | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
+        let parent = heap.Eval.PeekEvalStack()
+        let fvNew = new FplBaseConstructorCall((pos1, pos2), parent) 
+        heap.Eval.PushEvalStack(fvNew)
+        evalRef.Value inheritedClassTypeAst
+        evalRef.Value argumentTupleAst
+        heap.Eval.PopEvalStack()
+
+    // Definitions of predicates
+    | Ast.DefinitionPredicate((pos1, pos2), (predicateSignatureAst, optDefBlock)) ->
+
+
+        let parent = heap.Eval.PeekEvalStack()
+        let fv = new FplPredicate((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
+        heap.Eval.PushEvalStack(fv)
+        match predicateSignatureAst with
+        | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) ->
+            heap.Helper.InSignatureEvaluation <- true
+            evalRef.Value simpleSignatureAst
+            evalRef.Value paramTupleAst
+            heap.Helper.InSignatureEvaluation <- false
+            optUserDefinedSymbolAst |> Option.map evalRef.Value |> Option.defaultValue () |> ignore
+            // The reason why PredicateSignature hast to be evaluated inside DefinitionPredicate
+            // is that optDefBlock must be evaluated after the signature 
+            match optDefBlock with 
+            | Some (predicateContentAst, optPropertyListAsts) ->
+                evalRef.Value predicateContentAst
+                optPropertyListAsts |> Option.map (List.map evalRef.Value >> ignore) |> Option.defaultValue ()
+            | None -> fv.IsIntrinsic <- true
+            // and before inherited base types 
+            inhPredicateTypeListAstsOpt |> Option.map evalRef.Value |> Option.defaultValue ()
+            setSignaturePositions pos1 pos2
+        | _ -> ()
+        heap.Eval.PopEvalStack()
+    | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) -> 
+        ()
+        // empty since the pattern will be matched in DefinitionPredicate 
+        // we list it her to remove FS0025 incomplete pattern warnings
+    | Ast.DefPredicateContent(varDeclBlock, predicateAst) ->
+        evalRef.Value varDeclBlock
+        evalRef.Value predicateAst
+
+    // Definitions of functional terms
+    | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, functionalTermDefBlockAst)) ->
+
+
+        let parent = heap.Eval.PeekEvalStack()
+        let fv = new FplFunctionalTerm((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
+        heap.Eval.PushEvalStack(fv)
+        match functionalTermSignatureAst with
+        | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
+            evalRef.Value mappingAst
+            heap.Helper.InSignatureEvaluation <- true
+            evalRef.Value simpleSignatureAst
+            evalRef.Value paramTupleAst
+            heap.Helper.InSignatureEvaluation <- false
+            optUserDefinedSymbolAst |> Option.map evalRef.Value |> Option.defaultValue () 
+            // The reason why FunctionalTermSignature hast to be evaluated inside DefinitionFunctionalTerm
+            // is that functionalTermDefBlockAst must be evaluated after signature 
+            evalRef.Value functionalTermDefBlockAst
+            // and before inherited base types 
+            inhFunctionalTypeListAstsOpt |> Option.map evalRef.Value |> Option.defaultValue () 
+            setSignaturePositions pos1 pos2
+        | _ -> ()
+        heap.Eval.PopEvalStack()
+    | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
+        ()
+        // empty since the pattern will be matched in DefinitionFunctionalTerm 
+        // we list it her to remove FS0025 incomplete pattern warnings
+
+    | Ast.Mapping((pos1, pos2), variableTypeAst) ->
+        let fv = heap.Eval.PeekEvalStack()
+        let map = new FplMapping((pos1, pos2), fv)
+        heap.Eval.PushEvalStack(map)
+        evalRef.Value variableTypeAst
+        heap.Eval.PopEvalStack()
+    | Ast.FunctionalTermDefinitionBlock((pos1, pos2), optDefBlock) ->
+        let functionaTermBlock = heap.Eval.PeekEvalStack()
+        match optDefBlock with 
+        | Some (funcContentAst, optPropertyListAsts) ->
+            evalRef.Value funcContentAst
+            optPropertyListAsts |> Option.map (List.map evalRef.Value >> ignore) |> Option.defaultValue ()
+            let properties = functionaTermBlock.GetProperties()
+            if properties.IsEmpty && functionaTermBlock.ArgList.Count = 1 then
+                functionaTermBlock.ErrorOccurred <- emitST001Diagnostics functionaTermBlock.Name pos1 pos2
+        | None -> functionaTermBlock.IsIntrinsic <- true
+    | Ast.DefFunctionContent(varDeclBlock, retStmtAst) ->
+        evalRef.Value varDeclBlock
+        evalRef.Value retStmtAst
+
+    // Definition properties
+    | Ast.PredicateInstance((pos1, pos2), (signatureAst, predInstanceBlockAstOpt)) ->
+        let parent = heap.Eval.PeekEvalStack()
+        let fvNew = new FplMandatoryPredicate((pos1, pos2), parent)
+        heap.Eval.PushEvalStack(fvNew)
+        evalRef.Value signatureAst
+        match predInstanceBlockAstOpt with 
+        | Some predInstanceBlockAst ->
+            evalRef.Value predInstanceBlockAst
+        | None -> fvNew.IsIntrinsic <- true
+        heap.Eval.PopEvalStack()
+    | Ast.PredicateInstanceSignature((pos1, pos2), (simpleSignatureAst, paramTupleAst)) ->
+        heap.Helper.InSignatureEvaluation <- true
+        evalRef.Value simpleSignatureAst
+        evalRef.Value paramTupleAst
+        setSignaturePositions pos1 pos2
+        heap.Helper.InSignatureEvaluation <- false
+    | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermInstanceSignatureAst, functionalTermInstanceBlockOptAst)) ->
+        let parent = heap.Eval.PeekEvalStack()
+        let fvNew = new FplMandatoryFunctionalTerm((pos1, pos2), parent)
+        heap.Eval.PushEvalStack(fvNew)
+        evalRef.Value functionalTermInstanceSignatureAst
+        match functionalTermInstanceBlockOptAst with 
+        | Some functionalTermInstanceBlockAst ->
+            evalRef.Value functionalTermInstanceBlockAst
+        | None -> fvNew.IsIntrinsic <- true
+        heap.Eval.PopEvalStack()
+    | Ast.FunctionalTermInstanceSignature((pos1, pos2), ((simpleSignatureAst, paramTupleAst), mappingAst)) ->
+        heap.Helper.InSignatureEvaluation <- true
+        evalRef.Value simpleSignatureAst
+        evalRef.Value paramTupleAst
+        heap.Helper.InSignatureEvaluation <- false
+        evalRef.Value mappingAst
+        setSignaturePositions pos1 pos2
+
+    | _ ->
+        failwith (sprintf "{%O} is not a top definition or related node" ast)

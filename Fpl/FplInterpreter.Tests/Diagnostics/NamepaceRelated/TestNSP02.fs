@@ -4,8 +4,8 @@ open FParsec
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Errors.Diagnostics
 open TestFplInterpreter.Helpers.Common
-open Fpl.Interpreter.SymbolTable.Storage.Asts
-open Fpl.Interpreter.SymbolTable.Creation.UsesClauses
+open Fpl2Interpreter.SymbolTable.Storage.Asts
+open Fpl2Interpreter.SymbolTable.Creation.UsesClauses
 
 
 (* NSP02

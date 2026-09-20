@@ -1,7 +1,7 @@
 namespace Types
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl2Interpreter.BasicTypes
+open Fpl2Interpreter.SymbolTable.Storage.Heap
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]

@@ -145,7 +145,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Fpl\Fpl.fsproj" />
+        <ProjectReference Include="..\Fpl2Interpreter\Fpl2Interpreter.fsproj" />
         <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
     </ItemGroup>
 
