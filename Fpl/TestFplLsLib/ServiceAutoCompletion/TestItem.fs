@@ -20,8 +20,8 @@ type TestItem () =
     [<TestMethod>]
     member this.TestGetCompletionItemStrippingBracketsAndQuotes(input:string, expected:string) =
         let actual = stripQuotesOrBrackets input;
-        Assert.AreEqual<string>(expected, actual);
-        Assert.IsTrue(true);
+        Assert.AreEqual<string>(expected, actual)
+        Assert.IsTrue(true)
 
     [<DataRow(LiteralAx)>]
     [<DataRow(LiteralAxL)>]
@@ -83,9 +83,9 @@ type TestItem () =
     [<DataRow(LiteralUndefL)>]
     [<TestMethod>]
     member this.TestGetCompletionItemLabels(input:string) =
-        let actual = new FplCompletionItem(input, "");
-        Assert.AreEqual<string>("_ " + input, actual.Label);
-        Assert.IsTrue(true);
+        let actual = new FplCompletionItem(input, "")
+        Assert.AreEqual<string>("_ " + input, actual.Label)
+        Assert.IsTrue(true)
 
     [<DataRow(LiteralAx, "axiom (short form)")>]
     [<DataRow(LiteralPost, "postulate (short form)")>]
@@ -116,8 +116,8 @@ type TestItem () =
     [<DataRow(LiteralUndef, "undefined (short form)")>]
     [<TestMethod>]
     member this.TestGetDetailShortForms(input: string, expected: string) =
-        let actual = new FplCompletionItem(input, "");
-        Assert.AreEqual<string>(expected, actual.Detail);
+        let actual = new FplCompletionItem(input, "")
+        Assert.AreEqual<string>(expected, actual.Detail)
 
     [<DataRow(LiteralAxL, LiteralAxL)>]
     [<DataRow(LiteralPostL, LiteralPostL)>]
@@ -176,8 +176,8 @@ type TestItem () =
     [<DataRow(LiteralXor, "predicate (exclusive or)")>]
     [<TestMethod>]
     member this.TestGetDetailLongForms(input: string, expected: string) =
-        let actual = new FplCompletionItem(input, "");
-        Assert.AreEqual<string>(expected, actual.Detail);
+        let actual = new FplCompletionItem(input, "")
+        Assert.AreEqual<string>(expected, actual.Detail)
 
 
     [<DataRow(LiteralAx, CompletionItemKind.Class)>]
@@ -265,8 +265,8 @@ type TestItem () =
     [<DataRow(LiteralXor, CompletionItemKind.Operator)>]
     [<TestMethod>]
     member this.TestGetDetailCompletionKind(input: string, expected: CompletionItemKind) =
-        let actual = new FplCompletionItem(input, "");
-        Assert.AreEqual<CompletionItemKind>(expected, actual.Kind);
+        let actual = new FplCompletionItem(input, "")
+        Assert.AreEqual<CompletionItemKind>(expected, actual.Kind)
 
     [<DataRow(LiteralAx, "axiom02")>]
     [<DataRow(LiteralAxL, "axiom01")>]
@@ -354,9 +354,9 @@ type TestItem () =
     [<DataRow(LiteralXor, LiteralXor)>]
     [<TestMethod>]
     member this.TestGetCompletionItemSortTextsForKeywords(input: string, expected: string) =
-        let actual = new FplCompletionItem(input, "");
-        Console.WriteLine(input);
-        Assert.AreEqual<string>(expected, actual.SortText.Replace("zzz", ""));
+        let actual = new FplCompletionItem(input, "")
+        Console.WriteLine(input)
+        Assert.AreEqual<string>(expected, actual.SortText.Replace("zzz", ""))
 
     [<DataRow(LiteralAx, "axiom02")>]
     [<DataRow(LiteralAxL, "axiom01")>]
@@ -444,9 +444,9 @@ type TestItem () =
     [<DataRow(LiteralXor, LiteralXor)>]
     [<TestMethod>]
     member this.TestGetCompletionItemSortTextsForSnippets(input: string, expected: string) =
-        let actual = new FplCompletionItem(input, "xxx");
-        Console.WriteLine(input);
-        Assert.AreEqual<string>(expected, actual.SortText);
+        let actual = new FplCompletionItem(input, "xxx")
+        Console.WriteLine(input)
+        Assert.AreEqual<string>(expected, actual.SortText)
 
 
     [<DataRow(LiteralAx, true)>]
@@ -534,5 +534,5 @@ type TestItem () =
     [<DataRow(LiteralXor, false)>]
     [<TestMethod>]
     member this.TestGetDetailIsShort(input: string, expected:bool) =
-        let actual = new FplCompletionItem(input, "");
-        Assert.AreEqual<bool>(expected, actual.IsShort);
+        let actual = new FplCompletionItem(input, "")
+        Assert.AreEqual<bool>(expected, actual.IsShort)
