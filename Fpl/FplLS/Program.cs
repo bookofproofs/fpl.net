@@ -89,7 +89,7 @@ namespace FplLS
         {
             services.AddSingleton<BufferManager>();
             services.AddSingleton<DiagnosticsHandler>();
-            services.AddSingleton<FplAutoCompleteService>();
+            services.AddSingleton<CompletionHandler>();
         }
 
     }

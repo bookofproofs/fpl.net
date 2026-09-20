@@ -34,12 +34,11 @@ using static FplLsLib.Buffers.BuffMgr;
 using static FplLsLib.Buffers.Logging;
 using static FplLsLib.ServiceAutoCompletion.Main;
 
-class CompletionHandler(ILanguageServer languageServer, BufferManager bufferManager, FplAutoCompleteService fplAutoCompletionService) : ICompletionHandler
+class CompletionHandler(ILanguageServer languageServer, BufferManager bufferManager) : ICompletionHandler
 {
 
     private readonly ILanguageServer _languageServer = languageServer;
     private readonly BufferManager _bufferManager = bufferManager;
-    private readonly FplAutoCompleteService _fplAutoComplService = fplAutoCompletionService;
 
     private readonly DocumentSelector _documentSelector = new(
         new DocumentFilter()
