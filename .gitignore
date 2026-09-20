@@ -70,3 +70,5 @@
 /Fpl/Fpl2Interpreter/obj
 /Fpl/Fpl3LanguageServer/bin/Debug/net8.0
 /Fpl/Fpl3LanguageServer/obj
+/Fpl/Fpl3LanguageServer/bin/Release/net8.0
+/Fpl/Fpl4LanguageServer/obj

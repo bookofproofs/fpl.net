@@ -9,7 +9,7 @@
       "FplLS/1.0.0": {
         "dependencies": {
           "FSharp.Core": "10.1.301",
-          "FplLsLib": "1.0.0",
+          "Fpl3LanguageServer": "1.0.0",
           "System.Reactive.Reference": "4.4.0.0"
         },
         "runtime": {
@@ -488,28 +488,54 @@
       },
       "System.Threading.Tasks.Extensions/4.5.3": {},
       "System.ValueTuple/4.5.0": {},
-      "Fpl/1.0.0": {
+      "Fpl0Base/1.0.0": {
         "dependencies": {
           "FParsec": "1.1.1",
-          "FSharp.Core": "10.1.301",
-          "Newtonsoft.Json": "13.0.4",
-          "TestSharedConfig": "1.0.0"
+          "FSharp.Core": "10.1.301"
         },
         "runtime": {
-          "Fpl.dll": {
+          "Fpl0Base.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
         }
       },
-      "FplLsLib/1.0.0": {
+      "Fpl1Parser/1.0.0": {
         "dependencies": {
           "FSharp.Core": "10.1.301",
-          "Fpl": "1.0.0",
+          "Fpl0Base": "1.0.0",
+          "TestSharedConfig": "1.0.0"
+        },
+        "runtime": {
+          "Fpl1Parser.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Fpl2Interpreter/1.0.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.301",
+          "Fpl0Base": "1.0.0",
+          "Fpl1Parser": "1.0.0",
+          "Newtonsoft.Json": "13.0.4"
+        },
+        "runtime": {
+          "Fpl2Interpreter.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Fpl3LanguageServer/1.0.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.301",
+          "Fpl0Base": "1.0.0",
+          "Fpl2Interpreter": "1.0.0",
           "OmniSharp.Extensions.LanguageServer": "0.17.4"
         },
         "runtime": {
-          "FplLsLib.dll": {
+          "Fpl3LanguageServer.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
@@ -843,12 +869,22 @@
       "path": "system.valuetuple/4.5.0",
       "hashPath": "system.valuetuple.4.5.0.nupkg.sha512"
     },
-    "Fpl/1.0.0": {
+    "Fpl0Base/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "FplLsLib/1.0.0": {
+    "Fpl1Parser/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Fpl2Interpreter/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Fpl3LanguageServer/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
