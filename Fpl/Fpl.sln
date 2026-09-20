@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E632B8EE-C
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplLsLib", "FplLsLib\FplLsLib.fsproj", "{D310DDDF-7239-44F7-A715-AB84E1FC8968}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestFplLsLib", "TestFplLsLib\TestFplLsLib.fsproj", "{1B49BDD0-591A-4682-B528-740D1B20E58D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D310DDDF-7239-44F7-A715-AB84E1FC8968}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B49BDD0-591A-4682-B528-740D1B20E58D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
