@@ -24,13 +24,15 @@ SOFTWARE.
 
 
 using FplLS;
+using Microsoft.FSharp.Control;
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using static Fpl.Errors.Diagnostics;
-using static FplLsLib.Buffers.Logging;
 using static FplLsLib.Buffers.BuffMgr;
+using static FplLsLib.Buffers.Logging;
+using static FplLsLib.ServiceAutoCompletion.Main;
 
 class CompletionHandler(ILanguageServer languageServer, BufferManager bufferManager, FplAutoCompleteService fplAutoCompletionService) : ICompletionHandler
 {
@@ -72,7 +74,7 @@ class CompletionHandler(ILanguageServer languageServer, BufferManager bufferMana
         (int)request.Position.Line,
         (int)request.Position.Character);
 
-        var complList = await FplAutoCompleteService.GetParserChoices(buffer, position, _languageServer);
+        var complList = await FSharpAsync.StartAsTask(getParserChoices(buffer, position, _languageServer), null, null);
 
         return complList;
 

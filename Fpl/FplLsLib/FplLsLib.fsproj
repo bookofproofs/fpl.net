@@ -46,7 +46,7 @@
         <Compile Include="ServiceAutoCompletion\Whitespace.fs" />
         <Compile Include="ServiceAutoCompletion\Word.fs" />
         <Compile Include="ServiceAutoCompletion\ItemChoices.fs" />
-        <Compile Include="ServiceAutoCompletion\Service.fs" />
+        <Compile Include="ServiceAutoCompletion\Main.fs" />
     </ItemGroup>
 
     <ItemGroup>
