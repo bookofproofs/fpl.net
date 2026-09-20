@@ -12,7 +12,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddProofChoicesNumber(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             Assert.HasCount(15, actual);
         }
@@ -22,7 +22,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddProofKeywordCounts(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
@@ -39,7 +39,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -55,7 +55,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -71,7 +71,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddProofChoicesLabel(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -84,7 +84,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddProofChoicesDetail(string choice, string l)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -104,7 +104,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddProofChoicesInsertText(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)

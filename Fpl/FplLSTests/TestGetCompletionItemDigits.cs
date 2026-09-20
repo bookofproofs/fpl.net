@@ -10,7 +10,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddDigitsChoicesNumber(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDigits().GetChoices(detailCi);
             Assert.HasCount(1, actual);
         }
@@ -19,7 +19,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddChoicesSortText(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDigits().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -31,7 +31,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddDigitsChoicesLabel(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDigits().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -43,7 +43,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddDigitsChoicesDetail(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDigits().GetChoices(detailCi);
             foreach (var item in actual)
             {

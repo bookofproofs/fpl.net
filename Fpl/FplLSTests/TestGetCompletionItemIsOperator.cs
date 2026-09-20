@@ -11,7 +11,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddIsOperatorChoicesNumber(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
             Assert.HasCount(2, actual);
         }
@@ -20,7 +20,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddIsOperatorKeywordCounts(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
@@ -35,7 +35,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -50,7 +50,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddIsOperatorChoicesLabel(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -62,7 +62,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddIsOperatorChoicesDetail(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -74,7 +74,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddIsOperatorChoicesInsertText(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)

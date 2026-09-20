@@ -15,7 +15,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddPropertyChoicesNumber(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             Assert.HasCount(4, actual);
         }
@@ -25,7 +25,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddPropertyKeywordCounts(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
@@ -47,7 +47,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, string expected)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -65,7 +65,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice, string l)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -84,7 +84,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddPropertyChoicesLabel(string choice, string subType)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             var counterRelated = 0;
             foreach (var item in actual)
@@ -109,7 +109,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddPropertyChoicesDetailKeyword(string choice, string l)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             var countPredicative = 0;
             var countFunctional = 0;
@@ -132,7 +132,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddPropertyChoicesDetailNonKeyword(string choice, string l)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             var countPredicative = 0;
             var countFunctional = 0;
@@ -157,7 +157,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddPropertyChoicesInsertText(string choice, string subType)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)

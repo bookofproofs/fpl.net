@@ -10,7 +10,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddWordChoicesNumber(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             Assert.HasCount(1, actual);
         }
@@ -19,7 +19,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddWordValueCounts(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
@@ -33,7 +33,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -48,7 +48,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestInsertTextEndsWithSpace(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -64,7 +64,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddWordChoicesLabel(string choice, string l)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -76,7 +76,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddWordChoicesDetail(string choice, string l)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -88,7 +88,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddWordChoicesInsertText(string choice, string l)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             foreach (var item in actual)
             {

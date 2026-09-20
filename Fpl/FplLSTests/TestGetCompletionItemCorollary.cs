@@ -13,7 +13,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddCorollaryChoicesNumber(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
             Assert.HasCount(2, actual);
         }
@@ -23,7 +23,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddCorollaryKeywordCounts(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
@@ -40,7 +40,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -56,7 +56,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -72,7 +72,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddCorollaryChoicesLabel(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -85,7 +85,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddCorollaryChoicesDetail(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -98,7 +98,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddCorollaryChoicesInsertText(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)

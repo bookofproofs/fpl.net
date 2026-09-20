@@ -13,7 +13,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddCasesChoicesNumber(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCases().GetChoices(detailCi);
             Assert.HasCount(2, actual);
         }
@@ -22,7 +22,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddCasesKeywordCounts(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCases().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
@@ -36,7 +36,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddChoicesSortText(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -48,7 +48,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddCasesChoicesLabel(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -60,7 +60,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddCasesChoicesDetail(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -72,7 +72,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddCasesChoicesInsertText(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesCases().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)

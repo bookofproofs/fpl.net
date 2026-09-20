@@ -10,7 +10,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddIso639ChoicesNumber(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesIso639().GetChoices(detailCi);
             Assert.HasCount(490, actual);
         }
@@ -19,7 +19,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddIso639KeywordCounts(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesIso639().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
@@ -33,7 +33,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddIso639ChoicesLabel(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesIso639().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -45,7 +45,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddIso639ChoicesDetail(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesIso639().GetChoices(detailCi);
             foreach (var item in actual)
             {

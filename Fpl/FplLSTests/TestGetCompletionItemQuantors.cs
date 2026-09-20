@@ -14,7 +14,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddQuantifierChoicesNumber(string choice, int number)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
             Assert.HasCount(number, actual);
         }
@@ -25,7 +25,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddQuantifierKeywordCounts(string choice, int number)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
 
             var count = 0;
@@ -56,7 +56,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, string expected)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -73,7 +73,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestInsertTextEndsWithSpace(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -90,7 +90,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddQuantifierChoicesLabel(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
 
             foreach (var item in actual)
@@ -105,7 +105,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddQuantifierChoicesDetail(string choice, string s)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -122,7 +122,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddQuantifierChoicesInsertText(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
 
             foreach (var item in actual)

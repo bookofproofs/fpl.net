@@ -25,6 +25,9 @@ type FplCompletionItem(word: string, ?insertText: string) as this =
 
     let normalizedWord = stripQuotesOrBrackets word
 
+    let mutable wordField = normalizedWord
+    let mutable isShortField = false
+
     do
         this.InsertText <- normalizedWord + " "
         this.Label <- prefix + normalizedWord
@@ -464,12 +467,16 @@ type FplCompletionItem(word: string, ?insertText: string) as this =
     /// <summary>
     /// The normalized word (quotes/brackets stripped) this completion item represents.
     /// </summary>
-    member val Word = normalizedWord with get, set
+    member this.Word
+        with get () = wordField
+        and set (value: string) = wordField <- value
 
     /// <summary>
     /// Whether this item represents the "short form" of a keyword/construct.
     /// </summary>
-    member val IsShort = false with get, set
+    member this.IsShort
+        with get () = isShortField
+        and set (value: bool) = isShortField <- value
 
     // Public immutable-style helpers ------------------------------------------------
 

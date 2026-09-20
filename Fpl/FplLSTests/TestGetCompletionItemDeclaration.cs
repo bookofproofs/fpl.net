@@ -13,7 +13,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddDeclarationChoicesNumber(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
             Assert.HasCount(2, actual);
         }
@@ -23,7 +23,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddDeclarationKeywordCounts(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
@@ -40,7 +40,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -56,7 +56,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -72,7 +72,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddDeclarationChoicesLabel(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -85,7 +85,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddDeclarationChoicesDetail(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -98,7 +98,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddDeclarationChoicesInsertText(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)

@@ -11,7 +11,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddWhitespaceChoicesNumber(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             Assert.HasCount(1, actual);
         }
@@ -21,7 +21,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddWhitespaceTextCounts(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
@@ -36,7 +36,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -52,7 +52,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddWhitespaceChoicesLabel(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -65,7 +65,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddWhitespaceChoicesDetail(string choice, string l)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             foreach (var item in actual)
             {
@@ -78,7 +78,7 @@ namespace TestFplLS
         [TestMethod]
         public void TestAddWhitespaceChoicesInsertText(string choice)
         {
-            var detailCi = new FplCompletionItem(choice);
+            var detailCi = new FplCompletionItem(choice, "");
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             foreach (var item in actual)
             {

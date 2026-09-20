@@ -2,6 +2,7 @@
 
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
+using static FplLsLib.ServiceAutoCompletion.Item;
 
 namespace TestFplLS
 {
@@ -19,7 +20,7 @@ namespace TestFplLS
         [DataRow("token>", "token>")]
         public void TestGetCompletionItemStrippingBracketsAndQuotes(string input, string expected)
         {
-            var actual = FplCompletionItem.StripQuotesOrBrackets(input);
+            var actual = stripQuotesOrBrackets(input);
             Assert.AreEqual<string>(expected, actual);
         }
 
@@ -84,7 +85,7 @@ namespace TestFplLS
         [DataRow(LiteralUndefL)]
         public void TestGetCompletionItemLabels(string input)
         {
-            var actual = new FplCompletionItem(input);
+            var actual = new FplCompletionItem(input, "");
             Assert.AreEqual<string>("_ " + input, actual.Label);
         }
 
@@ -118,7 +119,7 @@ namespace TestFplLS
         [DataRow(LiteralUndef, "undefined (short form)")]
         public void TestGetDetailShortForms(string input, string expected)
         {
-            var actual = new FplCompletionItem(input);
+            var actual = new FplCompletionItem(input, "");
             Assert.AreEqual<string>(expected, actual.Detail);
         }
 
@@ -180,7 +181,7 @@ namespace TestFplLS
         [DataRow(LiteralXor, "predicate (exclusive or)")]
         public void TestGetDetailLongForms(string input, string expected)
         {
-            var actual = new FplCompletionItem(input);
+            var actual = new FplCompletionItem(input, "");
             Assert.AreEqual<string>(expected, actual.Detail);
         }
 
@@ -271,7 +272,7 @@ namespace TestFplLS
         [DataRow(LiteralXor, CompletionItemKind.Operator)]
         public void TestGetDetailCompletionKind(string input, CompletionItemKind expected)
         {
-            var actual = new FplCompletionItem(input);
+            var actual = new FplCompletionItem(input, "");
             Assert.AreEqual<CompletionItemKind>(expected, actual.Kind);
         }
 
@@ -362,7 +363,7 @@ namespace TestFplLS
         [DataRow(LiteralXor, LiteralXor)]
         public void TestGetCompletionItemSortTextsForKeywords(string input, string expected)
         {
-            var actual = new FplCompletionItem(input);
+            var actual = new FplCompletionItem(input, "");
             Console.WriteLine(input);
             Assert.AreEqual<string>(expected, actual.SortText?.Replace("zzz", ""));
         }
@@ -546,7 +547,7 @@ namespace TestFplLS
         [DataRow(LiteralXor, false)]
         public void TestGetDetailIsShort(string input, bool expected)
         {
-            var actual = new FplCompletionItem(input);
+            var actual = new FplCompletionItem(input, "");
             Assert.AreEqual<bool>(expected, actual.IsShort);
         }
     }

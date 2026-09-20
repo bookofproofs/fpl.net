@@ -28,7 +28,7 @@ namespace FplLS
                 HashSet<string> uniqueSymbols = [];
                 foreach (var choice in choices)
                 {
-                    var defaultCi = new FplCompletionItem(choice);
+                    var defaultCi = new FplCompletionItem(choice, "");
                     var completionItemChoices = defaultCi.GetChoices();
                     // prevent adding duplicate symbols if they can be used as infix postfix or prefix notation
                     foreach (var ci in completionItemChoices)
