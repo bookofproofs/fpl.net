@@ -74,3 +74,5 @@
 /Fpl/Fpl4LanguageServer/obj
 /Fpl/TestFpl1Parser/bin/Release/net8.0
 /Fpl/TestFpl1Parser/obj
+/Fpl/TestFpl2Interpreter/bin/Release/net8.0
+/Fpl/TestFpl2Interpreter/obj

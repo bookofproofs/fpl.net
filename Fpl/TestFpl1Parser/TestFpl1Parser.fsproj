@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="MSTestSettings.fs" />
         <Compile Include="TestDifferse.fs" />
         <Compile Include="TestExtensions.fs" />
         <Compile Include="TestQuantifiers.fs" />
