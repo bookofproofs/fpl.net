@@ -503,8 +503,7 @@
       "Fpl1Parser/1.0.0": {
         "dependencies": {
           "FSharp.Core": "10.1.301",
-          "Fpl0Base": "1.0.0",
-          "TestSharedConfig": "1.0.0"
+          "Fpl0Base": "1.0.0"
         },
         "runtime": {
           "Fpl1Parser.dll": {
@@ -536,17 +535,6 @@
         },
         "runtime": {
           "Fpl3LanguageServer.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        }
-      },
-      "TestSharedConfig/1.0.0": {
-        "dependencies": {
-          "FSharp.Core": "10.1.301"
-        },
-        "runtime": {
-          "TestSharedConfig.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
@@ -885,11 +873,6 @@
       "sha512": ""
     },
     "Fpl3LanguageServer/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "TestSharedConfig/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
