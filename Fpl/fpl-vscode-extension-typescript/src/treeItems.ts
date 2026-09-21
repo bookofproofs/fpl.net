@@ -4,6 +4,21 @@
 
 import * as vscode from 'vscode';
 
+// Raw JSON shape of a scope/arglist entry as returned by the 'getTreeData'
+// language server request (before being wrapped into a MyTreeItem).
+export interface FplScopeItemJson {
+    Type: string;
+    Name: string;
+    Line: number;
+    Column: number;
+    FilePath: string;
+    FplValueType: string;
+    FplValueRepr: string;
+    FplRefersTo: string;
+    Scope: FplScopeItemJson[];
+    ArgList: FplScopeItemJson[];
+}
+
 export const typeToIconMap: Map<string, string> = new Map();
 typeToIconMap.set('th', 'library');
 typeToIconMap.set('var', 'variable');
@@ -61,8 +76,8 @@ export class MyTreeItem extends vscode.TreeItem {
     public columnNumber: number;
     public filePath: string;
     public isVirtual: boolean;
-    public scope: MyTreeItem[];
-    public arglist: MyTreeItem[];
+    public scope: FplScopeItemJson[];
+    public arglist: FplScopeItemJson[];
 
     constructor(
         typ: string,
@@ -74,8 +89,8 @@ export class MyTreeItem extends vscode.TreeItem {
         fplValueType: string,
         fplValueRepr: string,
         fplRefersTo: string,
-        scope: MyTreeItem[] = [],
-        arglist: MyTreeItem[] = []
+        scope: FplScopeItemJson[] = [],
+        arglist: FplScopeItemJson[] = []
     ) {
         super(label, scope.length > 0 || arglist.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
         this.typ = typ;

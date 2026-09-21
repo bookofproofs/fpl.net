@@ -4,21 +4,8 @@
 
 import * as vscode from 'vscode';
 import { LanguageClient } from 'vscode-languageclient/node';
-import { MyTreeItem } from './treeItems';
+import { MyTreeItem, FplScopeItemJson } from './treeItems';
 import * as utils from './utils';
-
-interface FplScopeItemJson {
-    Type: string;
-    Name: string;
-    Line: number;
-    Column: number;
-    FilePath: string;
-    FplValueType: string;
-    FplValueRepr: string;
-    FplRefersTo: string;
-    Scope: FplScopeItemJson[];
-    ArgList: FplScopeItemJson[];
-}
 
 interface FplTreeDataJson {
     Scope: FplScopeItemJson[];
@@ -83,18 +70,18 @@ class FplTheoriesProvider implements vscode.TreeDataProvider<MyTreeItem> {
             // Return the cached roots — no server round-trip here.
             return Promise.resolve(this._cachedRoots);
         } else if (element.isVirtual) {
-            return Promise.resolve(this.parseScope(element.scope as unknown as FplScopeItemJson[]));
+            return Promise.resolve(this.parseScope(element.scope));
         } else {
             const children: MyTreeItem[] = [];
-            if (element.scope && element.scope.length > 0) children.push(...this.parseScope(element.scope as unknown as FplScopeItemJson[]));
-            if (element.arglist && element.arglist.length > 0) children.push(...this.parseArgList(element.arglist as unknown as FplScopeItemJson[]));
+            if (element.scope && element.scope.length > 0) children.push(...this.parseScope(element.scope));
+            if (element.arglist && element.arglist.length > 0) children.push(...this.parseArgList(element.arglist));
             return Promise.resolve(children);
         }
     }
 
     private parseScope(scope: FplScopeItemJson[]): MyTreeItem[] {
         return scope.map(item => {
-            const treeItem = new MyTreeItem(item.Type, 1, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope as unknown as MyTreeItem[], item.ArgList as unknown as MyTreeItem[]);
+            const treeItem = new MyTreeItem(item.Type, 1, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList);
             this._applyExpandState(treeItem);
             return treeItem;
         });
@@ -102,7 +89,7 @@ class FplTheoriesProvider implements vscode.TreeDataProvider<MyTreeItem> {
 
     private parseArgList(arglist: FplScopeItemJson[]): MyTreeItem[] {
         return arglist.map(item => {
-            const treeItem = new MyTreeItem(item.Type, 2, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope as unknown as MyTreeItem[], item.ArgList as unknown as MyTreeItem[]);
+            const treeItem = new MyTreeItem(item.Type, 2, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList);
             this._applyExpandState(treeItem);
             return treeItem;
         });
