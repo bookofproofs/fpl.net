@@ -37,6 +37,13 @@
 /Fpl/fpl-vscode-extension/publishToMarketPlace.txt
 /Fpl/fpl-vscode-extension/.vscode/publishToMarketPlace.txt
 
+#/Fpl/fpl-vscode-extension-typescript/*.vsix
+/Fpl/fpl-vscode-extension-typescript/node_modules
+#/Fpl/fpl-vscode-extension-typescript/dotnet-runtimes/FplLsDll/FplLS.exe
+#/Fpl/fpl-vscode-extension-typescript/dotnet-runtimes/FplLsDll/FplLS.pdb
+
+
+
 /theories/lib/Debug.txt
 
 # Un-ignore the affected subdirectory
