@@ -9,7 +9,7 @@ module Fpl1Parser.Debug
 open System
 open System.IO
 open FParsec
-open TestSharedConfig
+open Fpl0Base.TestConfig
 
 
 /// <summary>
@@ -37,7 +37,7 @@ open TestSharedConfig
 /// </example>
 let debugWrapper (p: Parser<_,_>) label : Parser<_,_> =
     fun stream ->
-        if TestConfig.DebugModeParser then
+        if DebugModeParser then
             let currDir =  Directory.GetCurrentDirectory()
             let logLine = sprintf "%A: Entering %s%s" stream.Position label Environment.NewLine
             File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)

@@ -57,7 +57,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Fpl1Parser\Fpl1Parser.fsproj" />
-        <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -4,9 +4,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.Helpers.Debug
-open Fpl2Interpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
 (* PR006
    Purpose: Report a reference to a non‑existing proof argument identifier.

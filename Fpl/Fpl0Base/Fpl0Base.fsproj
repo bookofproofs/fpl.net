@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Primitives\TestConfig.fs" />
         <Compile Include="Primitives\Privimitives.fs" />
         <Compile Include="Errors\Messages.fs" />
         <Compile Include="Errors\Diagnostics.fs" />

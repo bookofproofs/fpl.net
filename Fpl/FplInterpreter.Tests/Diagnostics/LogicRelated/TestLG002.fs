@@ -1,12 +1,9 @@
 namespace Diagnostics.LogicRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.Helpers.Debug
-open Fpl2Interpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
 (* LG002
    Purpose: Detect and report excessive recursive calls for a node.

@@ -16,7 +16,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Fpl0Base\Fpl0Base.fsproj" />
-        <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

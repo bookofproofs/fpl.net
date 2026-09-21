@@ -4,9 +4,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.Helpers.Debug
-open Fpl2Interpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
 (* SIG02
    Purpose: Report that a symbol/operator was declared with an already-used precedence in the same context.

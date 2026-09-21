@@ -11,7 +11,7 @@ open FParsec
 open Fpl0Base.Primitives
 open Fpl2Interpreter.BasicTypes
 open Fpl2Interpreter.Helpers.Debug
-open TestSharedConfig
+open Fpl0Base.TestConfig
 
 /// <summary>
 /// Represents a theory in the symbol table. A theory is a top-level container for
@@ -224,7 +224,7 @@ type SymbolTable() =
             | _ -> ()
 
             let indent, indentMinusOne =
-                if TestConfig.DebugModeInterpreter then
+                if DebugModeInterpreter then
                     String(' ', level), String(' ', level - 1)
                 else
                     String.Empty, String.Empty

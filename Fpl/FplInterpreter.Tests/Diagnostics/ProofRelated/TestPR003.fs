@@ -4,9 +4,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.Helpers.Debug
-open Fpl2Interpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
 (* PR003
    Purpose: Report a duplicate argument identifier declared inside the same proof.

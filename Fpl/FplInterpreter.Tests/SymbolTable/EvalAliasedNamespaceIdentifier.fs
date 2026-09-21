@@ -11,7 +11,6 @@ open Fpl2Interpreter.SymbolTable.Storage.Heap
 open Fpl2Interpreter.Main
 open Fpl2Interpreter.SymbolTable.Creation.UsesClauses
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
 [<TestClass>]
 type EvalAliasedNamespaceIdentifier() =
@@ -100,7 +99,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestDownloadLibMap01() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let url = "https://github.com/bookofproofs/fpl.net/blob/main/theories/lib"
             diagnosticsContainer.Clear()
             let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
@@ -115,7 +114,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestDownloadLibMap02() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let url = "https://github.com/bookofproofs/fpl.net/blob/main/theories/lib"
             diagnosticsContainer.Clear()
             let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
@@ -136,7 +135,7 @@ type EvalAliasedNamespaceIdentifier() =
     [<DataRow("FpX *", 0)>]
     [<TestMethod>]
     member this.TestFindFilesInLibMapWithWildcard(usesClause: string, expected:int) =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let filename = "TestFindFilesInLibMapWithWildcard.fpl"
             let stOpt = prepareFplCode (filename, sprintf "uses %s;" usesClause, false) 
             let fplLibUrl =
@@ -166,7 +165,7 @@ type EvalAliasedNamespaceIdentifier() =
     [<DataRow("Fpl.Commons", 2)>]
     [<TestMethod>]
     member this.TestParsedAstsCount(usesClause: string, expected: int) =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let filename = "TestParsedAstsCount.fpl"
             prepareFplCode (filename, sprintf "uses %s;" usesClause, false) 
             let result = heap.ParsedAsts
@@ -181,7 +180,7 @@ type EvalAliasedNamespaceIdentifier() =
     [<DataRow("Test1.Test2")>]
     [<TestMethod>]
     member this.TestAcquireSourcesWebAndCurrDir(pascelCaseId: string) =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
         
             // prepare test
             let pathToFile =
@@ -237,46 +236,46 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Number() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses01()
             Assert.AreEqual<int>(2, result.Count)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id1() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Test")
             Assert.AreEqual<string>("Test", result.Value.Id)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id2() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Fpl.Commons")
             Assert.AreEqual<string>("Fpl.Commons", result.Value.Id)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id1ReferencedAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Test")
             // "Test" knows that it references to "Fpl.Commons"
             Assert.AreEqual<string list>(["Fpl.Commons"], result.Value.Sorting.ReferencedAsts)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id1ReferencingAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Test")
             // "Test" knows that nothing is referencing to it
             Assert.AreEqual<string list>([], result.Value.Sorting.ReferencingAsts)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id2ReferencedAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Fpl.Commons")
             // "Fpl.Commons" knows that it doesn't reference to anything
             Assert.AreEqual<string list>([], result.Value.Sorting.ReferencedAsts)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id2ReferencingAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Fpl.Commons")
             // "Fpl.Commons" knows that "Test" is referencing to it
             Assert.AreEqual<string list>(["Test"], result.Value.Sorting.ReferencingAsts)
@@ -298,20 +297,20 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Number() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02()
             Assert.AreEqual<int>(3, result.Count)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id1() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Test")
             let actual = result.Value.Id
             Assert.AreEqual<string>("Test", actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id1ReferencedAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Test")
             // "Test" knows that it references to "Fpl.Commons"
             let actual = result.Value.Sorting.ReferencedAsts
@@ -319,7 +318,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id1ReferencingAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Test")
             // "Test" knows that nothing is referencing to it
             let actual = result.Value.Sorting.ReferencingAsts
@@ -327,7 +326,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id2() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.SetTheory")
             let actual = result.Value.Id
             Assert.AreEqual<string>("Fpl.SetTheory", actual)
@@ -335,7 +334,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id2ReferencedAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.SetTheory")
             // "Fpl.SetTheory" references to FplCommons
             let actual = result.Value.Sorting.ReferencedAsts
@@ -343,7 +342,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id2ReferencingAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.SetTheory")
             // "Fpl.Commons" knows that "Test" is referencing to it
             let actual = result.Value.Sorting.ReferencingAsts
@@ -351,14 +350,14 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id3() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.Commons")
             let actual = result.Value.Id
             Assert.AreEqual<string>("Fpl.Commons", actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id3ReferencedAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.Commons")
             // "Fpl.Commons" knows that it doesn't reference to anything
             let actual = result.Value.Sorting.ReferencedAsts
@@ -366,7 +365,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id3ReferencingAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.Commons")
             // "Fpl.Commons" knows that "Test" is referencing to it
             let actual = result.Value.Sorting.ReferencingAsts
@@ -388,20 +387,20 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Number() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03()
             Assert.AreEqual<int>(5, result.Count)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id1() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
             let actual = result.Value.Id
             Assert.AreEqual<string>("Test", actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id1ReferencedAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
             // "Test" knows that it references to "Fpl.Commons"
             let actual = result.Value.Sorting.ReferencedAsts
@@ -409,7 +408,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id1ReferencingAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
             // "Test" knows that nothing is referencing to it
             let actual = result.Value.Sorting.ReferencingAsts
@@ -417,7 +416,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id2() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.SetTheory")
             let actual = result.Value.Id
             Assert.AreEqual<string>("Fpl.SetTheory", actual)
@@ -425,7 +424,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id2ReferencedAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.SetTheory")
             // "Fpl.SetTheory" references to FplCommons
             let actual = result.Value.Sorting.ReferencedAsts
@@ -433,7 +432,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id2ReferencingAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.SetTheory")
             // "Fpl.Commons" knows that "Test" is referencing to it
             let actual = result.Value.Sorting.ReferencingAsts
@@ -441,14 +440,14 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id3() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.Commons")
             let actual = result.Value.Id
             Assert.AreEqual<string>("Fpl.Commons", actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id3ReferencedAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.Commons")
             // "Fpl.Commons" knows that it doesn't reference to anything
             let actual = result.Value.Sorting.ReferencedAsts
@@ -456,7 +455,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id3ReferencingAsts() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.Commons")
             // "Fpl.Commons" knows that "Test" is referencing to it
             let actual = result.Value.Sorting.ReferencingAsts
@@ -465,7 +464,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClausesTopologicalSorting01() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses01()
             let ra = result.TryFindAstById("Fpl.Commons")
             let rc = result.TryFindAstById("Test")
@@ -477,7 +476,7 @@ type EvalAliasedNamespaceIdentifier() =
     [<TestMethod>]
     member this.TestLoadAllUsesClausesTopologicalSorting02() =
         heap.ClearResultMemory()
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02()
             let ra = result.TryFindAstById("Fpl.Commons")
             let rb = result.TryFindAstById("Fpl.SetTheory")
@@ -491,7 +490,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClausesTopologicalSorting03() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses03()
             let ra = result.TryFindAstById("Fpl.Commons")
             let rb = result.TryFindAstById("Fpl.SetTheory")
@@ -511,7 +510,7 @@ type EvalAliasedNamespaceIdentifier() =
     
     [<TestMethod>]
     member this.TestGarbageCollector() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let filename = "TestGarbageCollector.fpl"
             prepareFplCode(filename, "uses Fpl.SetTheory", false) 
             // initial counts of parsed ast and theories in root
@@ -529,7 +528,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestGarbageCollector01() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let filename = "TestGarbageCollector01.fpl"
             prepareFplCode(filename, "", true) |> ignore
             prepareFplCode(filename, "uses Fpl.SetTheory", false) 
@@ -546,7 +545,7 @@ type EvalAliasedNamespaceIdentifier() =
         
     [<TestMethod>]
     member this.TestGarbageCollector02() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let filename = "TestGarbageCollector02.fpl"
             prepareFplCode(filename, "", true) |> ignore
             prepareFplCode(filename, "uses Fpl.SetTheory", false) 
@@ -564,7 +563,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestGarbageCollector03() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let filename = "TestGarbageCollector03.fpl"
             let fplCode = "uses Fpl.SetTheory;"
             prepareFplCode(filename, "", true) |> ignore
@@ -586,7 +585,7 @@ type EvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestGarbageCollector04() =
-        if not TestConfig.IsOffline then 
+        if not offlineWatcher.OfflineMode then 
             let filename = "TestGarbageCollector04.fpl"
             let fplCode = "uses Fpl.SetTheory"
             prepareFplCode(filename, "", true) |> ignore

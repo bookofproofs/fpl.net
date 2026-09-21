@@ -5,7 +5,6 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
 (* ST001
    Purpose: Warn that a block (class, function, or similar definition) is empty or marked as intrinsic without useful content.

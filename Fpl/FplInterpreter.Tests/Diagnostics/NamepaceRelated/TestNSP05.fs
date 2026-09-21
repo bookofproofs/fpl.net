@@ -2,10 +2,10 @@ namespace Diagnostics.NamespaceRelated
 
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open Fpl0Base.TestConfig
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
 (* NSP05
    Purpose: Report ambiguous sources when the same theory is found in multiple locations.
@@ -66,7 +66,7 @@ type TestNSP05() =
 
     [<TestMethod>]
     member this.TestNSP05() =
-        if not TestConfig.IsOffline then 
+        if not IsOffline then 
             let code = NSP05 ( ["./"; "https"], "Fpl.Commons", "./")
             printf "Trying %s" code.Message
             this.PrepareTestNSP05(false) |> ignore

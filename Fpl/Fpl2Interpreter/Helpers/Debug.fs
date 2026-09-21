@@ -6,7 +6,7 @@
 module Fpl2Interpreter.Helpers.Debug
 open System
 open System.IO
-open TestSharedConfig
+open Fpl0Base.TestConfig
 open Fpl2Interpreter.BasicTypes
 
 /// <summary>
@@ -63,7 +63,7 @@ type StaticDebug =
     /// </remarks>
     [<System.Diagnostics.Conditional("DEBUG")>]
     static member Debug(fv: FplGenericNode, debugMode: Debug) : unit =
-        if TestSharedConfig.TestConfig.DebugModeInterpreter then
+        if DebugModeInterpreter then
             let bars n = String.replicate n "| "
             let rec getPath (fv1:FplGenericNode) =
                 match fv1.Parent with
@@ -88,4 +88,4 @@ type StaticDebug =
 /// <summary>
 /// File-system watcher stub used for offline testing of debug flows.
 /// </summary>
-let offlineWatcher = TestConfig.OfflineWatcher()
+let offlineWatcher = OfflineWatcher()

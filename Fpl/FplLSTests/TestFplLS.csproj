@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fpl3LanguageServer\Fpl3LanguageServer.fsproj" />
-    <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
   </ItemGroup>
 
 </Project>
