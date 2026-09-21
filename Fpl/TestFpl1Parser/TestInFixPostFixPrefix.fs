@@ -1,0 +1,435 @@
+namespace TestFpl1Parser
+
+open FParsec
+open Fpl1Parser.Grammar
+open Microsoft.VisualStudio.TestTools.UnitTesting
+
+
+[<TestClass>]
+type TestInfixPostfixPrefix () =
+    let replaceWhiteSpace (input: string) =
+        let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
+        input.Split(whiteSpaceChars)
+            |> String.concat ""
+
+    [<TestMethod>]
+    member this.TestPostfix () =
+        let result = run (definition .>> eof) """def pred Successor(x: Nat) postfix "'" { intr }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixA () =
+        let result = run (definition .>> eof) """def pred T() postfix "" {intr}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage01 () =
+        let result = run (predicate .>> eof) """x'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage01a () =
+        let result = run (predicate .>> eof) """x''"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage02 () =
+        let result = run (predicate .>> eof) """x(i)'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage02a () =
+        
+        let result = run (predicate .>> eof) """x'(i)'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage03 () =
+        let result = run (predicate .>> eof) """x[i]'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage04 () =
+        
+        let result = run (predicate .>> eof) """x.SomeProperty()'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage05 () =
+        let result = run (predicate .>> eof) """1'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage06a () =
+        let result = run (predicate .>> eof) """-f(x)'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage06b () =
+        let result = run (predicate .>> eof) """-f((x + 1))!"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage06c () =
+        let result = run (predicate .>> eof) """f(x)!"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage06d () =
+        let result = run (predicate .>> eof) """-x!"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+
+    [<TestMethod>]
+    member this.TestPostfixUsage08 () =
+        let result = run (predicate .>> eof) """x'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage08a () =
+        let result = run (predicate .>> eof) """(x')'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage08b () =
+        let result = run (predicate .>> eof) """x''"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPostfixUsage09 () =
+        let result = run (predicate .>> eof) """x '"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestInfix () =
+        let result = run (definition .>> eof) """def func Add (x,y: Nat) -> Nat infix "+" 2 { intr }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestInfixA () =
+        let result = run (definition .>> eof) """def pred T() infix "" 0 {intr}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestInfixUsage01 () =
+        let result = run (predicate .>> eof) """(x + y)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestInfixUsage01a () =
+        let result = run (predicate .>> eof) """(x + y + z)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestInfixUsage02 () =
+        
+        let result = run (predicate .>> eof) """((x + y) + z)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestInfixUsage03 () =
+        let result = run (predicate .>> eof) """(x + (y + z))"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestInfixUsage04 () =
+        let result = run (predicate .>> eof) """(x ∈ z)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+        
+    [<TestMethod>]
+    member this.TestInfixUsage04a () =
+        let result = run (predicate .>> eof) """(x ∧ z)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestInfixUsage04b () =
+        let result = run (predicate .>> eof) """(x ∈ z)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCombinedUsage01 () =
+        let result = run (predicate .>> eof) """(x' + y'' < z)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCombinedUsage01a () =
+        
+        let result = run (predicate .>> eof) """(-x' + -y'' < -z)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCombinedUsage02 () =
+        let result = run (predicate .>> eof) """(x' + (y'' < z))"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCombinedUsage03 () =
+        let result = run (predicate .>> eof) """((x' + y'') < z)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCombinedUsage04 () =
+        let result = run (predicate .>> eof) """(-x' + -y'' + z)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCombinedUsage05 () =
+        let result = run (predicate .>> eof) """-(x + -y)'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCombinedUsage06 () =
+        let result = run (predicate .>> eof) """-(x + y)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("01", """-(x + y).Test()""")>]
+    [<DataRow("02", """(f -∘ g)(x)""")>]
+    [<DataRow("03", """(f + g)'(x)""")>]
+    [<DataRow("04", """f'(x)""")>]
+    [<TestMethod>]
+    member this.TestCombinedUsageFail (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<DataRow("02", """(f(x) -∘ g(x))""")>]
+    [<DataRow("03", """(f(x)' + g(x)')""")>]
+    [<DataRow("03a", """(f(x) + g(x))'""")>]
+    [<DataRow("04", """f(x)'""")>]
+    [<DataRow("05", """(x + y)""")>]
+    [<DataRow("06", """x + y""")>]
+    [<TestMethod>]
+    member this.TestCombinedUsageSuccess (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+
+    [<TestMethod>]
+    member this.TestCombinedUsage10 () =
+        let result = run (predicate .>> eof) """(f + -g)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCombinedUsage10a () =
+        let result = run (predicate .>> eof) """(f + -g)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefix () =
+        let result = run (definition .>> eof) """def func Minus(x: Nat) -> Nat prefix "-" { intr }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixA () =
+        let result = run (definition .>> eof) """def pred T() prefix "" {intr}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestPrefixUsage01 () =
+        let result = run (predicate .>> eof) """'x"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixUsage01a () =
+        let result = run (predicate .>> eof) """''x"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixUsage02 () =
+        let result = run (predicate .>> eof) """'x(i)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixUsage03 () =
+        let result = run (predicate .>> eof) """'x[i]"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixUsage04 () =
+        let result = run (predicate .>> eof) """'x.SomeProperty()"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixUsage05 () =
+        let result = run (predicate .>> eof) """'1"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixUsage06 () =
+        let result = run (predicate .>> eof) """-(x)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixUsage06a () =
+        let result = run (predicate .>> eof) """-Test(x)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixUsage07 () =
+        let result = run (predicate .>> eof) """-x'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixUsage07a () =
+        let result = run (predicate .>> eof) """-x"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestAnd01 () =
+        let result = run (predicate .>> eof) """and (x,y)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestAnd02 () =
+        let result = run (predicate .>> eof) """(x ∧ y)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestAnd03 () =
+        let result = run (predicate .>> eof) """(x ∧ not x)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplestPrefix () =
+        let result = run (predicate .>> eof) """-x"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplestPostfix () =
+        let result = run (predicate .>> eof) """x'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplestInfix () =
+        let result = run (predicate .>> eof) """(x + y)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplestInfixPrecedence01 () =
+        let result = run (predicate .>> eof) """(x + y = 1)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplestInfixPrecedence02 () =
+        let result = run (predicate .>> eof) """(x = y + 1)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplest () =
+        let result = run (predicate .>> eof) """x"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
