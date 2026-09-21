@@ -280,3 +280,127 @@ function getWebviewContent(katexJs: vscode.Uri, katexCss: vscode.Uri): string {
                 const num = expr.slice(0, slashIdx).trim();
                 const den = expr.slice(slashIdx + 1).trim();
                 return \`\\\\dfrac{\${applySymbols(num)}}{\${applySymbols(den)}}\`;
+            }
+            return applySymbols(expr);
+        }
+
+        function applySymbols(str) {
+            let result = str;
+            for (const [unicode, latex] of UNICODE_TO_LATEX) {
+                result = result.split(unicode).join(latex);
+            }
+            return result;
+        }
+
+        /**
+         * Renders a FPL expression as HTML using KaTeX.
+         * Falls back to the raw escaped string if KaTeX throws.
+         *
+         * @param {string} expr
+         * @returns {string} - HTML string
+         */
+        function renderExpr(expr) {
+            if (!expr) { return ''; }
+            try {
+                return katex.renderToString(fplToLatex(expr), {
+                    throwOnError: false,
+                    displayMode: false,
+                    output: 'html'
+                });
+            } catch (_) {
+                return esc(expr);
+            }
+        }
+
+        // ── General helpers ───────────────────────────────────────────────────
+        function esc(s) {
+            return String(s ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function buildTable(rows) {
+            if (!rows || rows.length === 0) {
+                return '<p class="empty">No valid statements found.</p>';
+            }
+
+            const visibleCols = COLUMNS.filter(col => !col.hidden);
+
+            const headers = visibleCols.map(col => {
+                let cls = '';
+                if (_sortCol === col.key) { cls = _sortAsc ? ' class="sort-asc"' : ' class="sort-desc"'; }
+                return \`<th\${cls} onclick="sortBy('\${col.key}')">\${esc(col.label)}</th>\`;
+            }).join('');
+
+            const bodyRows = rows.map(row => {
+                const cells = visibleCols.map(col => {
+                    if (col.key === 'statementExpression') {
+                        return \`<td class="expr-cell">\${renderExpr(row[col.key])}</td>\`;
+                    }
+                    return \`<td>\${esc(row[col.key])}</td>\`;
+                }).join('');
+                return \`<tr data-filepath="\${esc(row['FilePath'])}" data-line="\${row['Line']}" data-column="\${row['Column']}">\${cells}</tr>\`;
+            }).join('');
+
+            return \`<table><thead><tr>\${headers}</tr></thead><tbody>\${bodyRows}</tbody></table>\`;
+        }
+
+        function sortBy(col) {
+            if (_sortCol === col) {
+                _sortAsc = !_sortAsc;
+            } else {
+                _sortCol = col;
+                _sortAsc = true;
+            }
+
+            const sorted = [..._rows].sort((a, b) => {
+                const av = String(a[col] ?? '').toLowerCase();
+                const bv = String(b[col] ?? '').toLowerCase();
+                if (av < bv) return _sortAsc ? -1 : 1;
+                if (av > bv) return _sortAsc ? 1 : -1;
+                return 0;
+            });
+
+            document.getElementById('content').innerHTML = buildTable(sorted);
+        }
+
+        function refresh() {
+            document.getElementById('status').textContent = 'Loading\u2026';
+            vscode.postMessage({ command: 'refresh' });
+        }
+
+        window.addEventListener('message', event => {
+            const message = event.data;
+            if (message.command === 'update') {
+                document.getElementById('status').textContent =
+                    'Last updated: ' + new Date().toLocaleTimeString();
+                try {
+                    _rows = JSON.parse(message.data);
+                    _sortCol = null;
+                    _sortAsc = true;
+                    document.getElementById('content').innerHTML = buildTable(_rows);
+                } catch (_) {
+                    document.getElementById('content').innerHTML =
+                        '<p class="empty">Failed to parse data.</p>';
+                }
+            } else if (message.command === 'error') {
+                document.getElementById('status').textContent = 'Error: ' + message.message;
+            }
+        });
+
+        // ── Row double-click → navigate in editor ─────────────────────────────
+        document.getElementById('content').addEventListener('dblclick', e => {
+            const tr = e.target.closest('tr[data-filepath]');
+            if (!tr) { return; }
+            vscode.postMessage({
+                command: 'navigate',
+                filePath: tr.dataset.filepath,
+                line: parseInt(tr.dataset.line, 10),
+                column: parseInt(tr.dataset.column, 10)
+            });
+        });
+    </script>
+</body>
+</html>`;
+}

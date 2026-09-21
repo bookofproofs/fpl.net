@@ -55,3 +55,4 @@
 !/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS/**
 
 *.user
+/Fpl/fpl-vscode-extension-typescript/out
