@@ -1,7 +1,7 @@
 module Fpl0Base.TestConfig
 
 let IsOffline = true
-let DebugModeParser = false
+let DebugModeParser = false 
 let DebugModeInterpreter = false
 
 
