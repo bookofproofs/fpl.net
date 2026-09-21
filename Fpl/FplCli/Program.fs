@@ -2,13 +2,7 @@
 // It is not really needed because the necessary FPL modules are run 
 // as an FPL Language Server (see FplLS C# Project in the same solution).
 open FParsec
-open Fpl.Parser.Basic
-open Fpl.Parser.Grammar
+open Fpl1Parser.Grammar
 
-open Fpl.Tools
-//let par = attempt ((predicateWithQualification .>> SW .>> keywordIs) .>>. (SW >>. variableType))
-        
-//let result = run (par .>> eof) "y is M"
-//printfn "%O" result
-
-GrammarToGml.processGrammarFile @"C:\Dev\fpl.net\Fpl\Fpl\Parser\Grammar.fs" @"C:\tmp\grammar.gml" (Some [ "opt" ])
+let result = run (axiom .>> eof) """axiom ZeroIsNat {true}"""
+printfn "%O" result

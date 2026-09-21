@@ -17,11 +17,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Update="FSharp.Core" Version="10.1.301" />
+      <ProjectReference Include="..\Fpl0Base\Fpl0Base.fsproj" />
+      <ProjectReference Include="..\Fpl1Parser\Fpl1Parser.fsproj" />
+      <ProjectReference Include="..\Fpl2Interpreter\Fpl2Interpreter.fsproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Fpl\Fpl.fsproj" />
+        <PackageReference Update="FSharp.Core" Version="10.1.301" />
     </ItemGroup>
 
 </Project>

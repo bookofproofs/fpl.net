@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Primitives\TestConfig.fs" />
+        <Compile Include="Primitives\Privimitives.fs" />
+        <Compile Include="Errors\Messages.fs" />
+        <Compile Include="Errors\Diagnostics.fs" />
+        <Compile Include="Errors\Emitter.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FParsec" Version="1.1.1" />
+    </ItemGroup>
+
+</Project>

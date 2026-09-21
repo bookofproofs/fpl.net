@@ -1,0 +1,63 @@
+(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
+
+/// <summary>
+/// Debug helpers for FParsec parsers used during development and tests.
+/// When enabled, the wrappers log parser entry and exit information to a debug file.
+/// </summary>
+module Fpl1Parser.Debug
+
+open System
+open System.IO
+open FParsec
+open Fpl0Base.TestConfig
+
+
+/// <summary>
+/// Wraps a parser so that, when parser debug mode is enabled, entry and exit events
+/// (including the parser's reply status) are appended to a debug log file.
+/// </summary>
+/// <param name="p">The parser to wrap.</param>
+/// <param name="label">A textual label used to identify the parser in the log.</param>
+/// <returns>
+/// A parser that behaves like <paramref name="p"/> but logs entry/exit information when
+/// <c>TestConfig.DebugModeParser</c> is true.
+/// </returns>
+///<example id="uint8-1"><code lang="fsharp">
+/// let pExpr, pExprRef = createParserForwardedToRef()
+/// let pNumber = pint32 |> trace "number"
+/// let pParens = between (pchar '(') (pchar ')') pExpr |> trace "parens"
+/// do pExprRef :=
+///    choice [
+///        pNumber
+///        pParens
+///    ]
+///    |> trace "expr"
+/// run pExpr "(12)"
+/// </code>
+/// </example>
+let debugWrapper (p: Parser<_,_>) label : Parser<_,_> =
+    fun stream ->
+        if DebugModeParser then
+            let currDir =  Directory.GetCurrentDirectory()
+            let logLine = sprintf "%A: Entering %s%s" stream.Position label Environment.NewLine
+            File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
+            let reply = p stream
+            let logLine1 = sprintf "%A: Leaving %s (%A)%s" stream.Position label reply.Status Environment.NewLine
+            File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine1)
+            reply
+        else
+            p stream
+
+#if DEBUG
+/// <summary>
+/// Conditional operator alias for <see cref="debugWrapper"/>.
+/// In debug builds (when the DEBUG symbol is defined) this operator is bound to <c>debugWrapper</c>;
+/// in non-debug builds it is a no-op that returns the original parser unchanged.
+/// </summary>
+/// <param name="p">Parser to wrap.</param>
+/// <param name="label">Label for logging; ignored in non-debug builds.</param>
+/// <returns>The wrapped parser in debug builds, otherwise the original parser.</returns>
+let (<!>) = debugWrapper
+#else
+let (<!>) p _ = p
+#endif
