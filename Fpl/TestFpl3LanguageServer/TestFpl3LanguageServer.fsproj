@@ -21,6 +21,36 @@
         <Compile Include="MSTestSettings.fs" />
         <Compile Include="FileMgmt\TestPathEquivalentUri.fs" />
         <Compile Include="FileMgmt\TestDotNetDownload.fs" />
+        <Compile Include="ServiceAutoCompletion\TestItem.fs" />
+        <Compile Include="ServiceAutoCompletion\TestAxiom.fs" />
+        <Compile Include="ServiceAutoCompletion\TestCases.fs" />
+        <Compile Include="ServiceAutoCompletion\TestConstructor.fs" />
+        <Compile Include="ServiceAutoCompletion\TestCorollary.fs" />
+        <Compile Include="ServiceAutoCompletion\TestDeclaration.fs" />
+        <Compile Include="ServiceAutoCompletion\TestDefault.fs" />
+        <Compile Include="ServiceAutoCompletion\TestDefinition.fs" />
+        <Compile Include="ServiceAutoCompletion\TestDelegate.fs" />
+        <Compile Include="ServiceAutoCompletion\TestDigits.fs" />
+        <Compile Include="ServiceAutoCompletion\TestExtension.fs" />
+        <Compile Include="ServiceAutoCompletion\TestFor.fs" />
+        <Compile Include="ServiceAutoCompletion\TestIso639.fs" />
+        <Compile Include="ServiceAutoCompletion\TestIsOperator.fs" />
+        <Compile Include="ServiceAutoCompletion\TestKeyword.fs" />
+        <Compile Include="ServiceAutoCompletion\TestLocalization.fs" />
+        <Compile Include="ServiceAutoCompletion\TestMapCases.fs" />
+        <Compile Include="ServiceAutoCompletion\TestPascalCaseId.fs" />
+        <Compile Include="ServiceAutoCompletion\TestPredicate.fs" />
+        <Compile Include="ServiceAutoCompletion\TestProof.fs" />
+        <Compile Include="ServiceAutoCompletion\TestProperty.fs" />
+        <Compile Include="ServiceAutoCompletion\TestQuantifier.fs" />
+        <Compile Include="ServiceAutoCompletion\TestRegex.fs" />
+        <Compile Include="ServiceAutoCompletion\TestSelf.fs" />
+        <Compile Include="ServiceAutoCompletion\TestString.fs" />
+        <Compile Include="ServiceAutoCompletion\TestTheoremLikeStmt.fs" />
+        <Compile Include="ServiceAutoCompletion\TestUses.fs" />
+        <Compile Include="ServiceAutoCompletion\TestVariable.fs" />
+        <Compile Include="ServiceAutoCompletion\TestWhitespace.fs" />
+        <Compile Include="ServiceAutoCompletion\TestWord.fs" />
     </ItemGroup>
 
     <ItemGroup>
