@@ -129,9 +129,9 @@ function refreshWebviewData(client: LanguageClient): void {
     if (!currentPanel) {
         return;
     }
-    client.sendRequest<string>('getWebviewData', {}).then(json => {
+    client.sendRequest<string>('getWebviewData', {}).then((json: string) => {
         currentPanel?.webview.postMessage({ command: 'update', data: json });
-    }).catch(err => {
+    }).catch((err: unknown) => {
         utils.log2Console('Webview data fetch failed: ' + err, true);
         currentPanel?.webview.postMessage({ command: 'error', message: String(err) });
     });
@@ -239,12 +239,12 @@ function getWebviewContent(katexJs: vscode.Uri, katexCss: vscode.Uri): string {
             { key: 'Line',                label: 'Line',   hidden: true },
             { key: 'Column',              label: 'Column', hidden: true },
         ];
-        
+
         let _rows = [];
         let _sortCol = null;
         let _sortAsc = true;
 
-        // ── Unicode → LaTeX conversion ────────────────────────────────────────
+        // ── Unicode to LaTeX conversion ────────────────────────────────────────
         // Maps every FPL Unicode symbol to its KaTeX equivalent.
         const UNICODE_TO_LATEX = [
             // logical connectives
@@ -268,25 +268,27 @@ function getWebviewContent(katexJs: vscode.Uri, katexCss: vscode.Uri): string {
         /**
          * Converts a FPL Unicode expression string to a KaTeX-renderable LaTeX string.
          * Inference rules use "/" as numerator/denominator separator and are rendered
-         * as a fraction: \dfrac{premises}{conclusion}.
+         * as a fraction: \\dfrac{premises}{conclusion}.
          *
          * @param {string} expr - the raw statementExpression value from ToJson2()
          * @returns {string}    - a LaTeX string suitable for katex.renderToString()
          */
         function fplToLatex(expr) {
-            const slashIdx = expr.indexOf('/');
+            var slashIdx = expr.indexOf('/');
             if (slashIdx !== -1) {
                 // Inference rule: "premise1, premise2 / conclusion"
-                const num = expr.slice(0, slashIdx).trim();
-                const den = expr.slice(slashIdx + 1).trim();
-                return \`\\\\dfrac{\${applySymbols(num)}}{\${applySymbols(den)}}\`;
+                var num = expr.slice(0, slashIdx).trim();
+                var den = expr.slice(slashIdx + 1).trim();
+                return '\\\\dfrac{' + applySymbols(num) + '}{' + applySymbols(den) + '}';
             }
             return applySymbols(expr);
         }
 
         function applySymbols(str) {
-            let result = str;
-            for (const [unicode, latex] of UNICODE_TO_LATEX) {
+            var result = str;
+            for (var i = 0; i < UNICODE_TO_LATEX.length; i++) {
+                var unicode = UNICODE_TO_LATEX[i][0];
+                var latex = UNICODE_TO_LATEX[i][1];
                 result = result.split(unicode).join(latex);
             }
             return result;
@@ -314,7 +316,7 @@ function getWebviewContent(katexJs: vscode.Uri, katexCss: vscode.Uri): string {
 
         // ── General helpers ───────────────────────────────────────────────────
         function esc(s) {
-            return String(s ?? '')
+            return String(s == null ? '' : s)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;');
@@ -325,25 +327,25 @@ function getWebviewContent(katexJs: vscode.Uri, katexCss: vscode.Uri): string {
                 return '<p class="empty">No valid statements found.</p>';
             }
 
-            const visibleCols = COLUMNS.filter(col => !col.hidden);
+            var visibleCols = COLUMNS.filter(function (col) { return !col.hidden; });
 
-            const headers = visibleCols.map(col => {
-                let cls = '';
+            var headers = visibleCols.map(function (col) {
+                var cls = '';
                 if (_sortCol === col.key) { cls = _sortAsc ? ' class="sort-asc"' : ' class="sort-desc"'; }
-                return \`<th\${cls} onclick="sortBy('\${col.key}')">\${esc(col.label)}</th>\`;
+                return '<th' + cls + ' onclick="sortBy(\\'' + col.key + '\\')">' + esc(col.label) + '</th>';
             }).join('');
 
-            const bodyRows = rows.map(row => {
-                const cells = visibleCols.map(col => {
+            var bodyRows = rows.map(function (row) {
+                var cells = visibleCols.map(function (col) {
                     if (col.key === 'statementExpression') {
-                        return \`<td class="expr-cell">\${renderExpr(row[col.key])}</td>\`;
+                        return '<td class="expr-cell">' + renderExpr(row[col.key]) + '</td>';
                     }
-                    return \`<td>\${esc(row[col.key])}</td>\`;
+                    return '<td>' + esc(row[col.key]) + '</td>';
                 }).join('');
-                return \`<tr data-filepath="\${esc(row['FilePath'])}" data-line="\${row['Line']}" data-column="\${row['Column']}">\${cells}</tr>\`;
+                return '<tr data-filepath="' + esc(row['FilePath']) + '" data-line="' + row['Line'] + '" data-column="' + row['Column'] + '">' + cells + '</tr>';
             }).join('');
 
-            return \`<table><thead><tr>\${headers}</tr></thead><tbody>\${bodyRows}</tbody></table>\`;
+            return '<table><thead><tr>' + headers + '</tr></thead><tbody>' + bodyRows + '</tbody></table>';
         }
 
         function sortBy(col) {
@@ -354,9 +356,9 @@ function getWebviewContent(katexJs: vscode.Uri, katexCss: vscode.Uri): string {
                 _sortAsc = true;
             }
 
-            const sorted = [..._rows].sort((a, b) => {
-                const av = String(a[col] ?? '').toLowerCase();
-                const bv = String(b[col] ?? '').toLowerCase();
+            var sorted = _rows.slice().sort(function (a, b) {
+                var av = String(a[col] == null ? '' : a[col]).toLowerCase();
+                var bv = String(b[col] == null ? '' : b[col]).toLowerCase();
                 if (av < bv) return _sortAsc ? -1 : 1;
                 if (av > bv) return _sortAsc ? 1 : -1;
                 return 0;
@@ -370,8 +372,8 @@ function getWebviewContent(katexJs: vscode.Uri, katexCss: vscode.Uri): string {
             vscode.postMessage({ command: 'refresh' });
         }
 
-        window.addEventListener('message', event => {
-            const message = event.data;
+        window.addEventListener('message', function (event) {
+            var message = event.data;
             if (message.command === 'update') {
                 document.getElementById('status').textContent =
                     'Last updated: ' + new Date().toLocaleTimeString();
@@ -389,9 +391,9 @@ function getWebviewContent(katexJs: vscode.Uri, katexCss: vscode.Uri): string {
             }
         });
 
-        // ── Row double-click → navigate in editor ─────────────────────────────
-        document.getElementById('content').addEventListener('dblclick', e => {
-            const tr = e.target.closest('tr[data-filepath]');
+        // ── Row double-click to navigate in editor ─────────────────────────────
+        document.getElementById('content').addEventListener('dblclick', function (e) {
+            var tr = e.target.closest('tr[data-filepath]');
             if (!tr) { return; }
             vscode.postMessage({
                 command: 'navigate',

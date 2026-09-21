@@ -89,7 +89,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             if (err) utils.log2Console('Error writing file:' + err.message, true);
         });
 
-        const disposableClient = client.start();
+        await client.start();
 
         const disposableCommand = vscode.commands.registerCommand('fpl-vscode-extension.helloWorld', function () {
             vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
@@ -129,7 +129,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             fplTheoriesProvider.refresh();
         }
 
-        context.subscriptions.push(disposableClient);
         context.subscriptions.push(disposableCommand);
         context.subscriptions.push(disposableCommand2);
         context.subscriptions.push(disposableRefresh);

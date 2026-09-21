@@ -44,7 +44,7 @@ class FplTheoriesProvider implements vscode.TreeDataProvider<MyTreeItem> {
     }
 
     public refresh(): void {
-        this.client.sendRequest<string>('getTreeData', {}).then(json => {
+        this.client.sendRequest<string>('getTreeData', {}).then((json: string) => {
             try {
                 const treeData: FplTreeDataJson = JSON.parse(json);
                 this._cachedRoots = this.parseScope(treeData.Scope);
@@ -53,13 +53,13 @@ class FplTheoriesProvider implements vscode.TreeDataProvider<MyTreeItem> {
                 this._cachedRoots = [];
             }
             this._onDidChangeTreeData.fire();
-        }).catch(error => {
+        }).catch((error: unknown) => {
             utils.log2Console('Failed to get tree data ' + error, true);
             this._cachedRoots = [];
             this._onDidChangeTreeData.fire();
         });
     }
-
+    
     public getTreeItem(element: MyTreeItem): vscode.TreeItem {
         this._applyExpandState(element);
         return element;
