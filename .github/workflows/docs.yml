@@ -41,6 +41,7 @@ jobs:
           --output ../_site
           --sourcefolder ${{ github.workspace }} 
           --sourcerepo https://github.com/bookofproofs/fpl.net/tree/main/ 
+          --properties Configuration=Release
           --parameters root https://bookofproofs.github.io/fpl.net/ fsdocs-license-link https://github.com/bookofproofs/fpl.net/blob/main/LICENSE.md 
 
       - name: Upload Pages artifact
