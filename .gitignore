@@ -32,27 +32,9 @@
 /Fpl/fpl-vscode-extension/node_modules
 /Fpl/fpl-vscode-extension/Landau.odt
 /Fpl/fpl-vscode-extension/.~lock.Landau.odt#
-/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLsDll/FplLS.exe
-/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLsDll/FplLS.pdb
-/Fpl/fpl-vscode-extension/publishToMarketPlace.txt
+/Fpl/fpl-vscode-extension/out
 /Fpl/fpl-vscode-extension/.vscode/publishToMarketPlace.txt
-
-#/Fpl/fpl-vscode-extension-typescript/*.vsix
-/Fpl/fpl-vscode-extension-typescript/node_modules
-#/Fpl/fpl-vscode-extension-typescript/dotnet-runtimes/FplLsDll/FplLS.exe
-#/Fpl/fpl-vscode-extension-typescript/dotnet-runtimes/FplLsDll/FplLS.pdb
-
-
 
 /theories/lib/Debug.txt
 
-# Un-ignore the affected subdirectory
-!/Fpl/fpl-vscode-extension/dotnet-runtimes/
-# ignore all subdirectories
-/Fpl/fpl-vscode-extension/dotnet-runtimes/**
-# un-ignore only the FplLS subdirectory and its subdirectories
-!/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS/
-!/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS/**
-
 *.user
-/Fpl/fpl-vscode-extension-typescript/out

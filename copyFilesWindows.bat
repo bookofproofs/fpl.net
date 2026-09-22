@@ -1,6 +1,6 @@
 @echo off
 set "source_folder=.\Fpl\FplLS\bin\Release\net8.0"
-set "destination_folder=.\Fpl\fpl-vscode-extension\dotnet-runtimes\FplLsDll"
+set "destination_folder=.\Fpl\fpl-vscode-extension\out\dotnet-runtimes\FplLsDll"
 
 REM Delete all files in the destination folder
 del /Q "%destination_folder%\*.*"

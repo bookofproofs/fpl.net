@@ -22,12 +22,7 @@
         "language",
         "proving"
     ],
-    "activationEvents": [
-        "workspaceContains:**/*.fpl",
-        "onCommand:extension.openFileAtLine",
-        "onCommand:fpl-vscode-extension.showWebview"
-    ],
-    "main": "./extension.js",
+    "main": "./out/extension.js",
     "contributes": {
         "languages": [
             {
@@ -86,7 +81,8 @@
             "explorer": [
                 {
                     "id": "fplTheories",
-                    "name": "FPL Theories"
+                    "name": "FPL Theories",
+                    "icon": "./images/logo.png"
                 }
             ]
         },
@@ -141,14 +137,27 @@
         }
     },
     "scripts": {
-        "lint": "eslint .",
-        "pretest": "npm run lint",
-        "test": "node ./test/runTest.js"
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "vscode:prepublish": "npm run compile",
+        "lint": "eslint src --ext ts",
+        "pretest": "npm run compile && npm run lint",
+        "test": "node ./out/test/runTest.js"
     },
     "dependencies": {
         "adm-zip": "latest",
         "katex": "^0.17.0",
         "tar": "latest",
         "vscode-languageclient": "latest"
+    },
+    "devDependencies": {
+        "typescript": "^5.4.0",
+        "@types/node": "^20.0.0",
+        "@types/vscode": "^1.81.0",
+        "@types/tar": "^6.1.0",
+        "@types/adm-zip": "^0.5.0",
+        "eslint": "^8.57.0",
+        "@typescript-eslint/parser": "^7.0.0",
+        "@typescript-eslint/eslint-plugin": "^7.0.0"
     }
 }
