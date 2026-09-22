@@ -12,6 +12,13 @@ let client: LanguageClient | undefined;
 let outputChannel: vscode.OutputChannel | undefined;
 let activationCancelled = false;
 
+interface IDotnetAcquireResult {
+    dotnetPath: string;
+}
+
+const DOTNET_ACQUIRE_EXTENSION_ID = 'fpl-vscode-extension';
+const DOTNET_VERSION = '8.0';
+
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     activationCancelled = false;
 
@@ -28,22 +35,25 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     });
 
     try {
-        const platform = process.platform;
-        const arch = process.arch;
-        const runtimeName = platform + '-' + arch;
-        utils.log2Console('running on ' + runtimeName, false);
+        utils.log2Console('acquiring shared .NET ' + DOTNET_VERSION + ' runtime via ms-dotnettools.vscode-dotnet-runtime', false);
 
-        const dotnetExecutableName = process.platform === 'win32' ? 'dotnet.exe' : 'dotnet';
+        const acquireResult = await vscode.commands.executeCommand<IDotnetAcquireResult>(
+            'dotnet.acquire',
+            { version: DOTNET_VERSION, requestingExtensionId: DOTNET_ACQUIRE_EXTENSION_ID }
+        );
 
-        const relPathToServerDll = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
-        const relPathToDotnetRuntime = path.join(__dirname, 'dotnet-runtimes', runtimeName);
-        const relPathToDotnet = path.join(relPathToDotnetRuntime, dotnetExecutableName);
+        if (!acquireResult?.dotnetPath) {
+            throw new Error('Failed to acquire the .NET runtime via ms-dotnettools.vscode-dotnet-runtime.');
+        }
 
-        await utils.acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime);
+        const relPathToDotnet = acquireResult.dotnetPath;
+        utils.log2Console('using shared dotnet runtime at ' + relPathToDotnet, false);
 
         if (activationCancelled) {
             return;
         }
+
+        const relPathToServerDll = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
 
         const serverOptions: ServerOptions = {
             run: { command: relPathToDotnet, args: [relPathToServerDll] },
@@ -56,14 +66,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
         const fplTheoriesProvider = createFplTheoriesProvider(client);
 
-        // createTreeView instead of registerTreeDataProvider gives access to
-        // onDidExpandElement / onDidCollapseElement for collapse-state memory.
         const treeView = vscode.window.createTreeView('fplTheories', {
             treeDataProvider: fplTheoriesProvider,
             showCollapseAll: true
         });
 
-        // Track expand/collapse so the state survives a manual refresh.
         context.subscriptions.push(
             treeView.onDidExpandElement(event => {
                 if (event.element.id !== undefined) {
@@ -95,8 +102,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
         });
 
-        // Explicit on-demand refresh command — wired to the ⟳ button in
-        // the view title bar via package.json menus/view/title.
         const disposableRefresh = vscode.commands.registerCommand('fpl-vscode-extension.refreshTheories', () => {
             fplTheoriesProvider.refresh();
         });
@@ -123,7 +128,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             restoreWebviewPanel(context, client);
         }
 
-        // Populate the tree once on activation if an FPL file is already open.
         if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === 'fpl') {
             utils.log2Console('initial treeview refresh', false);
             fplTheoriesProvider.refresh();

@@ -29,12 +29,13 @@
 /api
 
 /Fpl/fpl-vscode-extension/*.vsix
+/Fpl/fpl-vscode-extension/out
 /Fpl/fpl-vscode-extension/node_modules
 /Fpl/fpl-vscode-extension/Landau.odt
 /Fpl/fpl-vscode-extension/.~lock.Landau.odt#
-/Fpl/fpl-vscode-extension/out
 /Fpl/fpl-vscode-extension/.vscode/publishToMarketPlace.txt
 
 /theories/lib/Debug.txt
 
 *.user
+/Fpl/fpl-vscode-extension/src/.vs
