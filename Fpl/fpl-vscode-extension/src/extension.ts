@@ -53,7 +53,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             return;
         }
 
-        const relPathToServerDll = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
+        const relPathToServerDll = path.join(__dirname, 'FplLsDll', 'FplLS.dll');
 
         const serverOptions: ServerOptions = {
             run: { command: relPathToDotnet, args: [relPathToServerDll] },
@@ -91,7 +91,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
         const config = vscode.workspace.getConfiguration('fplExtension');
         const configJson = JSON.stringify(config, null, 2);
-        const relPathToConfig = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'vsfplconfig.json');
+        const relPathToConfig = path.join(__dirname, 'FplLsDll', 'vsfplconfig.json');
         fs.writeFile(relPathToConfig, configJson, err => {
             if (err) utils.log2Console('Error writing file:' + err.message, true);
         });

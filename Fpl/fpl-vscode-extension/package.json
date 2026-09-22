@@ -139,7 +139,8 @@
     "scripts": {
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
-        "vscode:prepublish": "npm run compile",
+        "copy-ls-dlls": "node ./scripts/copyLsDlls.js",
+        "vscode:prepublish": "npm run copy-ls-dlls && npm run compile",
         "lint": "eslint src --ext ts",
         "pretest": "npm run compile && npm run lint",
         "test": "node ./out/test/runTest.js"

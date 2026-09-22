@@ -1,2 +1,14 @@
+Before testing the extension with VS Code (F5): run this command to ensure you have the latest release of the language server:
+npm run vscode:prepublish
+
+If you only want to test the DLL refresh step in isolation (without recompiling TypeScript), just run:
+npm run copy-ls-dlls
+
+(both steps will recreate the folder ./out/FplLsDll with its contents copied from the .net Release)
+
+This is a good way to sanity-check that dotnet publish succeeds and that out/FplLsDll gets populated correctly before you commit to running the full vsce package/vsce publish flow, which also does packaging/upload work you may not want to repeat unnecessarily.
+
+
+When finally publishing the extension, run
 vsce package
 vsce publish
