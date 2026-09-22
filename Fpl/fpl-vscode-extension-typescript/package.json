@@ -22,11 +22,6 @@
         "language",
         "proving"
     ],
-    "activationEvents": [
-        "workspaceContains:**/*.fpl",
-        "onCommand:extension.openFileAtLine",
-        "onCommand:fpl-vscode-extension.showWebview"
-    ],
     "main": "./out/extension.js",
     "contributes": {
         "languages": [
@@ -86,7 +81,8 @@
             "explorer": [
                 {
                     "id": "fplTheories",
-                    "name": "FPL Theories"
+                    "name": "FPL Theories",
+                    "icon": "./images/logo.png"
                 }
             ]
         },
