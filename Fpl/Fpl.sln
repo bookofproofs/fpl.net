@@ -41,6 +41,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestFpl2Interpreter", "Test
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestFpl3LanguageServer", "TestFpl3LanguageServer\TestFpl3LanguageServer.fsproj", "{9D9BD124-9C99-4E05-88D5-4B5A68D0735B}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "fpl-vscode-extension", "fpl-vscode-extension\fpl-vscode-extension.esproj", "{C51C64F5-B4FF-CE79-B7DF-7E84326D2584}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,12 @@ Global
 		{9D9BD124-9C99-4E05-88D5-4B5A68D0735B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D9BD124-9C99-4E05-88D5-4B5A68D0735B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D9BD124-9C99-4E05-88D5-4B5A68D0735B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C51C64F5-B4FF-CE79-B7DF-7E84326D2584}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C51C64F5-B4FF-CE79-B7DF-7E84326D2584}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C51C64F5-B4FF-CE79-B7DF-7E84326D2584}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{C51C64F5-B4FF-CE79-B7DF-7E84326D2584}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C51C64F5-B4FF-CE79-B7DF-7E84326D2584}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C51C64F5-B4FF-CE79-B7DF-7E84326D2584}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

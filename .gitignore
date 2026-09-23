@@ -39,3 +39,4 @@
 
 *.user
 /Fpl/fpl-vscode-extension/src/.vs
+/Fpl/fpl-vscode-extension/obj/Release
