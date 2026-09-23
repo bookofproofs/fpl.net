@@ -1,0 +1,54 @@
+# .vscodeignore
+# Controls what gets included in the packaged .vsix produced by `vsce package`.
+# Without this file, vsce falls back to the repository's .gitignore rules,
+# which would incorrectly exclude the compiled `out/` folder and `node_modules/`
+# (both needed at runtime). This file explicitly overrides that.
+
+
+# out/** is deliberately NOT excluded.
+# This is the whole point. By omitting it from .vscodeignore, it will be included in the package (overriding the .gitignore fallback behavior).
+
+# --- Source & build config (not needed at runtime) ---
+src/**
+tsconfig.json
+.eslintrc*
+scripts/**
+
+# --- Dev/CI/editor artifacts ---
+.vscode/**
+.vscode-test/**
+.github/**
+.vs/**
+*.log
+
+# --- Tests ---
+out/test/**
+**/*.test.js
+**/*.map
+
+# --- Misc project files not needed in the package ---
+.gitignore
+.gitattributes
+CONTRIBUTING.md
+*.vsix
+copydlls.bat
+
+# --- node_modules exclusions (vsce keeps "dependencies", drops "devDependencies" ---
+# but being explicit here avoids relying solely on that heuristic)
+node_modules/.bin/**
+node_modules/**/*.md
+node_modules/**/*.txt
+node_modules/**/*.map
+node_modules/**/*.d.ts
+node_modules/**/*.ts
+node_modules/**/*.py
+node_modules/**/NOTICE
+node_modules/**/NOTICE.*
+node_modules/**/CHANGELOG*
+node_modules/**/test/**
+node_modules/**/tests/**
+node_modules/**/.github/**
+node_modules/typescript/**
+node_modules/eslint*/**
+node_modules/@typescript-eslint/**
+node_modules/@types/**
