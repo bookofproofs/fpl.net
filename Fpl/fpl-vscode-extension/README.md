@@ -6,9 +6,6 @@ This extension enables you to make use of advantages of an IDE like VS Code whil
 
 This is a Proof of Concept of a private research project to develop such a language. 
 
-For more information or code examples, see https://github.com/bookofproofs/fpl.net. 
-In this repository, you will also find the source code for this extension.
-
 ## Features
 
 * A custom Formal Proving Language (FPL) for writing and structuring mathematical proofs independently of natural language, with rich mathematical notation and a continuously simplified, readable syntax
@@ -19,21 +16,15 @@ In this repository, you will also find the source code for this extension.
 * Cross-platform support via on-demand .NET runtime acquisition for Windows, Linux, and macOS
 * Automated versioning, changelog, and release-note synchronization across the solution and the VS Code extension's publishing pipeline
 
+For a more detailed feature list see [RELEASE NOTES](./RELEASE_NOTES.md).
+
+For a full change log see the [CHANGELOG](./CHANGELOG.md).
+
 <img src="https://github.com/bookofproofs/fpl.net/blob/main/Fpl/fpl-vscode-extension/images/FplExtension.gif?raw=true" width="550">
 
-There is also an [FPL Channel](https://www.youtube.com/@bookofproofs "FPL Channel") on YouTube devoted to the language.
+To contribute to this project, visit our [repository](https://github.com/bookofproofs/fpl.net). 
+You can find there also some FPL code examples that you can try out in this extension.
 
-
-## Requirements
-
-VSCode version ">1.84.2"
-
-## Extension Settings
-
-None
-
-## Known Issues
-
-* None
+There is also an [FPL Channel](https://www.youtube.com/@bookofproofs "FPL Channel") on YouTube devoted to the FPL language.
 
 

@@ -145,8 +145,9 @@
         "check-version-changelog-match": "node ./scripts/check-version-changelog-match.js",
         "sync-version": "node ./scripts/sync-version.js",
         "sync-vscode-changelog": "node ./scripts/sync-vscode-changelog.js",
+        "copy-release-notes": "node ./scripts/copy-release-notes.js",
         "copy-ls-dlls": "node ./scripts/copyLsDlls.js",
-        "vscode:prepublish": "npm run check-version-changelog-match && npm run sync-version && npm run sync-vscode-changelog && npm run copy-ls-dlls && npm run compile",
+        "vscode:prepublish": "npm run check-version-changelog-match && npm run sync-version && npm run sync-vscode-changelog && npm run copy-release-notes && npm run copy-ls-dlls && npm run compile",
         "lint": "eslint src --ext ts",
         "pretest": "npm run compile && npm run lint",
         "test": "node ./out/test/runTest.js"

@@ -61,7 +61,7 @@ and this project adheres to Semantic Versioning (MAJOR.MINOR.PATCH).
 
 ## [v1.6.0] - 2024-09-09
 ### Added
-- **[vscode]** Tree view for symbol navigation; configuration properties (`vsfplconfig.json`).
+- **[vscode]** Tree view for symbol table navigation; configuration properties (`vsfplconfig.json`).
 
 ## [v1.5.4] - 2024-03-21
 ### Fixed
