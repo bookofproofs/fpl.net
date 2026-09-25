@@ -1,16 +1,16 @@
 # Change Log
 
 All notable changes to the VS Code extension **FPL (Formal Proving Language)**
-are documented in this file. For a full list of changes of the **Fpl solution**
+are documented in this file. For a full list of changes of the **FPL solution**
 (including parser, interpreter, language server, ...),
 see [CHANGELOG.md](https://github.com/bookofproofs/fpl.net/blob/main/CHANGELOG.md).
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to Semantic Versioning (MAJOR.MINOR.PATCH).
 
-## [Unreleased]
+## [v5.1.1] - 2026-09-25
 ### Added
-- **[vscode]** Automate syncing vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files
+- **[vscode]** Automate syncing and checking vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files
 
 ## [v5.1.0] - 2026-09-21
 ### Changed

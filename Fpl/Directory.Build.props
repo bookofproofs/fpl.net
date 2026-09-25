@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <VersionPrefix>5.1.0</VersionPrefix>
+        <VersionPrefix>5.1.1</VersionPrefix>
         <!-- Optional: append pre-release label, e.g. -beta.1 -->
         <!-- <VersionSuffix>beta.1</VersionSuffix> -->
         <Version Condition="'$(VersionSuffix)' == ''">$(VersionPrefix)</Version>
