@@ -228,7 +228,7 @@ Each entry is tagged with the part(s) of the solution it affects:
 ## [v1.7.0] - 2024-11-18
 ### Added
 - **[vscode]** Navigation tree view with colors and icons, backed by the new symbol table.
-- **[language-server]** `DocuSymbolTable` navigation and document symbol improvements.
+- **[language-server]** `SymbolTable` navigation and document symbol improvements.
 - **[interpreter]** `SIG04` diagnostics extended to infix, prefix, postfix operations and types.
 - **[interpreter]** `PR004`/`PR005` diagnostics, `ID014`/`ID015` diagnostics, and justified-argument `BlockType` inference.
 - **[interpreter]** Initial evaluation of `return` statements.
@@ -271,7 +271,7 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[interpreter]** FPL interpreter (alpha version): evaluation of conjunction, disjunction, xor, implication, and equivalence expressions; initial delegate module.
 - **[interpreter]** Diagnostics `ID002`–`ID013`, `VAR00`–`VAR03`, `PR000`–`PR002`, `LG000`/`LG001`, `GEN00`, `SIG00`–`SIG04`, `NSP003`–`NSP005`.
 - **[interpreter]** Garbage collector, tokenizer, circular theory-usage/import detection.
-- **[vscode]** Tree view for symbol navigation; configuration properties (`vsfplconfig.json`).
+- **[vscode]** Tree view for symbol table navigation; configuration properties (`vsfplconfig.json`).
 ### Changed
 - **[interpreter]** Syntax simplification for class inheritance (templates and extensions no longer allowed).
 - **[interpreter]** Replaced `EvaluationType`/`EvalContext` approach with a centralized evaluation-stack model in the symbol table.
@@ -309,9 +309,8 @@ Each entry is tagged with the part(s) of the solution it affects:
 
 ## [v1.5.0] - 2024-02-03
 ### Added
-- **[parser]** Newest FPL parser (v3.4.0).
+- **[parser]** Newest FPL parser, including inbuilt parsers for math operators, replacing regex-based matching.
 - **[vscode]** Auto-completion for infix, prefix, postfix, and user-defined mathematical/object symbols.
-- **[parser]** Inbuilt parsers for math operators, replacing regex-based matching.
 ### Changed
 - **[other]** Localization strings reorganized for infix/postfix/prefix/symbol keywords.
 ### Fixed
@@ -406,11 +405,11 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[vscode]** Support for standard color themes.
 ### Fixed
 - **[vscode]** Extension version-number display bug.
-- **[parser]** **[language-server]** Language Server updated to reflect FPL grammar 2.4.2.
+- **[parser]** **[language-server]** Language Server updated to reflect newest FPL grammar 
 
 ## [v1.2.6] - 2023-09-08
 ### Changed
-- **[parser]** FPL syntax updated to version 2.4.2.
+- **[parser]** FPL syntax updated
 
 ## [v1.2.5] - 2023-09-06
 ### Fixed

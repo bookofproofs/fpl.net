@@ -1,3 +1,21 @@
+0) Update release notes (using AI)
+
+Prompt: 
+
+Copilot, please generate an entry for the file #file:'C:\Dev\fpl.net\Fpl\RELEASE_NOTES.md'  that summarizes the changes from the file #file:'C:\Dev\fpl.net\Fpl\CHANGELOG.md'.
+between the versions [provide new version number] (next to-be-released version) 
+and the version [provide the last published version number] (last publicly released version). 
+
+Please group the release notes for this release by the tags following the convention you can already find in 
+RELEASE_NOTES.md: While the CHANGELOG.md is outlined using the hierarchy 
+version number -> change type -> tag, 
+the release notes should be outlined using the hierarchy 
+release number -> tag.
+
+The preferred order the tags is (if applicable): [parser], [interpreter], [language-server], [vscode], [other]
+
+It suffices to output only the single release note with this version number (no re-printing the existing release notes for other versions is needed).
+
 1) 
 Before testing the extension with VS Code (F5): run this command to ensure you have the latest release of the language server:
 npm run vscode:prepublish
