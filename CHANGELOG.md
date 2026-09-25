@@ -1,6 +1,6 @@
 # Change Log
 
-All notable changes to the Fpl solution (parser, interpreter, language server, and VS Code extension) are documented in this file.
+All notable changes to the **FPL solution** (parser, interpreter, language server, and VS Code extension) are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to Semantic Versioning (MAJOR.MINOR.PATCH).
@@ -14,6 +14,9 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[other]** - something else was changed, like documentation, test suite, .net version, etc.
 
 ## [Unreleased]
+
+
+## [v5.1.1] - 2026-09-25
 ### Added
 - **[vscode]** Automate syncing vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files
 

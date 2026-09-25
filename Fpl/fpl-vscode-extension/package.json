@@ -143,8 +143,9 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "sync-version": "node ./scripts/sync-version.js",
+        "sync-vscode-changelog": "node ./scripts/sync-vscode-changelog.js",
         "copy-ls-dlls": "node ./scripts/copyLsDlls.js",
-        "vscode:prepublish": "npm run sync-version && npm run copy-ls-dlls && npm run compile",
+        "vscode:prepublish": "npm run sync-version && npm run sync-vscode-changelog && npm run copy-ls-dlls && npm run compile",
         "lint": "eslint src --ext ts",
         "pretest": "npm run compile && npm run lint",
         "test": "node ./out/test/runTest.js"
