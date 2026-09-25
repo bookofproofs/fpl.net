@@ -5,6 +5,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="images\" />
-    <Folder Include="scripts\" />
   </ItemGroup>
 </Project>

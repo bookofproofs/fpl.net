@@ -1,4 +1,4 @@
-# Changelog
+# Change Log
 
 All notable changes to the Fpl solution (parser, interpreter, language server, and VS Code extension) are documented in this file.
 
@@ -14,7 +14,8 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[other]** - something else was changed, like documentation, test suite, .net version, etc.
 
 ## [Unreleased]
-- (to come)
+### Added
+- **[vscode]** Automate syncing vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files
 
 ## [v5.1.0] - 2026-09-21
 ### Changed
