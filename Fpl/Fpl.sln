@@ -6,11 +6,10 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{980CFF4A-DD73-4DA5-A84A-0759F39CB526}"
 	ProjectSection(SolutionItems) = preProject
 		.runsettings = .runsettings
+		..\CHANGELOG.md = ..\CHANGELOG.md
 		..\CODE_OF_CONDUCT.md = ..\CODE_OF_CONDUCT.md
 		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
-		..\articles\index.md = ..\articles\index.md
-		..\INTRO.md = ..\INTRO.md
-		..\LICENSE.md = ..\LICENSE.md
+		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
 		..\styles\site.css = ..\styles\site.css
 	EndProjectSection
@@ -23,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E632B8EE-C
 	ProjectSection(SolutionItems) = preProject
 		docs\DocuFplGrammarParserEvolution.md = docs\DocuFplGrammarParserEvolution.md
 		docs\DocuFplGrammarPocShiftFromPythonToFSharp.md = docs\DocuFplGrammarPocShiftFromPythonToFSharp.md
+		docs\index.md = docs\index.md
+		RELEASE_NOTES.md = RELEASE_NOTES.md
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplLS", "FplLS\FplLS.fsproj", "{E45713AD-1DC0-4FFF-8FB6-EA67F65F651E}"

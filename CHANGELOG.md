@@ -13,7 +13,6 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[parser]** - the FPL parser / grammar was changed
 - **[other]** - something else was changed, like documentation, test suite, .net version, etc.
 
-
 ## [Unreleased]
 - (to come)
 
