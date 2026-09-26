@@ -73,6 +73,8 @@ This project maintains a [`CHANGELOG.md`](./CHANGELOG.md) at the repository root
   - Open the main solution file located at fpl.net/Fpl/Fpl.sln. 
   - You can run .NET releated unit tests there.
 - For trying out the VS Code extension: 
+  - Install `Node.js` (if not already available on your system)
+  - Run `npm install` from the folder `fpl.net/Fpl/fpl-vscode-extension`
   - Use Visual Studio Code.
   - Open fpl.net/Fpl/fpl-vscode-extension as folder
   - Press F5 to start the debugging session.

@@ -1,6 +1,13 @@
 # Third-Party Notices
 
-## Component
+## Node modules used for the VS Code extension
+These components depend on the current version of our extension and can be found in individual `Node.js` installation files. 
+The original license files are installed automatically in the subfolder `fpl.net/Fpl/fpl-vscode-extension/node_modules`, if you run locally `npm install` from the folder `fpl.net/Fpl/fpl-vscode-extension`.
+
+*Unfortunately, and for technical reasons, it is not possible to cite all legal notices of the node modules that are currently used in these Third-Party Notices.*
+
+
+## Component TextPos
 - `module Fpl3LanguageServer.Buffers.TextPos`
 
 Derived from https://github.com/tintoy/msbuild-project-tools-server/blob/master/src/LanguageServer.Common/Utilities/TextPositions.cs
@@ -30,7 +37,7 @@ SOFTWARE.
 This component is included under the MIT License.  
 The original license text is reproduced below:
 
-## Components
+## Some components of the language server
 - `module FplLS.Program`
 - `module Fpl3LanguageServer.Buffers.BuffMgr`
 - `module Fpl3LanguageServer.Buffers.DocSync`
