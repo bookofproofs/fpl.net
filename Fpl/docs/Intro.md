@@ -1,4 +1,3 @@
-# 1 Introduction
 
 ## 1.1 What is FPL?
 
@@ -8,16 +7,16 @@ local natural languages.
 
 While English is currently the de facto standard natural language for
 mathematical publications, FPL should further facilitate the dialog between 
-mathematicians worldwide, providing a standard for notation, and the  
-degree of details of mathematical proofs, definitions, axioms, and theorems. 
+mathematicians worldwide, providing a standard for notation and the  
+degree of detail of mathematical proofs, definitions, axioms, and theorems. 
 
 At the same time, as a formal language, FPL aims to facilitate 
 the automation of:
-* parsing and translating the code written in FPL into an arbitrary human 
-local language (as a bridge between FPL, which is a formal language and 
+* parsing and translating the code written in FPL into an arbitrary local human 
+language (as a bridge between FPL, which is a formal language, and 
 any natural language),
-* verifying, if a code written in FPL (a mathematical theory) is logically
-consistent (i.e. without contradictions), 
+* verifying whether code written in FPL (a mathematical theory) is logically
+consistent (i.e., without contradictions), 
 * helping to find a proof for a theorem, given a theory written 
 in FPL,   
 * generating theories based on axioms written in FPL,
@@ -50,14 +49,14 @@ This principle will be difficult to accomplish since a formal language can be hu
 
 > "The syntax of FPL should be inspired by modern mathematical notation while preserving the readability principle."
 
-The richness of modern mathematical notation imposes at least two challenges for a formal language specification like FPL: one is its catchy readability, another it's ambiguity. 
+The richness of modern mathematical notation imposes at least two challenges for a formal language specification like FPL: one is its catchy readability, the other is its ambiguity. 
 
 #### The Readability Challenge 
 
 * Modern mathematical notation is very rich (we use here LaTeX notation):
-   * indexing of variables (e.g, `$x_i,$` `$x_{i_j}$`, `$x^{(k)}_j$`, etc.) 
-   * enumerations (e.g. `$a_1,\ldots,a_n$`)
-   * matrices (e.g. `$\pmatrix{a_{11}&a_{12}\\a_{21}&a_{22}}$`) 
+   * indexing of variables (e.g., `$x_i,$` `$x_{i_j}$`, `$x^{(k)}_j$`, etc.) 
+   * enumerations (e.g., `$a_1,\ldots,a_n$`)
+   * matrices (e.g., `$\pmatrix{a_{11}&a_{12}\\a_{21}&a_{22}}$`) 
    * short notation for special operations like summation `$\sum,$`, products `$\prod$`, integrals `$\int$`, composition of functions `$f(g(f(x))))$`,
    * and a lot of other notational conventions.  
 * At the same time, the LaTeX examples given above demonstrate that coding this notation is by far not as readable and catchy as its typeset result. Observe that richness of notation and readability are not necessarily conflicting principles. If you consider the typeset result of a LaTeX code or mathematical notes written by hand, using a pencil and a sheet of paper, both are possible at once: a rich _and_ a catchy notation. A rich notation becomes less catchy if we try to code it in a computer-readable format, like LaTeX or a related formal system. 
@@ -68,7 +67,7 @@ Because FPL is intended to be a formal language, its specification has to resolv
 
 * Another feature of modern mathematical notation is its intrinsic ambiguity. There are many examples: 
    * The symbol "1" can mean different things: in some contexts, it would be the natural number `$1$`, in some other contexts, the real number `$1$`, or even the complex number `$1$`. It can even mean no number when used to denote the neutral element of multiplication in the ring of square matrices, together with matrix addition and matrix multiplication.
-   * The symbols "`$+$`", "`$\cdot$`" could mean the addition and the multiplication of numbers, but also operations on other objects, e.g., vectors or congruence classes. If FPL would be used to write a theory introducing the addition and the multiplication, should it also be possible to re-define such symbols?
+   * The symbols "`$+$`", "`$\cdot$`" could mean the addition and the multiplication of numbers, but also operations on other objects, e.g., vectors or congruence classes. If FPL were used to write a theory introducing addition and multiplication, should it also be possible to redefine such symbols?
    * In some mathematical contexts, it is necessary to use some other symbol for an operand to avoid confusion with other symbols that are used in the same context meaning different things.  
    * Moreover, any numerical constant could be written in decimal, octal, binary, or other systems but still mean the same real number. 
    * We cannot represent any irrational number (like the constant `$\Pi=3.1415\ldots$`) in its whole precision. Thus, an agreed notation (the Greek capital `$\Pi$`) is used to denote such constants. But in other contexts, the same Greek capital `$\Pi$` could mean any variable or element of any arbitrary set or class. Things become even more complicated when we try to use these symbols as indices of variables, e.g., `$A_\Pi.$` 
@@ -87,13 +86,13 @@ Thus, theories written in FPL simplify things by asserting that:
 * Only two truth values are possible (true, false) but nothing in between (no "fuzzy logic" interpretations are allowed).
 * If a theorem is derivable from true axioms using the declared rules of inference, it is automatically valid (i.e., true).
 
-This approach is similar to the approach used in mathematics, in which axioms are variable, but both, the rules of inference and interpretation, are not always explicitly apparent. The rules of inference are not explicitly given since mathematics is not formulated in a formal language. Interpretation is also not explicitly defined. Common sense is that if something is "logically correctly derived from axioms," then it "is also true". However, we should be aware that this is only one of many different possible interpretations, and thus the theories of contemporary mathematics are not the only possible ones. They might even be false under different interpretations. 
+This approach is similar to the approach used in mathematics, in which axioms are variable, but both the rules of inference and the interpretation are not always explicitly apparent. The rules of inference are not explicitly given since mathematics is not formulated in a formal language. Interpretation is also not explicitly defined. Common sense is that if something is "logically correctly derived from axioms," then it "is also true." However, we should be aware that this is only one of many different possible interpretations, and thus the theories of contemporary mathematics are not the only possible ones. They might even be false under different interpretations. 
 
 ### 1.3.4 Principle 4: Theory Independence
 
 > "While using the axiomatic method, FPL should not stick to a pre-defined set of axioms and rules of inference. Instead, its meta syntax and semantics should allow developing any theory using the axiomatic method."
 
-FPL should allow formulating any new theory starting with a new set of axioms and rules of interference. This way, we should ensure the scalability and extensibility of FPL to anticipate future developments in mathematics and its evolution as a science.
+FPL should allow formulating any new theory starting with a new set of axioms and rules of inference. This way, we should ensure the scalability and extensibility of FPL to anticipate future developments in mathematics and its evolution as a science.
 
 ### 1.3.5 Principle 5: Theory Standardization and Extensibility
 
@@ -111,15 +110,15 @@ The distinction between standard and non-standard modules of FPL should be made 
 
 > "The syntax and semantics of FPL should enable the creation of automated aids and tools."
 
-While human readability remains important (see Principle 1), FPL should be formal enough to facilitate a rigid and unambiguous notation. 
+While human readability remains important (see Principle 1), FPL should be formal enough to facilitate a rigorous and unambiguous notation. 
 
-The syntax of FPL should be formal enough to develop automated tools capable of verifying the correctness of FPL theories. In addition, integrated Development Environments (IDEs) for FPL should assist users in writing correct mathematical proofs and formulate mathematical definitions that meet modern standards. 
+The syntax of FPL should be formal enough to develop automated tools capable of verifying the correctness of FPL theories. In addition, Integrated Development Environments (IDEs) for FPL should assist users in writing correct mathematical proofs and formulating mathematical definitions that meet modern standards. 
 
-Also, the syntax should make it possible to program automated tools translating a theory that we formulated in FPL into a given natural human language (possibly including LaTeX notation for mathematical formulae). With this respect, FPL should provide a means to formulate the same content independently from a given natural human language while still enabling people to read the content even if they do not use or know FPL. 
+Also, the syntax should make it possible to program automated tools translating a theory that we formulated in FPL into a given natural human language (possibly including LaTeX notation for mathematical formulae). In this respect, FPL should provide a means to formulate the same content independently from a given natural human language while still enabling people to read the content even if they do not use or know FPL. 
 
 # 2 High-Level Conceptual Design
 
-The project to develop FPL started June 14, 2020. In my [research paper](https://github.com/bookofproofs/fpl/blob/master/hld/FPLHighLevelDesign.pdf),
+The project to develop FPL started on June 14, 2020. In my [research paper](https://github.com/bookofproofs/fpl/blob/master/hld/FPLHighLevelDesign.pdf),
 I identified the following High-Level Requirements for the FPL language:
 
 | No.        | Requirement for FPL         | Level  |
@@ -129,7 +128,7 @@ I identified the following High-Level Requirements for the FPL language:
 |3 |Express PBM in a structured code to distinguish it from text passages written in prose.|MUST|
 |4 |Support eight building blocks of PBM: definitions, theorems, propositions, lemmas, corollaries, axioms, proofs, and conjectures.|MUST|
 |5 |Allow embedding FPL code into surrounding text that might contain non-PBM contents.|MUST|
-|6 |Support localization|SHOULD|
+|6 |Support localization.|SHOULD|
 |7 |Allow distinguishing four theorem-like building blocks: theorems, propositions, lemmas, and corollaries.|SHOULD|
 |8 |Allow zero to many proofs of theorem-like building blocks and distinguish them syntactically from unproven conjectures.|MUST|
 |9 |Disambiguate FPL code on a syntactical level using appropriate parentheses rules.|MUST|
@@ -137,40 +136,35 @@ I identified the following High-Level Requirements for the FPL language:
 |11 |Incorporate the syntax of predicate logic (at least PL2).|MUST|
 |12 |Allow referring to (unproven) conjectures in mathematical proofs and interpret such proofs accordingly.|MUST|
 |13 |Support nesting and linking different logical steps and proofs into more complex ones.|MUST|
-|14 |Use definitions as a meta-language to introduce new syntax and new domains of discourses allowing to interpret the formulas.|MUST|
+|14 |Use definitions as a meta-language to introduce new syntax and new domains of discourse allowing to interpret the formulas.|MUST|
 |15 |Definitions introduce new types that can be used to declare FPL variables.|MUST|
-|16 |Support for asserting and checking a type of a variable (`is` operator)|MUST|
+|16 |Support for asserting and checking a type of a variable (`is` operator).|MUST|
 |17 |Support flexible notation while defining new predicates, functional terms, or mathematical objects.|MUST|
 |18 |Allow a free configuration of axioms and inference rules.|MUST|
-|19 |Look&feel of notation, possibly similar modern notation. Ideally, exploit the possibilities of LaTeX.|SHOULD| 
+|19 |Look&feel of notation, possibly similar to modern notation. Ideally, exploit the possibilities of LaTeX.|SHOULD| 
 |20 |Accept different levels of detail in mathematical proofs. If requested, provide additional details for validated proofs.|SHOULD|
 |21 |Independence from foundations: No built-in axiomatic system of PBM in the syntax of FPL.|MUST|
 |22 |Support both intuitionistic and non-intuitionistic arguments and mathematical objects.|SHOULD|
 |23|Support definitions with compound parameters having implicit properties.|MUST|
-|24|Support for relative definitions|MUST|
-|25|Support for intrinsic definitions|MUST|
-|26|Syntax independent from notation|MUST|
+|24|Support for relative definitions.|MUST|
+|25|Support for intrinsic definitions.|MUST|
+|26|Syntax independent from notation.|MUST|
 |27|Allow ranges of variables, including *countable* or *uncountable*, *ordered* or *unordered*, *finite*, or *infinite*.|SHOULD|
 |28|Support inheritance and overriding of properties of parent classes when defining new *types*.|MUST|
 |29|Determining the type (`is` operator) reflects the inheritance tree.|MUST|
 |30|Stating axioms inside a definition as mandatory properties or as separate building blocks.|SHOULD|
-|31|Support of definitions of functional terms|MUST|
-|32|Support of definitions of predicates|MUST|
+|31|Support of definitions of functional terms.|MUST|
+|32|Support of definitions of predicates.|MUST|
 |33|Clear scope of variables in which they are declared.|MUST|
-|34|Support to declare variables in the defined types, including support for at least PL2|MUST|
-|35|Support assignment of values or expressions to variables|MUST|
-|36|Support to delegate the interpretation of intrinsic definitions|MUST|
-|37|FPL to allow identification by providing means of casting different data types to each other.|SHOULD|
-|38|Allow recursive linguistic constructs|MUST|
-|39|Allow loops|MUST|
+|34|Support to declare variables in the defined types, including support for at least PL2.|MUST|
+|35|Support assignment of values or expressions to variables.|MUST|
+|36|Support to delegate the interpretation of intrinsic definitions.|MUST|
+|37|FPL to allow identification of mathematical types by providing means of casting different data types to each other.|SHOULD|
+|38|Allow recursive linguistic constructs.|MUST|
+|39|Allow loops.|MUST|
 |40|Allow self-reference in definitions.|MUST|
 |41|Support generic types.|MUST| 
-|42|Check the self-containment (FPL interpreter)|MUST|
+|42|Check the self-containment (FPL interpreter).|MUST|
 
 The paper also contains a description of a proof of concept that is based on some first FPL code examples you can
 find in this repository as well as the original syntax diagrams of the FPL grammar (version 1.0.0).
-
-
-
-
-

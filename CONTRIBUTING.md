@@ -14,7 +14,7 @@ Source files should not duplicate the full license text. Instead, each source fi
 
 For your own contribution, attribute yourself in our [CONTRIBUTORS.md](./CONTRIBUTORS.md) file.
 
-If you use third party code, attribute it in our [THIRD-PARTY-NOTICE.md](./THIRD-PARTY-NOTICE.md) file.
+If you use third party code, attribute it in our [THIRD_PARTY_NOTICE.md](./THIRD_PARTY_NOTICE.md) file.
 
 Why this approach?
 
@@ -65,3 +65,14 @@ This project maintains a [`CHANGELOG.md`](./CHANGELOG.md) at the repository root
 * ```refactor/<descriptive_repository_name>``` - focus on refactoring
 * ```test/<descriptive_repository_name>``` - focus on test coverage
 * ```doc/<descriptive_repository_name>``` - focus on documentation
+
+## Getting Started and How to Test Your Code
+
+- For trying out the solution: 
+  - It is convenient to use Visual Studio.
+  - Open the main solution file located at fpl.net/Fpl/Fpl.sln. 
+  - You can run .NET releated unit tests there.
+- For trying out the VS Code extension: 
+  - Use Visual Studio Code.
+  - Open fpl.net/Fpl/fpl-vscode-extension as folder
+  - Press F5 to start the debugging session.
