@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Basic FPL parser helpers and combinators built on top of FParsec.
 /// </summary>

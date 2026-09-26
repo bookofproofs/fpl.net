@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module containing symbol-table node implementations for definition properties such as
 /// mandatory predicates and mandatory functional terms used inside FPL definitions.

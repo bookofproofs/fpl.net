@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// This module contains all side-effect functions necessary to emit diagnostics for the FPL language server.
 /// </summary>

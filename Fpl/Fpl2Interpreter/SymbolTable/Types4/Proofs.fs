@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module containing symbol-table nodes used by the FPL interpreter to model and
 /// evaluate proof-related constructs and justification items.

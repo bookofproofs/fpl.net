@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module providing utilities to match and instantiate expressions during proof
 /// inference and justification processing.

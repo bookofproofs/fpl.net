@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Utility functions to embed and resolve nodes into the interpreter symbol table.
 /// </summary>

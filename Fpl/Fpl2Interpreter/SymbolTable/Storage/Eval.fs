@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// This module contains classes and utilities used during the transition process 
 /// between the AST of the FPL parser and the symbol table of the FPL interpreter.

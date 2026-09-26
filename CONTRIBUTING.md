@@ -10,20 +10,13 @@ This project uses the MIT License. Maintain a single canonical `LICENSE` file at
 
 Source files should not duplicate the full license text. Instead, each source file should include a short header that references the canonical `LICENSE` file and the copyright owner. This keeps files concise while preserving legal attribution.
 
-### Recommended short header (F#)
+### Recommended approach
 
-Place this header at the top of each `.fs` file (and analogous short headers for other file types):
+For your own contribution, attribute yourself in our [CONTRIBUTORS.md](./CONTRIBUTORS.md) file.
 
-```fsharp
-(*
-Copyright (c) 2026+ bookofproofs
-See LICENSE in the project root for license terms.
-*)
-```
+If you use third party code, attribute it in our [THIRD-PARTY-NOTICE.md](./THIRD-PARTY-NOTICE.md) file.
 
-For files that already contain the full license block (historical files), it is acceptable to leave those unchanged. New files and file updates should use the short header format.
-
-## Why this approach
+Why this approach?
 
 - Single source of truth: keeps the full license text in one place making updates straightforward.
 - Reduces noise in individual source files, improving readability.
@@ -65,21 +58,8 @@ This project maintains a [`CHANGELOG.md`](./CHANGELOG.md) at the repository root
 - **[interpreter]** Corrected false positive in `SIG04` diagnostics for nested corollaries.
 ```
 
-## How to contribute?
-It is important to coordinate the project FPL Interpreter among the team.
-* In the beginning, get in touch with the team via [Discussions](https://github.com/bookofproofs/fpl/discussions). 
-* Please propose the work items you would like to focus on in the Discussions section. Please also describe your anticipated solution, and be sufficiently specific. 
-* Next, agree with the team upon the work items you will get assigned to cover.
-* Implement the work items.
-* If necessary, create unit tests related to the new code. 
-* Test your repository against your new and the existing unit tests.
-* Before creating a pull request, verify if the number of failed unit test got greater than the number you got before you implemented the change. Ideally, no unit tests should fail before creating the pull request. 
-* Update `CHANGELOG.md` as described in the Changelog Policy above, if applicable.
-* Create a pull request.
-
 ## Conventions for your pull-requests
-* Never push your repository directly into the `main` branch.
-* Instead, create pull requests using the following naming conventions:
+* Create pull requests using the following naming conventions:
 * ```fix/<descriptive_repository_name>``` - focus on bug fixes
 * ```feat/<descriptive_repository_name>``` - focus on a new feature
 * ```refactor/<descriptive_repository_name>``` - focus on refactoring

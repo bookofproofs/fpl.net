@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Provides specialized evaluators for AST nodes related to symbol extensions of the FPL
 /// language. Evaluators update interpreter state on the shared <c>heap</c>, set expression

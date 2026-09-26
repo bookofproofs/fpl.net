@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Evaluators for AST nodes that denote FPL type constructs (keywords, templates, array types,
 /// inherited types and compound type forms).

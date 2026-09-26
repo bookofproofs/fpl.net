@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Provides a globally accessible forward reference to the main AST evaluator and a set of
 /// small helper functions used by modules that depend on the evaluator.

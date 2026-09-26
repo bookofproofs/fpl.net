@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module housing symbol-table nodes that model the FPL assignment statement.
 /// </summary>

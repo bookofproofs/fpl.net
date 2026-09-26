@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Parser combinators that produce the FPL abstract syntax tree (AST).
 /// This module exposes the concrete-combinator definitions used by the front-end

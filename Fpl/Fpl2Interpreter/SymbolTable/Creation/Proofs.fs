@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Provides specialized evaluators for AST nodes that represent proofs and related
 /// constructs in FPL (proof signatures, proof blocks, arguments, justifications, and

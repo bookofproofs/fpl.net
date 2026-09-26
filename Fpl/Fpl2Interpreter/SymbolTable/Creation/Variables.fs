@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Specialized evaluators for AST nodes that represent FPL variables and variable declarations.
 /// </summary>

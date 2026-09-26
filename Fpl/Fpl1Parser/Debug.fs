@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Debug helpers for FParsec parsers used during development and tests.
 /// When enabled, the wrappers log parser entry and exit information to a debug file.

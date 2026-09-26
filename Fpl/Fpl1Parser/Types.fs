@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// AST types and helper types for the FPL grammar.
 /// This module exposes the core abstract-syntax-node representations used by the parser

@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module that defines symbol-table nodes used to model and interpret rules of inference
 /// and predicate lists in the FPL interpreter.

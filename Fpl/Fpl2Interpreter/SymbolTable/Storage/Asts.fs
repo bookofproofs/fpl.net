@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// This module contains types necessary to pre-process AST from the FPL Parser
 /// before it can be further analyzed by the FPL interpreter.

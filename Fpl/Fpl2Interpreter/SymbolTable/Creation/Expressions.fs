@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Evaluators and helpers for AST nodes that represent expressions (infix, prefix/postfix, parentheses,
 /// qualified predicates and more).

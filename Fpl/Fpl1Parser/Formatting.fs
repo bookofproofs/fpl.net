@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Helpers to reformat and sanitize FParsec error messages so they become
 /// more suitable for diagnostics shown in IDEs and language servers.

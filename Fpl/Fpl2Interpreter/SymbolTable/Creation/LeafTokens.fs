@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module that provides specialized evaluators for AST nodes representing lexical and leaf tokens
 /// of the FPL language.
