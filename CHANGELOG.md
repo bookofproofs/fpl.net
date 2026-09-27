@@ -16,9 +16,9 @@ Each entry is tagged with the part(s) of the solution it affects:
 ## [Unreleased]
 
 
-## [v5.1.1] - 2026-09-25
+## [v5.1.1] - 2026-09-27
 ### Added
-- **[vscode]** Automate syncing and checking vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files
+- **[vscode]** New release 5.1.1, automate syncing and checking vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files
 
 ## [v5.1.0] - 2026-09-21
 ### Changed
