@@ -1,8 +1,22 @@
 module Fpl0Base.TestConfig
 
+#if FPL_IS_OFFLINE
 let IsOffline = true
-let DebugModeParser = false 
+#else
+let IsOffline = false
+#endif
+
+#if FPL_DEBUG_PARSER
+let DebugModeParser = true
+#else
+let DebugModeParser = false
+#endif
+
+#if FPL_DEBUG_INTERPRETER
+let DebugModeInterpreter = true
+#else
 let DebugModeInterpreter = false
+#endif
 
 
 // Sets or gets the current OfflineMode.

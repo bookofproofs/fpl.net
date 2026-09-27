@@ -143,11 +143,12 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "check-version-changelog-match": "node ./scripts/check-version-changelog-match.js",
+        "check-debug-flags": "node ./scripts/check-debug-flags.js",
         "sync-version": "node ./scripts/sync-version.js",
         "sync-vscode-changelog": "node ./scripts/sync-vscode-changelog.js",
         "copy-docs": "node ./scripts/copy-docs.js",
         "copy-ls-dlls": "node ./scripts/copyLsDlls.js",
-        "vscode:prepublish": "npm run check-version-changelog-match && npm run sync-version && npm run sync-vscode-changelog && npm run copy-docs && npm run copy-ls-dlls && npm run compile",
+        "vscode:prepublish": "npm run check-debug-flags && npm run check-version-changelog-match && npm run sync-version && npm run sync-vscode-changelog && npm run copy-docs && npm run copy-ls-dlls && npm run compile",
         "lint": "eslint src --ext ts",
         "pretest": "npm run compile && npm run lint",
         "test": "node ./out/test/runTest.js"

@@ -8,5 +8,18 @@
         <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
         <FileVersion>$(VersionPrefix)</FileVersion>
         <InformationalVersion>$(Version)</InformationalVersion>
+        <FplIsOffline>false</FplIsOffline>
+        <FplDebugModeParser>false</FplDebugModeParser>
+        <FplDebugModeInterpreter>false</FplDebugModeInterpreter>
     </PropertyGroup>
+    <PropertyGroup>
+        <DefineConstants Condition="'$(FplIsOffline)' == 'true'">$(DefineConstants);FPL_IS_OFFLINE</DefineConstants>
+        <DefineConstants Condition="'$(FplDebugModeParser)' == 'true'">$(DefineConstants);FPL_DEBUG_PARSER</DefineConstants>
+        <DefineConstants Condition="'$(FplDebugModeInterpreter)' == 'true'">$(DefineConstants);FPL_DEBUG_INTERPRETER</DefineConstants>
+    </PropertyGroup>
+
+
+
+
+
 </Project>
