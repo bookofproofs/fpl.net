@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Diagnostics support types and helpers used by the parser and interpreter.
 /// </summary>

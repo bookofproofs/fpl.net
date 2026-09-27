@@ -1,0 +1,25 @@
+<Project>
+    <PropertyGroup>
+        <VersionPrefix>5.1.1</VersionPrefix>
+        <!-- Optional: append pre-release label, e.g. -beta.1 -->
+        <!-- <VersionSuffix>beta.1</VersionSuffix> -->
+        <Version Condition="'$(VersionSuffix)' == ''">$(VersionPrefix)</Version>
+        <Version Condition="'$(VersionSuffix)' != ''">$(VersionPrefix)-$(VersionSuffix)</Version>
+        <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
+        <FileVersion>$(VersionPrefix)</FileVersion>
+        <InformationalVersion>$(Version)</InformationalVersion>
+        <FplIsOffline>false</FplIsOffline>
+        <FplDebugModeParser>false</FplDebugModeParser>
+        <FplDebugModeInterpreter>false</FplDebugModeInterpreter>
+    </PropertyGroup>
+    <PropertyGroup>
+        <DefineConstants Condition="'$(FplIsOffline)' == 'true'">$(DefineConstants);FPL_IS_OFFLINE</DefineConstants>
+        <DefineConstants Condition="'$(FplDebugModeParser)' == 'true'">$(DefineConstants);FPL_DEBUG_PARSER</DefineConstants>
+        <DefineConstants Condition="'$(FplDebugModeInterpreter)' == 'true'">$(DefineConstants);FPL_DEBUG_INTERPRETER</DefineConstants>
+    </PropertyGroup>
+
+
+
+
+
+</Project>

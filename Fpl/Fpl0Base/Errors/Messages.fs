@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Centralized string-based error messages and small helper utilities
 /// used by the FPL compiler, parser and diagnostics subsystems.

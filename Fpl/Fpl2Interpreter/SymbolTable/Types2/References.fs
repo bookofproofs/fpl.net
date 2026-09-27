@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module containing helper functions and reference node implementations that resolve
 /// and evaluate references to other nodes in the symbol table.

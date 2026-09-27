@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module providing a process-wide heap memory used by the interpreter to hold
 /// evaluation state, parsed ASTs, the symbol table and auxiliary stores.

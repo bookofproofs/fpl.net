@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Lightweight debug utilities used by the interpreter. Intended for development and testing only.
 /// </summary>

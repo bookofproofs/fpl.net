@@ -2,17 +2,30 @@
 
 'use strict';
 
-const vscode = require('vscode');
-const utils = require('./utils');
+import * as vscode from 'vscode';
+import { LanguageClient } from 'vscode-languageclient/node';
+import * as utils from './utils';
 
 const STATE_KEY = 'fplWebviewLayout';
-let currentPanel = undefined;
+let currentPanel: vscode.WebviewPanel | undefined;
 
-function loadLayout(context) {
-    return context.workspaceState.get(STATE_KEY, { column: vscode.ViewColumn.Two, isOpen: false });
+interface WebviewLayoutState {
+    column: vscode.ViewColumn;
+    isOpen: boolean;
 }
 
-function saveLayout(context, column, isOpen) {
+interface WebviewMessage {
+    command: 'refresh' | 'navigate';
+    filePath?: string;
+    line?: number;
+    column?: number;
+}
+
+function loadLayout(context: vscode.ExtensionContext): WebviewLayoutState {
+    return context.workspaceState.get<WebviewLayoutState>(STATE_KEY, { column: vscode.ViewColumn.Two, isOpen: false });
+}
+
+function saveLayout(context: vscode.ExtensionContext, column: vscode.ViewColumn | null, isOpen: boolean): void {
     const current = loadLayout(context);
     context.workspaceState.update(STATE_KEY, {
         column: column != null ? column : current.column,
@@ -20,7 +33,7 @@ function saveLayout(context, column, isOpen) {
     });
 }
 
-function createOrShowWebviewPanel(context, client) {
+export function createOrShowWebviewPanel(context: vscode.ExtensionContext, client: LanguageClient): void {
     const layout = loadLayout(context);
     const column = layout.column
         || (vscode.window.activeTextEditor
@@ -36,7 +49,7 @@ function createOrShowWebviewPanel(context, client) {
     currentPanel = vscode.window.createWebviewPanel(
         'fplDataView',
         'Valid Statements Overview',
-        column,
+        column as vscode.ViewColumn,
         {
             enableScripts: true,
             retainContextWhenHidden: true,
@@ -47,27 +60,27 @@ function createOrShowWebviewPanel(context, client) {
     );
 
     const katexBase = vscode.Uri.joinPath(context.extensionUri, 'node_modules', 'katex', 'dist');
-    const katexJs  = currentPanel.webview.asWebviewUri(vscode.Uri.joinPath(katexBase, 'katex.min.js'));
+    const katexJs = currentPanel.webview.asWebviewUri(vscode.Uri.joinPath(katexBase, 'katex.min.js'));
     const katexCss = currentPanel.webview.asWebviewUri(vscode.Uri.joinPath(katexBase, 'katex.min.css'));
 
     currentPanel.webview.html = getWebviewContent(katexJs, katexCss);
 
-    saveLayout(context, column, true);
+    saveLayout(context, column as vscode.ViewColumn, true);
 
     refreshWebviewData(client);
 
     currentPanel.webview.onDidReceiveMessage(
-        message => {
+        (message: WebviewMessage) => {
             if (message.command === 'refresh') {
                 refreshWebviewData(client);
-            } else if (message.command === 'navigate') {
+            } else if (message.command === 'navigate' && message.filePath !== undefined && message.line !== undefined && message.column !== undefined) {
                 const uri = vscode.Uri.file(message.filePath);
                 vscode.workspace.openTextDocument(uri).then(doc => {
                     vscode.window.showTextDocument(doc, vscode.ViewColumn.One).then(editor => {
                         // FParsec positions are 1-based; VSCode Position is 0-based
                         const pos = new vscode.Position(
-                            Math.max(0, message.line - 1),
-                            Math.max(0, message.column - 1)
+                            Math.max(0, (message.line as number) - 1),
+                            Math.max(0, (message.column as number) - 1)
                         );
                         editor.selection = new vscode.Selection(pos, pos);
                         editor.revealRange(
@@ -104,7 +117,7 @@ function createOrShowWebviewPanel(context, client) {
     );
 }
 
-function restoreWebviewPanel(context, client) {
+export function restoreWebviewPanel(context: vscode.ExtensionContext, client: LanguageClient): void {
     const layout = loadLayout(context);
     utils.log2Console('Restoring webview layout: ' + JSON.stringify(layout), false);
     if (layout.isOpen) {
@@ -112,19 +125,19 @@ function restoreWebviewPanel(context, client) {
     }
 }
 
-function refreshWebviewData(client) {
+function refreshWebviewData(client: LanguageClient): void {
     if (!currentPanel) {
         return;
     }
-    client.sendRequest('getWebviewData', {}).then(json => {
-        currentPanel.webview.postMessage({ command: 'update', data: json });
-    }).catch(err => {
+    client.sendRequest<string>('getWebviewData', {}).then((json: string) => {
+        currentPanel?.webview.postMessage({ command: 'update', data: json });
+    }).catch((err: unknown) => {
         utils.log2Console('Webview data fetch failed: ' + err, true);
-        currentPanel.webview.postMessage({ command: 'error', message: String(err) });
+        currentPanel?.webview.postMessage({ command: 'error', message: String(err) });
     });
 }
 
-function getWebviewContent(katexJs, katexCss) {
+function getWebviewContent(katexJs: vscode.Uri, katexCss: vscode.Uri): string {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -226,12 +239,12 @@ function getWebviewContent(katexJs, katexCss) {
             { key: 'Line',                label: 'Line',   hidden: true },
             { key: 'Column',              label: 'Column', hidden: true },
         ];
-        
+
         let _rows = [];
         let _sortCol = null;
         let _sortAsc = true;
 
-        // ── Unicode → LaTeX conversion ────────────────────────────────────────
+        // ── Unicode to LaTeX conversion ────────────────────────────────────────
         // Maps every FPL Unicode symbol to its KaTeX equivalent.
         const UNICODE_TO_LATEX = [
             // logical connectives
@@ -255,25 +268,27 @@ function getWebviewContent(katexJs, katexCss) {
         /**
          * Converts a FPL Unicode expression string to a KaTeX-renderable LaTeX string.
          * Inference rules use "/" as numerator/denominator separator and are rendered
-         * as a fraction: \dfrac{premises}{conclusion}.
+         * as a fraction: \\dfrac{premises}{conclusion}.
          *
          * @param {string} expr - the raw statementExpression value from ToJson2()
          * @returns {string}    - a LaTeX string suitable for katex.renderToString()
          */
         function fplToLatex(expr) {
-            const slashIdx = expr.indexOf('/');
+            var slashIdx = expr.indexOf('/');
             if (slashIdx !== -1) {
                 // Inference rule: "premise1, premise2 / conclusion"
-                const num = expr.slice(0, slashIdx).trim();
-                const den = expr.slice(slashIdx + 1).trim();
-                return \`\\\\dfrac{\${applySymbols(num)}}{\${applySymbols(den)}}\`;
+                var num = expr.slice(0, slashIdx).trim();
+                var den = expr.slice(slashIdx + 1).trim();
+                return '\\\\dfrac{' + applySymbols(num) + '}{' + applySymbols(den) + '}';
             }
             return applySymbols(expr);
         }
 
         function applySymbols(str) {
-            let result = str;
-            for (const [unicode, latex] of UNICODE_TO_LATEX) {
+            var result = str;
+            for (var i = 0; i < UNICODE_TO_LATEX.length; i++) {
+                var unicode = UNICODE_TO_LATEX[i][0];
+                var latex = UNICODE_TO_LATEX[i][1];
                 result = result.split(unicode).join(latex);
             }
             return result;
@@ -301,7 +316,7 @@ function getWebviewContent(katexJs, katexCss) {
 
         // ── General helpers ───────────────────────────────────────────────────
         function esc(s) {
-            return String(s ?? '')
+            return String(s == null ? '' : s)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;');
@@ -312,25 +327,25 @@ function getWebviewContent(katexJs, katexCss) {
                 return '<p class="empty">No valid statements found.</p>';
             }
 
-            const visibleCols = COLUMNS.filter(col => !col.hidden);
+            var visibleCols = COLUMNS.filter(function (col) { return !col.hidden; });
 
-            const headers = visibleCols.map(col => {
-                let cls = '';
+            var headers = visibleCols.map(function (col) {
+                var cls = '';
                 if (_sortCol === col.key) { cls = _sortAsc ? ' class="sort-asc"' : ' class="sort-desc"'; }
-                return \`<th\${cls} onclick="sortBy('\${col.key}')">\${esc(col.label)}</th>\`;
+                return '<th' + cls + ' onclick="sortBy(\\'' + col.key + '\\')">' + esc(col.label) + '</th>';
             }).join('');
 
-            const bodyRows = rows.map(row => {
-                const cells = visibleCols.map(col => {
+            var bodyRows = rows.map(function (row) {
+                var cells = visibleCols.map(function (col) {
                     if (col.key === 'statementExpression') {
-                        return \`<td class="expr-cell">\${renderExpr(row[col.key])}</td>\`;
+                        return '<td class="expr-cell">' + renderExpr(row[col.key]) + '</td>';
                     }
-                    return \`<td>\${esc(row[col.key])}</td>\`;
+                    return '<td>' + esc(row[col.key]) + '</td>';
                 }).join('');
-                return \`<tr data-filepath="\${esc(row['FilePath'])}" data-line="\${row['Line']}" data-column="\${row['Column']}">\${cells}</tr>\`;
+                return '<tr data-filepath="' + esc(row['FilePath']) + '" data-line="' + row['Line'] + '" data-column="' + row['Column'] + '">' + cells + '</tr>';
             }).join('');
 
-            return \`<table><thead><tr>\${headers}</tr></thead><tbody>\${bodyRows}</tbody></table>\`;
+            return '<table><thead><tr>' + headers + '</tr></thead><tbody>' + bodyRows + '</tbody></table>';
         }
 
         function sortBy(col) {
@@ -341,9 +356,9 @@ function getWebviewContent(katexJs, katexCss) {
                 _sortAsc = true;
             }
 
-            const sorted = [..._rows].sort((a, b) => {
-                const av = String(a[col] ?? '').toLowerCase();
-                const bv = String(b[col] ?? '').toLowerCase();
+            var sorted = _rows.slice().sort(function (a, b) {
+                var av = String(a[col] == null ? '' : a[col]).toLowerCase();
+                var bv = String(b[col] == null ? '' : b[col]).toLowerCase();
                 if (av < bv) return _sortAsc ? -1 : 1;
                 if (av > bv) return _sortAsc ? 1 : -1;
                 return 0;
@@ -357,8 +372,8 @@ function getWebviewContent(katexJs, katexCss) {
             vscode.postMessage({ command: 'refresh' });
         }
 
-        window.addEventListener('message', event => {
-            const message = event.data;
+        window.addEventListener('message', function (event) {
+            var message = event.data;
             if (message.command === 'update') {
                 document.getElementById('status').textContent =
                     'Last updated: ' + new Date().toLocaleTimeString();
@@ -376,9 +391,9 @@ function getWebviewContent(katexJs, katexCss) {
             }
         });
 
-        // ── Row double-click → navigate in editor ─────────────────────────────
-        document.getElementById('content').addEventListener('dblclick', e => {
-            const tr = e.target.closest('tr[data-filepath]');
+        // ── Row double-click to navigate in editor ─────────────────────────────
+        document.getElementById('content').addEventListener('dblclick', function (e) {
+            var tr = e.target.closest('tr[data-filepath]');
             if (!tr) { return; }
             vscode.postMessage({
                 command: 'navigate',
@@ -391,5 +406,3 @@ function getWebviewContent(katexJs, katexCss) {
 </body>
 </html>`;
 }
-
-module.exports = { createOrShowWebviewPanel, restoreWebviewPanel };

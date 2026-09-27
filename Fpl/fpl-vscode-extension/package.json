@@ -3,7 +3,7 @@
     "displayName": "FPL (Formal Proving Language)",
     "description": "Write mathematics independently of natural languages.",
     "icon": "images/logo.png",
-    "version": "1.7.0",
+    "version": "5.1.1",
     "repository": "https://github.com/bookofproofs/fpl.net",
     "publisher": "bookofproofs",
     "license": "MIT",
@@ -22,12 +22,10 @@
         "language",
         "proving"
     ],
+    "main": "./out/extension.js",
     "activationEvents": [
-        "workspaceContains:**/*.fpl",
-        "onCommand:extension.openFileAtLine",
-        "onCommand:fpl-vscode-extension.showWebview"
+        "workspaceContains:**/*.fpl"
     ],
-    "main": "./extension.js",
     "contributes": {
         "languages": [
             {
@@ -86,7 +84,8 @@
             "explorer": [
                 {
                     "id": "fplTheories",
-                    "name": "FPL Theories"
+                    "name": "FPL Theories",
+                    "icon": "./images/logo.png"
                 }
             ]
         },
@@ -141,14 +140,32 @@
         }
     },
     "scripts": {
-        "lint": "eslint .",
-        "pretest": "npm run lint",
-        "test": "node ./test/runTest.js"
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "check-version-changelog-match": "node ./scripts/check-version-changelog-match.js",
+        "check-debug-flags": "node ./scripts/check-debug-flags.js",
+        "sync-version": "node ./scripts/sync-version.js",
+        "sync-vscode-changelog": "node ./scripts/sync-vscode-changelog.js",
+        "copy-docs": "node ./scripts/copy-docs.js",
+        "copy-ls-dlls": "node ./scripts/copyLsDlls.js",
+        "vscode:prepublish": "npm run check-debug-flags && npm run check-version-changelog-match && npm run sync-version && npm run sync-vscode-changelog && npm run copy-docs && npm run copy-ls-dlls && npm run compile",
+        "lint": "eslint src --ext ts",
+        "pretest": "npm run compile && npm run lint",
+        "test": "node ./out/test/runTest.js"
     },
     "dependencies": {
-        "adm-zip": "latest",
         "katex": "^0.17.0",
-        "tar": "latest",
         "vscode-languageclient": "latest"
-    }
+    },
+    "devDependencies": {
+        "typescript": "^5.4.0",
+        "@types/node": "^20.0.0",
+        "@types/vscode": "^1.81.0",
+        "eslint": "^8.57.0",
+        "@typescript-eslint/parser": "^7.0.0",
+        "@typescript-eslint/eslint-plugin": "^7.0.0"
+    },
+    "extensionDependencies": [
+        "ms-dotnettools.vscode-dotnet-runtime"
+    ]
 }

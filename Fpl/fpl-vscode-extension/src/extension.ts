@@ -1,16 +1,25 @@
 'use strict';
 
-const vscode = require('vscode');
-const { LanguageClient } = require('vscode-languageclient');
-const utils = require('./utils');
-const { createFplTheoriesProvider } = require('./providers');
-const { createOrShowWebviewPanel, restoreWebviewPanel } = require('./webviewPanel');
+import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs';
+import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import * as utils from './utils';
+import { createFplTheoriesProvider } from './providers';
+import { createOrShowWebviewPanel, restoreWebviewPanel } from './webviewPanel';
 
-let client;
-let outputChannel;
+let client: LanguageClient | undefined;
+let outputChannel: vscode.OutputChannel | undefined;
 let activationCancelled = false;
 
-async function activate(context) {
+interface IDotnetAcquireResult {
+    dotnetPath: string;
+}
+
+const DOTNET_ACQUIRE_EXTENSION_ID = 'fpl-vscode-extension';
+const DOTNET_VERSION = '8.0';
+
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
     activationCancelled = false;
 
     if (!outputChannel) {
@@ -26,50 +35,55 @@ async function activate(context) {
     });
 
     try {
-        const platform = process.platform;
-        const arch = process.arch;
-        const runtimeName = platform + '-' + arch;
-        utils.log2Console('running on ' + runtimeName, false);
+        utils.log2Console('acquiring shared .NET ' + DOTNET_VERSION + ' runtime via ms-dotnettools.vscode-dotnet-runtime', false);
 
-        const path = require('path');
-        const relPathToServerDll = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
-        const relPathToDotnetRuntime = path.join(__dirname, 'dotnet-runtimes', runtimeName);
-        const relPathToDotnet = path.join(relPathToDotnetRuntime, 'dotnet');
+        const acquireResult = await vscode.commands.executeCommand<IDotnetAcquireResult>(
+            'dotnet.acquire',
+            { version: DOTNET_VERSION, requestingExtensionId: DOTNET_ACQUIRE_EXTENSION_ID }
+        );
 
-        await utils.acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime);
+        if (!acquireResult?.dotnetPath) {
+            throw new Error('Failed to acquire the .NET runtime via ms-dotnettools.vscode-dotnet-runtime.');
+        }
+
+        const relPathToDotnet = acquireResult.dotnetPath;
+        utils.log2Console('using shared dotnet runtime at ' + relPathToDotnet, false);
 
         if (activationCancelled) {
             return;
         }
 
-        const serverOptions = {
+        const relPathToServerDll = path.join(__dirname, 'FplLsDll', 'FplLS.dll');
+
+        const serverOptions: ServerOptions = {
             run: { command: relPathToDotnet, args: [relPathToServerDll] },
             debug: { command: relPathToDotnet, args: [relPathToServerDll] }
         };
 
-        const clientOptions = { documentSelector: [{ scheme: 'file', language: 'fpl' }] };
+        const clientOptions: LanguageClientOptions = { documentSelector: [{ scheme: 'file', language: 'fpl' }] };
 
         client = new LanguageClient('fpl-vscode-extension', 'FPL Language Server', serverOptions, clientOptions);
 
         const fplTheoriesProvider = createFplTheoriesProvider(client);
 
-        // createTreeView instead of registerTreeDataProvider gives access to
-        // onDidExpandElement / onDidCollapseElement for collapse-state memory.
         const treeView = vscode.window.createTreeView('fplTheories', {
             treeDataProvider: fplTheoriesProvider,
             showCollapseAll: true
         });
 
-        // Track expand/collapse so the state survives a manual refresh.
         context.subscriptions.push(
             treeView.onDidExpandElement(event => {
-                fplTheoriesProvider.markExpanded(event.element.id);
+                if (event.element.id !== undefined) {
+                    fplTheoriesProvider.markExpanded(event.element.id);
+                }
             })
         );
 
         context.subscriptions.push(
             treeView.onDidCollapseElement(event => {
-                fplTheoriesProvider.markCollapsed(event.element.id);
+                if (event.element.id !== undefined) {
+                    fplTheoriesProvider.markCollapsed(event.element.id);
+                }
             })
         );
 
@@ -77,25 +91,22 @@ async function activate(context) {
 
         const config = vscode.workspace.getConfiguration('fplExtension');
         const configJson = JSON.stringify(config, null, 2);
-        const fs = require('fs');
-        const relPathToConfig = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'vsfplconfig.json');
+        const relPathToConfig = path.join(__dirname, 'FplLsDll', 'vsfplconfig.json');
         fs.writeFile(relPathToConfig, configJson, err => {
             if (err) utils.log2Console('Error writing file:' + err.message, true);
         });
 
-        const disposableClient = client.start();
+        await client.start();
 
         const disposableCommand = vscode.commands.registerCommand('fpl-vscode-extension.helloWorld', function () {
             vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
         });
 
-        // Explicit on-demand refresh command — wired to the ⟳ button in
-        // the view title bar via package.json menus/view/title.
         const disposableRefresh = vscode.commands.registerCommand('fpl-vscode-extension.refreshTheories', () => {
             fplTheoriesProvider.refresh();
         });
 
-        const disposableCommand2 = vscode.commands.registerCommand('extension.openFileAtPosition', (filePath, lineNumber, columnNumber) => {
+        const disposableCommand2 = vscode.commands.registerCommand('extension.openFileAtPosition', (filePath: string, lineNumber: number, columnNumber: number) => {
             const openPath = vscode.Uri.file(filePath);
             vscode.workspace.openTextDocument(openPath).then(doc => {
                 vscode.window.showTextDocument(doc).then(editor => {
@@ -108,18 +119,20 @@ async function activate(context) {
         });
 
         const disposableWebview = vscode.commands.registerCommand('fpl-vscode-extension.showWebview', () => {
-            createOrShowWebviewPanel(context, client);
+            if (client) {
+                createOrShowWebviewPanel(context, client);
+            }
         });
 
-        restoreWebviewPanel(context, client);
+        if (client) {
+            restoreWebviewPanel(context, client);
+        }
 
-        // Populate the tree once on activation if an FPL file is already open.
         if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === 'fpl') {
             utils.log2Console('initial treeview refresh', false);
             fplTheoriesProvider.refresh();
         }
 
-        context.subscriptions.push(disposableClient);
         context.subscriptions.push(disposableCommand);
         context.subscriptions.push(disposableCommand2);
         context.subscriptions.push(disposableRefresh);
@@ -133,9 +146,9 @@ async function activate(context) {
     }
 }
 
-function deactivate() {
+export function deactivate(): Thenable<void> | undefined {
     activationCancelled = true;
-    utils.init(null);
+    utils.init(undefined);
 
     if (outputChannel) {
         outputChannel.dispose();
@@ -145,8 +158,3 @@ function deactivate() {
     if (!client) return undefined;
     return client.stop();
 }
-
-module.exports = {
-    activate,
-    deactivate
-};

@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module containing symbol-table nodes that model the FPL <c>cases</c> statement.
 /// </summary>

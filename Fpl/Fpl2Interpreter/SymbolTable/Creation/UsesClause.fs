@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Utilities to evaluate and resolve FPL <c>uses</c> clauses, download or load referenced sources,
 /// update the parsed AST registry and emit diagnostics for ambiguous or invalid references.

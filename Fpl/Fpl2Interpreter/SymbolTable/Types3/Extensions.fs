@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module containing FPL symbol-table node types and helpers that model and interpret
 /// extensions, return statements and related utilities.

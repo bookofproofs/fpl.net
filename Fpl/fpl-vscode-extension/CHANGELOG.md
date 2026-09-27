@@ -1,107 +1,137 @@
 # Change Log
 
-All notable changes to the "fpl-vscode-extension" extension will be documented in this file.
+All notable changes to the VS Code extension **FPL (Formal Proving Language)**
+are documented in this file. For a full list of changes of the **FPL solution**
+(including parser, interpreter, language server, ...),
+see [CHANGELOG.md](https://github.com/bookofproofs/fpl.net/blob/main/CHANGELOG.md).
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to Semantic Versioning (MAJOR.MINOR.PATCH).
 
-## 1.7.0
-* Navigation tree view with symbol table added
-* Some improvements in type signature recognition 
+## [v5.1.1] - 2026-09-25
+### Added
+- **[vscode]** Automate syncing and checking vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files
 
-## 1.6.3
-* Bugfix missing updating current theory diagnostics and vscode object explorer
+## [v5.1.0] - 2026-09-21
+### Changed
+- **[vscode]** Converted the `fpl-vscode-extension` folder into a proper `.esproj` project within the solution; migrated `extension.js`/`webViewPanel.js` to TypeScript; adopted `@vscode/dotnet-runtime` (Microsoft's official acquisition API) instead of a custom dotnet download mechanism.
+### Added
+- **[vscode]** Automated pre-publish step to copy language server DLLs into the VS Code extension; `launch.json` for extension debugging.
+### Fixed
+- **[vscode]** `.gitignore` and `.vscodeignore` corrected for the new TypeScript-based extension; extension compile errors resolved (`tsconfig.json` `moduleResolution: bundler`); removed undefined command from `package.json`.
 
-## 1.6.2
-* Bugfixes related to VSCode navigation and error diagnostics
+## [v5.0.2] - 2026-08-22
+### Fixed
+- **[vscode]** Replaced deprecated `url.resolve` with the WHATWG URL API to avoid activation race conditions.
 
-## 1.6.0
-* FPL interpreter (alpha version)
+## [v5.0.1] - 2026-07-06
+### Added
+- **[vscode]** New webview panel showing valid statements as a sortable, KaTeX-rendered table (including rules of inference), replacing the earlier JSON-based tree view for this feature.
+- **[vscode]** Double-click navigation from the valid-statement table to the corresponding source location; window layout persistence for the panel; a dedicated "FPL" command submenu.
+### Changed
+- **[vscode]** Tree view now refreshes without arbitrarily collapsing nodes, preserving user-expanded state where possible.
 
-## 1.5.2-4
-* Bugfix spawn UNKNOWN
+## [v4.6.0] - 2026-04-21
+### Added
+- **[vscode]** Tree provider and request handler for retrieving valid statements from the language server; markdown tooltips for expression previews.
 
-## 1.5.1
-* Migration to .NET 8.0
-* Bugfix duplicates in auto-completion items 
+## [v3.0.0] - 2025-08-17
+### Fixed
+- **[vscode]** Fixed downloading of the redirected dotnet runtime library in the extension.
 
-## 1.5.0
-* Contains the newest FPL parser 
-* Allows auto-completion for user-defined mathematical symbols
+## [v1.8.0] - 2024-11-21
+### Fixed
+- **[vscode]** Fixed disappearing symbol table while navigating the tree view; added tooltips to the tree view.
 
-## 1.4.9
-* Gif image added
+## [v1.7.0] - 2024-11-18
+### Added
+- **[vscode]** Navigation tree view with colors and icons, backed by the new symbol table.
+### Changed
+- **[vscode]** Removed `Scope` sub-nodes from the tree view for a cleaner presentation.
+### Fixed
+- **[vscode]** Tree view rendering bug; colors interfering with debug console logs.
 
-## 1.4.8
-* Minor Bugfixes in Parser and Language Server 
+## [v1.6.3] - 2024-10-03
+### Added
+- **[vscode]** Type info shown in the VS Code object explorer; main theory marked in the explorer.
 
-## 1.4.7
-* CHANGELOG and README for FPL extension updated
+## [v1.6.2] - 2024-09-29
+### Fixed
+- **[vscode]** Missing syntax-error diagnostics display; README updated.
 
-## 1.4.6
-* FPL support for user-defined prefix, postfix, and infix notation for mathematical operators in expressions.
+## [v1.6.0] - 2024-09-09
+### Added
+- **[vscode]** Tree view for symbol table navigation; configuration properties (`vsfplconfig.json`).
 
-## 1.4.5
-* Bugfixes in the syntax of referencing identifiers in proofs and corollaries
+## [v1.5.4] - 2024-03-21
+### Fixed
+- **[vscode]** `spawn UNKNOWN` error in the extension.
 
-## 1.4.4
-* Bugfixes in the syntax of indexed and dotted predicates
-* Disambiguation of parent-class calls and indexed predicates by introducing the new keyword base.
+## [v1.5.1] - 2024-03-03
+### Fixed
+- **[vscode]** Duplicate items in auto-completion.
 
-## 1.4.3
-* Additional keyword bydef
+## [v1.5.0] - 2024-02-03
+### Added
+- **[vscode]** Auto-completion for infix, prefix, postfix, and user-defined mathematical/object symbols.
 
-## 1.4.2
-* Minor bugfixes
+## [v1.4.1] - 2023-11-17
+### Added
+- **[vscode]** Equality snippet.
+### Fixed
+- **[vscode]** "Exists n-times" snippet; `getLineOffset` bugfix.
 
-## 1.4.1
-* Minor bugfixes
+## [v1.4.0] - 2023-11-17
+### Added
+- **[vscode]** Syntactical autocompletion service.
+- **[vscode]** Syntax highlighting for argument identifiers and code markdown; code-example highlighting and insertions in comments.
+### Fixed
+- **[vscode]** Numerous bugfixes across autocompletion for axioms, definitions, theorems, lemmas, conjectures, properties, proofs, corollaries, quantors, and delegates.
 
-## 1.4.0
-* Syntactical autocompletion service added
-* Syntax-Highlighting for argument identifiers and code markdown added
-* Minor bugfixes in the FPL grammar for argument identifiers and 'assume' arguments  
+## [v1.2.9] - 2023-09-30
+### Fixed
+- **[vscode]** Improved display of fatal errors.
 
-## 1.3.0
-* Rewrite error recovery / diagnostics
+## [v1.2.7] - 2023-09-08
+### Added
+- **[vscode]** Support for standard color themes.
+### Fixed
+- **[vscode]** Extension version-number display bug.
 
+## [v1.2.5] - 2023-09-06
+### Fixed
+- **[vscode]** Syntax highlighting for comments.
 
-## 1.2.9, 1.2.10
-* Update DLL library for the Language Server 
+## [v1.2.4] - 2023-09-06
+### Fixed
+- **[vscode]** Syntax highlighting for comments.
 
-## 1.2.8
-- Support for standard color themes
+## [v1.2.3] - 2023-09-06
+### Fixed
+- **[vscode]** Syntax highlighting for comments.
 
-## 1.2.7
-- Update FPL Language Server to reflect FPL grammar 2.4.2
+## [v1.2.2] - 2023-09-05
+### Fixed
+- **[vscode]** Synchronization of install and start processes.
 
-## 1.2.6
-- Correcting syntax highlighting issues for comments
+## [v1.2.1] - 2023-09-04
+### Fixed
+- **[vscode]** Logging and installation issues, including excessive `node_modules` exclusions.
 
-## 1.2.2, 1.2.3, 1.2.4, 1.2.5
-- Logging and installation issues fixed
+## [v1.2.0] - 2023-09-03
+### Added
+- **[vscode]** Dotnet runtimes for Windows, Linux, and macOS x64, downloaded on demand rather than bundled with the extension.
+### Changed
+- **[vscode]** `activationEvents` added to suppress `vsce` packaging errors; release notes updated.
 
-## 1.2.1
-- Diagnostics are now not mocked but come directly from the FPL parser.
-- However, the parser has still no error recovery added and you will see at most one syntax error per .fpl file.
+## [v1.1.1] - 2023-09-03
+### Added
+- **[vscode]** Bundled dotnet runtime for Windows x64 and compiled DLL for the initial FPL Language Server.
 
-## 1.2.0
-- Dotnet runtimes for windows, linux and macOS x64 
-- Extension does not include a dotnet runtime, instead, it will be downloaded on demand on a particular platform
+## [v1.0.1] - 2023-08-31
+### Added
+- **[vscode]** Extension icon, description, categories, and keywords.
 
-## 1.1.1
-- inclusion of a dotnet runtime for windows x64 and a compiled dll lib for initial FPL Language Server 
-
-## 1.1.0
-
-- FPL Language Client and Server added and try to start when an fpl file is open. 
-- However, FPL Server will fail, since the path to dll is not correct
-
-## 1.0.1
-
-- Icon addes
-- Description added
-- Categories amended
-- Keywords added
-## 1.0.0
-
-- Initial release with syntax highlighting
+## [v1.0.0] - 2023-08-29
+### Added
+- **[vscode]** Initial release with syntax highlighting.

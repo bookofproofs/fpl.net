@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module containing FPL symbol-table node types that model and interpret the
 /// <c>mcases</c> statement (map/case expressions).

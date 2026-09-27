@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Provides specialized evaluators for AST nodes related to FPL definitions and definition-related
 /// blocks (classes, predicates, functional terms, instances, constructors, mappings and properties).

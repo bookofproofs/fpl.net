@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Primitive identifiers, keyword and string constants used by the parser and
 /// the error-recovery subsystem.

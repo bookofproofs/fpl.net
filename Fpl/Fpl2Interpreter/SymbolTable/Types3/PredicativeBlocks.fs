@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module containing predicative block node implementations for axioms, theorems,
 /// lemmas, propositions, corollaries and conjectures in the symbol table.

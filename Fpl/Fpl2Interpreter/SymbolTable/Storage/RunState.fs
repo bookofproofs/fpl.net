@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// This module contains types modeling the storage memory used to separate the
 /// scope of called FPL nodes such as functions, constructors, predicates, etc.

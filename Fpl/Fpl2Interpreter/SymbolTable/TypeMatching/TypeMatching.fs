@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Utilities to compare and match FPL types used by the interpreter's symbol table.
 /// </summary>

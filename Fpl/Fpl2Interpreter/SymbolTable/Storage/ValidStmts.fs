@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// Module containing classes used to store valid statements globally in the Fpl2Interpreter namespace.
 /// </summary>

@@ -1,5 +1,3 @@
-(* Copyright (c) 2021+ bookofproofs See LICENSE in the project root for license terms. *)
-
 /// <summary>
 /// This module contains all functions used in the Fpl2Interpreter namespace
 /// for type and consistency checking.
