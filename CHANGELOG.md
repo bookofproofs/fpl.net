@@ -14,6 +14,8 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[other]** - something else was changed, like documentation, test suite, .net version, etc.
 
 ## [Unreleased]
+### Added
+- **[vscode]** Minor fixes in docs (e.g., broken links)
 
 
 ## [v5.1.1] - 2026-09-27
