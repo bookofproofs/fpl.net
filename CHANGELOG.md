@@ -25,8 +25,10 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[interpreter]** Split the monolithic `Fpl` project into separate libraries: `Fpl0Base`, `Fpl1Parser`, `Fpl2Interpreter`.
 - **[language-server]** Moved `FplLSLib` into a new `Fpl3LanguageServer` project; replaced the C# language server implementation with an F#-based one (migrated `TextDocumentSyncHandler`, `FplLsTraceLogger`, `DiagnosticHandler`, `TextPositions`, and the completion handler to F#).
 - **[interpreter]** Consolidated test projects (`FplParser.Tests`, `FplInterpreter.Tests`, `FplLSTests`, `TestFplLsLib`, `TestConfig`) into `TestFpl1Parser`, `TestFpl2Interpreter`, and `TestFpl3LanguageServer`.
-- **[vscode]** Converted the `fpl-vscode-extension` folder into a proper `.esproj` project within the solution; migrated `extension.js`/`webViewPanel.js` to TypeScript; adopted `@vscode/dotnet-runtime` (Microsoft's official acquisition API) instead of a custom dotnet download mechanism.
+- **[vscode]** Migrated the extension from javascript to typescript; adopted `@vscode/dotnet-runtime` (Microsoft's official acquisition API) instead of a custom dotnet download mechanism.
+- **[other]** Converted the `fpl-vscode-extension` folder into a proper `.esproj` project within the solution.
 - **[other]** Added an `fsdocs`/DocFX-based documentation site published to GitHub Pages as a subfolder, separate from the repository `README.md` landing page.
+
 ### Added
 - **[vscode]** Automated pre-publish step to copy language server DLLs into the VS Code extension; `launch.json` for extension debugging.
 ### Fixed
