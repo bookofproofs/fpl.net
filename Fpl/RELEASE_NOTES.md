@@ -12,7 +12,36 @@ A major leap since v1.7.0: a complete interpreter overhaul, a vastly expanded di
 ### Parser
 - User-defined prefix/postfix/infix operators and mathematical symbols, infix expressions without mandatory parentheses, and Unicode math notation (`∃`, `∀`, `¬`, `∃!`, dotted logical connectives).
 - Numerous syntax simplifications (optional definition blocks/inherited types, simplified constructors/quantifiers) and new keywords (`base`, `bydef`, `val`/`validity`).
-- A major grammar rewrite with stricter whitespace control and a much-improved regex-based error-recovery/diagnostics engine.
+- A major grammar rewrite with stricter whitespace control and a much-improved regex-based error-recovery/diagnostics engine:
+  1. No more extra blocks for `uses`, `inference`, `theory`, `localization`; each building block uses a unique prefix keyword.
+  2. In-block variable type declarations and statements are wrapped with `dec` / `;`.
+  3. Classes allow multiple inheritance (from class/object types only).
+  4. Class constructors may call parental constructors using `base.ParentClass(...)`.
+  5. Explicit `intrinsic` keyword for intrinsic/empty definitions. Intrisic defintions may be simplified further by omitting a block `{...}` entirely.
+  6. `assert` is a statement (not a predicate in places where a predicate is expected).
+  7. `for` replaces `loop`/`range` with `for i in x` and `for i is <type>`.
+  8. New quantifier keyword `exn` for 'exists N' multi-occurrence forms (disambiguation).
+  9. In-built equality predicate using infix `=` enclosed by parentheses: `(x = y)` and chained equalities.
+  10. Named variable declarations in quantifiers `all x:Type (...)`.
+  11. Ranges removed from generic square-bracket usage; coordinate lists remain.
+  12. `delegate` prefix replaces `py`; delegate names regex expanded.
+  13. Simplified extension syntax using `ext` definitions and `@` tokens; indices now use `[...]`.
+  14. Simplified proofs and justification syntaxes.
+  15. `cases` branch syntax simplified to use `|` and default `?`.
+  16. New `constructor` (short `ctor`) keyword for constructors.
+  17. Better recognition of misplaced keywords and generics.
+  18. Localizations separators adjusted to avoid parse ambiguities.
+  19. `property` keyword replaces `mandatory`, no more `optional` properties. Optionality can be configured via inheritance chains.
+  20. Theorem-like statements use predicate blocks (no separate premise/conclusion blocks if unnecessary).
+  21. File-name driven namespaces; each `.fpl` file acts as a namespace and files must end with `;`.
+  22. Extended justification keywords, e.g. `bydef`, `byax`, `byinf`, `bycor`.
+  23. Stricter usage of qualifiers, coordinates and ranges.
+  24. User-defined infix/prefix/postfix/object symbols supported.
+  25. Self-containment: declaration order now matters (implementation- and parser-level facilitation).
+  26. `parent` replaces earlier `@self` semantics; `self` remains positional.
+  27. `and`, `or`, `xor` changed from n-ary to binary.
+      28. Error recovery capabilities added.
+
 
 ### Interpreter
 - Complete architectural overhaul: the `FplBlockType` enum was replaced by a polymorphic `FplValue`/`FplGenericNode` class hierarchy, powering a real **`Run`** execution engine for actual proof evaluation.

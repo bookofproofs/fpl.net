@@ -25,8 +25,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplCli", "FplCli\FplCli.fsp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E632B8EE-C496-41C1-8DC1-A9F84023624C}"
 	ProjectSection(SolutionItems) = preProject
-		docs\DocuFplGrammarParserEvolution.md = docs\DocuFplGrammarParserEvolution.md
-		docs\DocuFplGrammarPocShiftFromPythonToFSharp.md = docs\DocuFplGrammarPocShiftFromPythonToFSharp.md
 		docs\index.md = docs\index.md
 		docs\Intro.md = docs\Intro.md
 	EndProjectSection

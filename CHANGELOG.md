@@ -30,9 +30,12 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[vscode]** Migrated the extension from javascript to typescript; adopted `@vscode/dotnet-runtime` (Microsoft's official acquisition API) instead of a custom dotnet download mechanism.
 - **[other]** Converted the `fpl-vscode-extension` folder into a proper `.esproj` project within the solution.
 - **[other]** Added an `fsdocs`/DocFX-based documentation site published to GitHub Pages as a subfolder, separate from the repository `README.md` landing page.
+- **[parser]** Simplified infix-operators: infix expressions no longer have to be put into parentheses to be parsed correctly.
 
 ### Added
 - **[vscode]** Automated pre-publish step to copy language server DLLs into the VS Code extension; `launch.json` for extension debugging.
+- **[parser]** Error recovery capabilities added; syntax errors are now localized inside each FPL building block, with recovery starting after each block that has a syntax error.
+
 ### Fixed
 - **[other]** Numerous CI/CD fixes for the DocFX/`fsdocs` GitHub Pages workflow (deploy environment, working directory, multiline YAML parameters, artifact-only builds to avoid races with the standard Pages workflow).
 - **[vscode]** `.gitignore` and `.vscodeignore` corrected for the new TypeScript-based extension; extension compile errors resolved (`tsconfig.json` `moduleResolution: bundler`); removed undefined command from `package.json`.
@@ -144,9 +147,13 @@ Each entry is tagged with the part(s) of the solution it affects:
 ### Added
 - **[interpreter]** `IHasDimensions` interface and array-type support (`FplVariableArray`, replacing `FplVariableMany`/`FplVariableMany1`); removed extension types from the syntax to simplify the grammar.
 - **[interpreter]** `SIG08`–`SIG11` diagnostics for signature/argument mismatches.
+- **[parser]** `mcases` keyword allowing cases to be predicates; explicit dimension(s) declarations for variadic variable types (type `*`); more explicit justification items in proofs (`by corollary`, `by proof reference`, `by definition`).
+### Changed
+- **[parser]** Further syntax simplifications: removed parameters from theorem-like statements, axioms, and reference rules; removed templates as class-type declarations; removed nested bracketed types; removed "at least one" variadic variable type (type `+`).
 ### Fixed
 - **[interpreter]** `SIG03`, `SIG06`, `VAR06` diagnostics corrected for extensions and array assignments.
-
+- **[parser]** Bugfixes and refactoring around significant spaces, literals, error recovery, auto-completion, and positioning.
+- 
 ## [v3.6.0] - 2025-11-08
 ### Added
 - **[interpreter]** `ID020`–`ID027` diagnostics (duplicate detection, invalid references, missing implementations).
@@ -332,9 +339,12 @@ Each entry is tagged with the part(s) of the solution it affects:
 ### Changed
 - **[other]** CHANGELOG and README for the FPL extension updated.
 - **[parser]** Refactored `predicateList1`.
+- **[parser]** Removed the necessity to put negation and quantifier predicates into parentheses; bugfixes of significant spaces in the syntax.
+### Added
+- **[parser]** Making user-defined infix and postfix notations possible.
 ### Removed
 - **[parser]** Removed indexed predicates.
-
+- 
 ## [v1.4.6] - 2023-12-03
 ### Added
 - **[parser]** Support for user-defined prefix, postfix, and infix notation for mathematical operators in expressions.
