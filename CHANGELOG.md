@@ -15,7 +15,7 @@ Each entry is tagged with the part(s) of the solution it affects:
 
 ## [Unreleased]
 ### Added
-- **[vscode]** Minor fixes in docs (e.g., broken links)
+- **[vscode]** Minor fixes in docs (e.g., broken links, and consistency check last CHANGE and RELEASE versions and dates)
 
 
 ## [v5.1.1] - 2026-09-27
