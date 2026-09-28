@@ -61,7 +61,8 @@ function parseVersions(lines) {
 
         const bulletMatch = line.match(BULLET_TAG_REGEX);
         if (bulletMatch && currentSection) {
-            currentSection.bullets.push({ tag: bulletMatch[1], line });
+            const strippedLine = line.replace(BULLET_TAG_REGEX, '-').replace(/^- \s+/, '- ');
+            currentSection.bullets.push({ tag: bulletMatch[1], line: strippedLine });
         }
     }
 

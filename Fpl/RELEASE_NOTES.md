@@ -6,7 +6,7 @@ This page summarizes the notable releases of the **FPL solution** (parser, inter
 
 ___
 
-## [5.1.1] - 2026-09-25
+## [v5.1.1] - 2026-09-27
 A major leap since v1.7.0: a complete interpreter overhaul, a vastly expanded diagnostics system, a much richer FPL syntax, and the VS Code extension's transformation into a full mathematical IDE.
 
 ### Parser
@@ -31,7 +31,7 @@ A major leap since v1.7.0: a complete interpreter overhaul, a vastly expanded di
 ### Other
 - Added an `fsdocs`/DocFX documentation site on GitHub Pages; numerous CI/CD improvements.
 
-## [1.7.0] - 2024-11-18
+## [v1.7.0] - 2024-11-18
 Introduced the first navigation-oriented tooling for the VS Code extension, backed by a new symbol table, alongside substantial diagnostics and signature-matching refinements.
 
 ### Parser
@@ -51,7 +51,7 @@ Introduced the first navigation-oriented tooling for the VS Code extension, back
 ### Other
 - Upgraded to OmniSharp 0.17.0 and refreshed NuGet packages.
 
-## [1.6.0] - 2024-09-09
+## [v1.6.0] - 2024-09-09
 Introduced the first alpha version of the FPL interpreter, a substantially expanded diagnostics system, the initial VS Code tree view, and migration to .NET 8.0.
 
 ### Interpreter
@@ -68,7 +68,7 @@ Introduced the first alpha version of the FPL interpreter, a substantially expan
 ### Other
 - Migrated to .NET 8.0; renamed registry/library projects; simplified diagnostics code; removed obsolete `.runsettings`.
 
-## [1.5.0] - 2024-02-03
+## [v1.5.0] - 2024-02-03
 Brought a much richer FPL grammar for user-defined mathematical notation and infix operators, with corresponding autocompletion and highlighting improvements.
 
 ### Parser
@@ -85,7 +85,7 @@ Brought a much richer FPL grammar for user-defined mathematical notation and inf
 ### Other
 - Reorganized localization strings; added a README/extension-listing GIF; updated CHANGELOG/README.
 
-## [1.4.0] - 2023-11-17
+## [v1.4.0] - 2023-11-17
 Introduced the VS Code extension's syntactical autocompletion service, along with new syntax-highlighting features.
 
 ### Parser
@@ -95,7 +95,7 @@ Introduced the VS Code extension's syntactical autocompletion service, along wit
 - New syntactical autocompletion service and syntax highlighting for argument identifiers, markdown, and code examples.
 - Numerous autocompletion bugfixes across most FPL block types.
 
-## [1.3.0] - 2023-11-04
+## [v1.3.0] - 2023-11-04
 Brought a major rewrite of the parser's error-recovery and diagnostics engine, alongside grammar updates and several extension polish fixes.
 
 ### Parser
@@ -110,7 +110,7 @@ Brought a major rewrite of the parser's error-recovery and diagnostics engine, a
 - New support for standard color themes.
 - Fixed fatal-error display, version-number display, comment highlighting, install/start synchronization, and logging issues.
 
-## [1.2.0] - 2023-09-03
+## [v1.2.0] - 2023-09-03
 Marked the extension's earliest foundational milestones: the first syntax-highlighting release and FPL Language Client/Server integration.
 
 ### Parser
