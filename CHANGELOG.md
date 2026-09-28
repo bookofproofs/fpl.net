@@ -1,4 +1,4 @@
-# Change Log
+# Changelog
 
 All notable changes to the **FPL solution** (parser, interpreter, language server, and VS Code extension) are documented in this file.
 

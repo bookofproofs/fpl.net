@@ -6,7 +6,7 @@ This page summarizes the notable releases of the **FPL solution** (parser, inter
 
 ___
 
-## [5.1.1] - 2026-09-25
+## [5.1.1] - 2026-09-27
 A major leap since v1.7.0: a complete interpreter overhaul, a vastly expanded diagnostics system, a much richer FPL syntax, and the VS Code extension's transformation into a full mathematical IDE.
 
 ### Parser
