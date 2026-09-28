@@ -29,7 +29,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E632B8EE-C
 		docs\DocuFplGrammarPocShiftFromPythonToFSharp.md = docs\DocuFplGrammarPocShiftFromPythonToFSharp.md
 		docs\index.md = docs\index.md
 		docs\Intro.md = docs\Intro.md
-		docs\RELEASE_NOTES.md = docs\RELEASE_NOTES.md
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplLS", "FplLS\FplLS.fsproj", "{E45713AD-1DC0-4FFF-8FB6-EA67F65F651E}"
