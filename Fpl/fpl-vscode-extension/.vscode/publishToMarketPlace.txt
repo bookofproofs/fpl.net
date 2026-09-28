@@ -33,5 +33,7 @@ npx vsce ls
 
 4)
 When finally publishing the extension, run
-vsce package
-vsce publish
+npx vsce verify-pat bookofproofs
+npm run package
+npm run publish
+

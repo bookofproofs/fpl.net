@@ -18,8 +18,9 @@ It comes with a VS Code extension that enables you to make use of advantages of 
 
 ## Further resources
 
+- There is an [API documentation](https://bookofproofs.github.io/fpl.net).
 - For a more detailed feature list see [RELEASE NOTES](./Fpl/RELEASE_NOTES.md).
-- For a full change log see the [CHANGELOG](./CHANGELOG.md).
+- For a full change log see the [CHANGELOG](./CHANGELOG.md)
 - Contributions are wellcome: Read our [CONTRIBUTING.md](./CONTRIBUTING.md) guidelines, contribute, and attribute yourself in our [CONTRIBUTORS.md](./CONTRIBUTORS.md) list. 
 - We also use third-party code: See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) guidelines, contribute, and attribute yourself in our [CONTRIBUTORS.md](./CONTRIBUTORS.md) list. 
 - There is also an [FPL Channel](https://www.youtube.com/@bookofproofs "FPL Channel") on YouTube devoted to the FPL language.

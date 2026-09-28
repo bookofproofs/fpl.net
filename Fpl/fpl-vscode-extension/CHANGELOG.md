@@ -8,9 +8,9 @@ see [CHANGELOG.md](https://github.com/bookofproofs/fpl.net/blob/main/CHANGELOG.m
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to Semantic Versioning (MAJOR.MINOR.PATCH).
 
-## [v5.1.1] - 2026-09-25
+## [v5.1.1] - 2026-09-27
 ### Added
-- **[vscode]** Automate syncing and checking vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files
+- **[vscode]** New release 5.1.1, automate syncing and checking vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files
 
 ## [v5.1.0] - 2026-09-21
 ### Changed

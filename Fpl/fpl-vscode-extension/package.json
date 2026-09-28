@@ -151,19 +151,22 @@
         "vscode:prepublish": "npm run check-debug-flags && npm run check-version-changelog-match && npm run sync-version && npm run sync-vscode-changelog && npm run copy-docs && npm run copy-ls-dlls && npm run compile",
         "lint": "eslint src --ext ts",
         "pretest": "npm run compile && npm run lint",
-        "test": "node ./out/test/runTest.js"
+        "test": "node ./out/test/runTest.js",
+        "package": "vsce package",
+        "publish": "vsce publish"
     },
     "dependencies": {
         "katex": "^0.17.0",
         "vscode-languageclient": "latest"
     },
     "devDependencies": {
-        "typescript": "^5.4.0",
         "@types/node": "^20.0.0",
         "@types/vscode": "^1.81.0",
-        "eslint": "^8.57.0",
+        "@typescript-eslint/eslint-plugin": "^7.0.0",
         "@typescript-eslint/parser": "^7.0.0",
-        "@typescript-eslint/eslint-plugin": "^7.0.0"
+        "@vscode/vsce": "^4.0.0",
+        "eslint": "^8.57.0",
+        "typescript": "^5.4.0"
     },
     "extensionDependencies": [
         "ms-dotnettools.vscode-dotnet-runtime"
