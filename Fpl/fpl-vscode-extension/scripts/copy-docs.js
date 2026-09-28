@@ -15,10 +15,6 @@ const repoRoot = path.resolve(solutionDir, '..');
 // file (relative to the extension root).
 const filesToCopy = [
     {
-        source: path.join(repoRoot, 'RELEASE_NOTES.md'),
-        target: path.join(solutionDir, 'docs', 'RELEASE_NOTES.md')
-    },
-    {
         source: path.join(repoRoot, 'README.md'),
         target: path.join(extensionRoot, 'README.md')
     },

@@ -11,9 +11,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\CODE_OF_CONDUCT.md = ..\CODE_OF_CONDUCT.md
 		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
 		..\CONTRIBUTORS.md = ..\CONTRIBUTORS.md
+		Directory.Build.props = Directory.Build.props
+		..\.github\workflows\docs.yml = ..\.github\workflows\docs.yml
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
-		..\RELEASE_NOTES.md = ..\RELEASE_NOTES.md
+		RELEASE_NOTES.md = RELEASE_NOTES.md
 		..\styles\site.css = ..\styles\site.css
 	EndProjectSection
 EndProject

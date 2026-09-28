@@ -14,7 +14,7 @@ Source files should not duplicate the full license text. Instead, each source fi
 
 For your own contribution, attribute yourself in our [CONTRIBUTORS.md](./CONTRIBUTORS.md) file.
 
-If you use third party code, attribute it in our [THIRD_PARTY_NOTICE.md](./THIRD_PARTY_NOTICE.md) file.
+If you use third party code, attribute it in our [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) file.
 
 Why this approach?
 
