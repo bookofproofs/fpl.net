@@ -103,10 +103,13 @@ In this version, the parsers, AST annotations and unit test were added for the f
 * Axioms
 * Constructors
 
-%^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^%
+-------------------------------------
+
 Find above the change log of the new approach 
 based on .NET (combined F# grammar and parser) 
-# -------------------------------------
+
+-------------------------------------
+
 Find below the change log of the original FPL grammar version based on python and the tatsu parser generator.
 Please see also [DocuFplGrammarPocShiftFromPythonToFSharp.md](https://github.com/bookofproofs/fpl.net/blob/main/Fpl/Fpl/DocuFplGrammarPocShiftFromPythonToFSharp.md) for more details.
 
