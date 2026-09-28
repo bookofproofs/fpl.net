@@ -8,7 +8,7 @@
         <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
         <FileVersion>$(VersionPrefix)</FileVersion>
         <InformationalVersion>$(Version)</InformationalVersion>
-        <FplIsOffline>false</FplIsOffline>
+        <FplIsOffline>true</FplIsOffline>
         <FplDebugModeParser>false</FplDebugModeParser>
         <FplDebugModeInterpreter>false</FplDebugModeInterpreter>
     </PropertyGroup>
