@@ -13,6 +13,7 @@
         <Compile Include="Formatting.fs" />
         <Compile Include="Main.fs" />
         <Compile Include="Trivia.fs" />
+        <Compile Include="TrivaMap.fs" />
     </ItemGroup>
 
     <ItemGroup>
