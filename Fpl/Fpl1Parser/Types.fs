@@ -216,14 +216,3 @@ type Ast =
     | ErrorSyntax of Positions * string 
     | ErrorSyntaxBacktracking of Positions * string 
     | ErrorSyntaxChain of (Positions * Position) * (string * string)
-
-
-
-    
-
-
-
-
-
-
-

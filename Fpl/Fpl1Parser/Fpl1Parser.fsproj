@@ -12,6 +12,7 @@
         <Compile Include="Grammar.fs" />
         <Compile Include="Formatting.fs" />
         <Compile Include="Main.fs" />
+        <Compile Include="Trivia.fs" />
     </ItemGroup>
 
     <ItemGroup>
