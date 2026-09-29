@@ -340,3 +340,18 @@ let getErrorNodes (errorMsg:string) origLines origLength =
         else
             Ast.ErrorSyntaxChain(((pos, pos), maxPos), (collapseExpectingBlock errMsg, $"{chainId}.{(i+1).ToString()}"))
     )
+
+/// <summary>
+/// Pretty-prints an FPL abstract syntax tree back into canonically formatted FPL source text,
+/// following the project's indentation and spacing conventions.
+/// </summary>
+/// <param name="indentSize">Number of spaces used per indentation level.</param>
+/// <param name="ast">Root AST node(s) to format.</param>
+/// <returns>Canonically formatted FPL source code.</returns>
+/// <remarks>Reuses fplParser (already error-tolerant) to get Ast list from the buffer text — this means formatting works even for a syntax error code.
+///</remarks>
+let prettyPrint (indentSize: int) (asts: Ast list) : string =
+    // Walk the Ast union (Fpl1Parser.Types.Ast), emitting text with a StringBuilder,
+    // tracking indentation depth and applying the same style used elsewhere
+    // (block braces, statement separators, etc.)
+    failwith "TODO: implement AST-driven pretty printer"

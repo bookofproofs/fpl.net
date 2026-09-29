@@ -48,6 +48,7 @@
         <Compile Include="ServiceAutoCompletion\ItemChoices.fs" />
         <Compile Include="ServiceAutoCompletion\Main.fs" />
         <Compile Include="ServiceAutoCompletion\Handler.fs" />
+        <Compile Include="ServiceFormatting\Handler.fs" />
     </ItemGroup>
 
     <ItemGroup>
