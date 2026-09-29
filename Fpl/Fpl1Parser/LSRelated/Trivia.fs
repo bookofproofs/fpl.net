@@ -14,7 +14,7 @@
 /// and in <c>Fpl2Interpreter.SymbolTable.Creation.Main.eval</c> to make the two traversals easy to
 /// compare and keep in sync as the grammar evolves.
 /// </remarks>
-module Fpl1Parser.Trivia
+module Fpl1Parser.LSRelated.Trivia
 open System.Collections.Generic
 open Fpl1Parser.Types
 

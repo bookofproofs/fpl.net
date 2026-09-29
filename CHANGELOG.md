@@ -16,7 +16,8 @@ Each entry is tagged with the part(s) of the solution it affects:
 ## [Unreleased]
 ### Added
 - **[vscode]** Minor fixes in docs (e.g., broken links, and consistency check last CHANGE and RELEASE versions and dates)
-- **[language-server]** Start formatting service by adding an AST traversal utility `collectPositions` to find out "what nodes exist and where in FPL code" 
+- **[parser]** Add utities supporting formatting service (AST traversal utility `collectPositions`, `TriviaMap` to attach comments from FPL code in to AST nodes) 
+- **[language-server]** Add a and hook-up an initial formatting service for FPL 
 
 ## [v5.1.1] - 2026-09-27
 ### Added

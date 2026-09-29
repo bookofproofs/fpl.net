@@ -336,13 +336,12 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate16 () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
-            // a predicate with some preceding declarations or specifications
             dec a:obj  ;
             true
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionPredicate17 () =

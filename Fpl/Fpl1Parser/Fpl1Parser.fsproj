@@ -11,9 +11,12 @@
         <Compile Include="Basic.fs" />
         <Compile Include="Grammar.fs" />
         <Compile Include="Formatting.fs" />
+        <Compile Include="LSRelated\CommentLexer.fs" />
+        <Compile Include="LSRelated\Trivia.fs" />
+        <Compile Include="LSRelated\TrivaMap.fs" />
+        <Compile Include="LSRelated\Doc.fs" />
+        <Compile Include="LSRelated\PrettyPrint.fs" />
         <Compile Include="Main.fs" />
-        <Compile Include="Trivia.fs" />
-        <Compile Include="TrivaMap.fs" />
     </ItemGroup>
 
     <ItemGroup>

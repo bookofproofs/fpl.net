@@ -8,8 +8,14 @@ open OmniSharp.Extensions.LanguageServer.Protocol.Server
 open Fpl0Base.Errors.Diagnostics
 open Fpl3LanguageServer.Buffers.BuffMgr
 open Fpl3LanguageServer.Buffers.Logging
+open Fpl3LanguageServer.Buffers.TextPos
 open Fpl1Parser.Main
-open Fpl1Parser.Formatting
+open System.Collections.Generic
+open Fpl1Parser.Types
+open Fpl1Parser.LSRelated.CommentLexer
+open Fpl1Parser.LSRelated.Trivia
+open Fpl1Parser.LSRelated.TriviaMap
+open Fpl1Parser.LSRelated.PrettyPrint
 
 /// <summary>
 /// Handles textDocument/formatting requests, delegating to the FPL pretty-printer
@@ -37,13 +43,29 @@ type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferMan
                     let originalText = buffer.ToString()
                     let indentSize =
                         if request.Options.InsertSpaces then int request.Options.TabSize else 4
-                    let asts, _wasFullyParsed = fplParser originalText
-                    let formattedText = prettyPrint indentSize asts
-                    let lines = originalText.Split('\n')
-                    let lastLine = lines.Length - 1
-                    let lastCol = lines.[lastLine].TrimEnd('\r').Length
-                    let fullRange =
-                        Range(Position(0, 0), Position(lastLine, lastCol))
+
+                    // Parse (comment-stripped input, same pipeline the interpreter uses)
+                    let asts, _ = fplParser originalText
+                    // Discover comments independently, from raw source
+                    let comments = findComments originalText
+
+                    // Collect node positions from the parsed AST
+                    let nodePositions =
+                        asts
+                        |> List.collect (fun a ->
+                            let acc = List<Positions>()
+                            collectPositions acc a
+                            List.ofSeq acc)
+
+                    // Merge comments + node positions into a lookup table
+                    let triviaMap = buildTriviaMap nodePositions comments
+
+                    // Entry point into PrettyPrint: printAll drives print recursively per node
+                    let formattedText = printAll indentSize triviaMap asts
+
+                    // Wrap as a single full-document TextEdit
+                    let textPositions = TextPositions(originalText)
+                    let fullRange = textPositions.GetRange(0, originalText.Length)
                     return TextEditContainer([| TextEdit(Range = fullRange, NewText = formattedText) |])
             }
 
