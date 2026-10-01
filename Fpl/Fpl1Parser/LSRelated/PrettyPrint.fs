@@ -613,16 +613,14 @@ let rec private print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Do
 /// <remarks>
 /// This is the only function in the module intended to be called by <c>Fpl3LanguageServer</c>'s
 /// <c>FormattingHandler</c>. It maps <see cref="print"/> over each top-level node, inserts blank
-/// lines between building blocks per <c>EmptyLinesAfterBlocks</c>, and delegates final text
-/// composition to <see cref="Doc.render"/>, which is also responsible for honoring
-/// <c>opts.IndentSize</c> and <c>opts.MaxLineLength</c> (the latter driving every
-/// <see cref="OpeningStyle.Auto"/>/<see cref="CommaStyle.Auto"/> decision made while printing).
+/// lines between building blocks per <c>EmptyLinesAfterBlocks</c>, delegates text composition to
+/// <see cref="Doc.render"/> (which honors <c>opts.IndentSize</c> and <c>opts.MaxLineLength</c>, the
+/// latter driving every <see cref="OpeningStyle.Auto"/>/<see cref="CommaStyle.Auto"/> decision made
+/// while printing), and finally runs <see cref="Doc.collapseBlankLines"/> over the rendered text so
+/// that no run of blank lines — regardless of whether it came from source comments, consecutive
+/// hard breaks, or the <c>EmptyLinesAfterBlocks</c> separator itself — exceeds
+/// <c>opts.MaxConsecutiveBlankLines</c>.
 /// </remarks>
-/// <exception cref="System.ArgumentException">
-/// Thrown if <paramref name="opts"/>.<c>MaxConsecutiveBlankLines</c> would be violated by the
-/// fixed blank-line separation this function inserts between top-level blocks; not currently
-/// enforced — see the "Max consecutive blank lines" follow-up noted in the architecture review.
-/// </exception>
 let printAll (opts: FormattingOptions) (map: TriviaMap) (asts: Ast list) : string =
     let blankLines = concat (List.replicate opts.EmptyLinesAfterBlocks line)
     asts
@@ -630,3 +628,4 @@ let printAll (opts: FormattingOptions) (map: TriviaMap) (asts: Ast list) : strin
     |> List.collect (fun d -> [ d; line; blankLines ])
     |> concat
     |> render opts.IndentSize opts.MaxLineLength
+    |> collapseBlankLines opts.MaxConsecutiveBlankLines

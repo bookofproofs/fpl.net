@@ -168,3 +168,50 @@ let render (indentSize: int) (maxLineLength: int) (doc: Doc) : string =
 
     go 0 true 0 doc |> ignore
     sb.ToString()
+
+/// <summary>
+/// Collapses runs of blank lines in already-rendered text down to at most
+/// <paramref name="maxConsecutiveBlankLines"/> blank lines in a row.
+/// </summary>
+/// <param name="maxConsecutiveBlankLines">
+/// The maximum number of consecutive blank lines permitted anywhere in the output. A blank line is
+/// a line that is empty or contains only whitespace. Must be &gt;= 0; a value of <c>0</c> removes
+/// all blank lines entirely.
+/// </param>
+/// <param name="renderedText">The already-rendered text to normalize, as produced by <see cref="render"/>.</param>
+/// <returns>
+/// <paramref name="renderedText"/> with every run of more than <paramref name="maxConsecutiveBlankLines"/>
+/// consecutive blank lines replaced by exactly <paramref name="maxConsecutiveBlankLines"/> blank lines.
+/// Non-blank lines, and runs of blank lines at or under the limit, are left untouched.
+/// </returns>
+/// <remarks>
+/// This is a deliberate post-processing step over the final string rather than something baked
+/// into <see cref="Doc"/>/<see cref="render"/>: collapsing them centrally here, on the flat line sequence, is far simpler and more
+/// robust than threading a "blank line budget" counter through every call site in <c>Doc</c>/<c>print</c>
+/// that might contribute to a run.
+/// <para>
+/// Splits strictly on <see cref="System.Environment.NewLine"/> (the same line-ending <see cref="render"/>
+/// emits) rather than a general-purpose newline regex, so this function is only meaningful when
+/// applied to text produced by <see cref="render"/> itself.
+/// </para>
+/// </remarks>
+let collapseBlankLines (maxConsecutiveBlankLines: int) (renderedText: string) : string =
+    if maxConsecutiveBlankLines < 0 then
+        invalidArg (nameof maxConsecutiveBlankLines) "must be >= 0"
+    let nl = Environment.NewLine
+    let lines = renderedText.Split([| nl |], StringSplitOptions.None) |> Array.toList
+    let isBlank (s: string) = s.Trim().Length = 0
+
+    let rec loop (acc: string list) (blankRun: int) (remaining: string list) : string list =
+        match remaining with
+        | [] -> List.rev acc
+        | line :: rest when isBlank line ->
+            // only keep this blank line if we haven't already emitted the max in this run
+            if blankRun < maxConsecutiveBlankLines then
+                loop (line :: acc) (blankRun + 1) rest
+            else
+                loop acc blankRun rest
+        | line :: rest ->
+            loop (line :: acc) 0 rest
+
+    loop [] 0 lines |> String.concat nl
