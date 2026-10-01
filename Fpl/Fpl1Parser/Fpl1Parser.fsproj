@@ -15,6 +15,7 @@
         <Compile Include="LSRelated\Trivia.fs" />
         <Compile Include="LSRelated\TrivaMap.fs" />
         <Compile Include="LSRelated\Doc.fs" />
+        <Compile Include="LSRelated\FormattingOptions.fs" />
         <Compile Include="LSRelated\PrettyPrint.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>

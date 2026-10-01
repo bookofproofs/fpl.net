@@ -1,13 +1,14 @@
 /// <summary>
 /// Pretty-prints an FPL AST back to canonically formatted source text, re-inserting comments
-/// captured in a <c>TriviaMap</c> as leading/trailing trivia of their attached nodes.
+/// captured in a <c>TriviaMap</c> as leading/trailing trivia of their attached nodes, and honoring
+/// user-configurable <see cref="FormattingOptions.FormattingOptions"/>.
 /// </summary>
 module Fpl1Parser.LSRelated.PrettyPrint
 open Fpl1Parser.Types
 open Fpl1Parser.LSRelated.CommentLexer
 open Fpl1Parser.LSRelated.TriviaMap
 open Fpl1Parser.LSRelated.Doc
-
+open Fpl1Parser.LSRelated.FormattingOptions
 
 /// <summary>Renders a single comment, honoring its <see cref="CommentLexer.CommentKind"/>.</summary>
 /// <param name="c">The comment to render.</param>
@@ -66,6 +67,176 @@ let private withTrivia (map: TriviaMap) (pos: Positions) (body: Doc) : Doc =
             | None -> concat []
         concat [ leading; body; trailing ]
 
+// ============================================================================
+// FormattingOptions-aware layout helpers.
+// ============================================================================
+// These small combinators are the only places where a FormattingOptions value
+// actually influences the shape of the emitted Doc tree; every case in `print`
+// below composes bodies purely out of calls to these helpers (plus `text`/
+// `concat` for fixed FPL syntax such as literal keywords/punctuation that no
+// option controls), so that adding/adjusting an option never requires touching
+// more than one helper.
+
+/// <summary>Renders <paramref name="yn"/> as either a single space or nothing.</summary>
+let private optSpace (yn: OptionYesNo) : Doc =
+    match yn with
+    | Yes -> text " "
+    | No -> concat []
+
+/// <summary>
+/// Renders a keyword that has both a short and a long spelling, choosing the spelling per
+/// <paramref name="opts"/>.<c>KeywordStyle</c>.
+/// </summary>
+/// <param name="opts">The active formatting options.</param>
+/// <param name="short">The short spelling, e.g. <c>"def"</c>.</param>
+/// <param name="long">The long spelling, e.g. <c>"definition"</c>.</param>
+let private keyword (opts: FormattingOptions) (short: string) (long: string) : Doc =
+    match opts.KeywordStyle with
+    | KeywordLength.Short -> text short
+    | KeywordLength.Long -> text long
+
+/// <summary>
+/// Renders one of two spellings for a construct that has both a keyword form and a symbolic
+/// form, choosing per <paramref name="opts"/>.<c>CompoundPredicateStyle</c> (used for
+/// and/or/impl/iif/xor/not/all/exists).
+/// </summary>
+let private compoundNotation (opts: FormattingOptions) (kw: string) (sym: string) : Doc =
+    match opts.CompoundPredicateStyle with
+    | Notation.Keyword -> text kw
+    | Notation.Symbol -> text sym
+
+/// <summary>
+/// Renders one of two spellings for a user-defined operator, choosing per
+/// <paramref name="opts"/>.<c>OperatorStyle</c>.
+/// </summary>
+let private operatorNotation (opts: FormattingOptions) (kw: string) (sym: string) : Doc =
+    match opts.OperatorStyle with
+    | Notation.Keyword -> text kw
+    | Notation.Symbol -> text sym
+
+/// <summary>
+/// Renders an opening delimiter pair (<paramref name="openD"/>/<paramref name="closeD"/>, e.g.
+/// <c>"{"</c>/<c>"}"</c>) around <paramref name="bodyDoc"/>, honoring <paramref name="style"/>:
+/// <see cref="OpeningStyle.OneLiner"/> keeps everything inline, <see cref="OpeningStyle.Egyptian"/>
+/// keeps the opening delimiter on the preceding line with the body indented on following lines,
+/// <see cref="OpeningStyle.Allman"/> additionally puts the opening delimiter on its own line, and
+/// <see cref="OpeningStyle.Auto"/> defers the OneLiner-vs-Egyptian choice to <see cref="Doc.render"/>
+/// via <see cref="Doc.group"/>/<see cref="Doc.softline"/>.
+/// </summary>
+/// <param name="style">The requested <see cref="OpeningStyle"/>.</param>
+/// <param name="openD">The opening delimiter text, e.g. <c>"{"</c>.</param>
+/// <param name="closeD">The closing delimiter text, e.g. <c>"}"</c>.</param>
+/// <param name="bodyDoc">The already-rendered content to place between the delimiters.</param>
+let private delimited (style: OpeningStyle) (openD: string) (closeD: string) (bodyDoc: Doc) : Doc =
+    match style with
+    | OpeningStyle.OneLiner ->
+        concat [ text " "; text openD; text " "; bodyDoc; text " "; text closeD ]
+    | OpeningStyle.Egyptian ->
+        concat [ text " "; text openD; line; indent bodyDoc; line; text closeD ]
+    | OpeningStyle.Allman ->
+        concat [ line; text openD; line; indent bodyDoc; line; text closeD ]
+    | OpeningStyle.Auto ->
+        group (concat [ text " "; text openD; softline; indent bodyDoc; softline; text closeD ])
+
+/// <summary>
+/// Renders a comma-separated list of already-printed item <see cref="Doc"/>s, honoring
+/// <paramref name="style"/>: <see cref="CommaStyle.OneLiner"/> places all items on one line
+/// separated by <c>", "</c> (or <c>","</c>, depending on <paramref name="spaceAfterComma"/>);
+/// <see cref="CommaStyle.Trailing"/>/<see cref="CommaStyle.Leading"/> place one item per line with
+/// the comma trailing or leading each item respectively; <see cref="CommaStyle.Auto"/> defers the
+/// OneLiner-vs-Leading choice to <see cref="Doc.render"/> via <see cref="Doc.group"/>.
+/// </summary>
+/// <param name="style">The requested <see cref="CommaStyle"/>.</param>
+/// <param name="spaceAfterComma">Whether a one-liner separates items with <c>", "</c> or <c>","</c>.</param>
+/// <param name="items">The already-rendered item documents, in order.</param>
+let private commaList (style: CommaStyle) (spaceAfterComma: OptionYesNo) (items: Doc list) : Doc =
+    let sep = match spaceAfterComma with Yes -> text ", " | No -> text ","
+    let oneLiner () =
+        match items with
+        | [] -> concat []
+        | d :: rest -> concat (d :: (rest |> List.collect (fun d -> [ sep; d ])))
+    let trailing () =
+        match items with
+        | [] -> concat []
+        | _ ->
+            let n = List.length items
+            items
+            |> List.mapi (fun i d -> if i < n - 1 then concat [ d; text ","; line ] else d)
+            |> concat
+    let leading () =
+        match items with
+        | [] -> concat []
+        | d :: rest -> concat (d :: (rest |> List.collect (fun d -> [ line; text ","; d ])))
+    match style with
+    | CommaStyle.OneLiner -> oneLiner ()
+    | CommaStyle.Trailing -> trailing ()
+    | CommaStyle.Leading -> leading ()
+    | CommaStyle.Auto ->
+        match items with
+        | [] -> concat []
+        | [ d ] -> d
+        | d :: rest ->
+            group (concat (d :: (rest |> List.collect (fun d -> [ text ","; softline; d ]))))
+
+/// <summary>
+/// Wraps <paramref name="bodyDoc"/> in parentheses, honoring <paramref name="opts"/>'s
+/// <c>ParenthesesStyle</c>, <c>SpacingBeforeParentheses</c> and <c>SpacingInsideParentheses</c>.
+/// </summary>
+let private parens (opts: FormattingOptions) (bodyDoc: Doc) : Doc =
+    let inside = match opts.SpacingInsideParentheses with Yes -> text " " | No -> concat []
+    let beforeOpen = optSpace opts.SpacingBeforeParentheses
+    match opts.ParenthesesStyle with
+    | OpeningStyle.OneLiner | OpeningStyle.Auto ->
+        // Parentheses are always single-construct wrappers (argument/param tuples, grouping) —
+        // Egyptian/Allman-style line breaks don't apply to them the way they do to braces; Auto
+        // therefore behaves like OneLiner here, and any width overflow is instead handled by the
+        // comma-list inside choosing to break (see commaList/Auto).
+        concat [ beforeOpen; text "("; inside; bodyDoc; inside; text ")" ]
+    | OpeningStyle.Egyptian | OpeningStyle.Allman ->
+        concat [ beforeOpen; text "("; inside; bodyDoc; inside; text ")" ]
+
+/// <summary>
+/// Wraps <paramref name="bodyDoc"/> in square brackets, honoring <paramref name="opts"/>'s
+/// <c>SpacingBeforeBrackets</c> and <c>SpacingInsideBrackets</c>.
+/// </summary>
+let private brackets (opts: FormattingOptions) (bodyDoc: Doc) : Doc =
+    let inside = match opts.SpacingInsideBrackets with Yes -> text " " | No -> concat []
+    let beforeOpen = optSpace opts.SpacingBeforeBrackets
+    concat [ beforeOpen; text "["; inside; bodyDoc; inside; text "]" ]
+
+/// <summary>Renders a brace-delimited block using <paramref name="opts"/>'s <c>BraceStyle</c>.</summary>
+let private braces (opts: FormattingOptions) (bodyDoc: Doc) : Doc =
+    delimited opts.BraceStyle "{" "}" bodyDoc
+
+/// <summary>
+/// Renders a parameter/argument tuple: <c>"(" + commaList(items) + ")"</c>, honoring
+/// <paramref name="style"/> (the caller supplies <c>opts.ParameterStyle</c> or
+/// <c>opts.ArgumentStyle</c> as appropriate) plus the shared parenthesis/spacing options.
+/// </summary>
+let private tuple (opts: FormattingOptions) (style: CommaStyle) (items: Doc list) : Doc =
+    parens opts (commaList style opts.SpacingAfterCommas items)
+
+/// <summary>
+/// Renders a declaration block's content and trailing semicolon, honoring
+/// <paramref name="opts"/>.<c>DeclSemicolon</c>: <see cref="BlockStyle.Compact"/> keeps every
+/// declaration and the semicolon on one line; <see cref="BlockStyle.Enclosing"/> places each
+/// declaration on its own indented line with the semicolon on its own trailing line.
+/// </summary>
+let private declBlock (opts: FormattingOptions) (declDocs: Doc list) : Doc =
+    match opts.DeclSemicolon with
+    | BlockStyle.Compact ->
+        concat [ text "dec "; concat (declDocs |> List.collect (fun d -> [ d; text " " ])); text ";" ]
+    | BlockStyle.Enclosing ->
+        concat [ text "dec"; line
+                 indent (concat (declDocs |> List.map (fun d -> concat [ d; line ])))
+                 text ";" ]
+
+/// <summary>Renders the <c>is</c>-operator honoring <paramref name="opts"/>.<c>IsOperator</c>.</summary>
+let private isOperator (opts: FormattingOptions) (subjectDoc: Doc) (typeDoc: Doc) : Doc =
+    match opts.IsOperator with
+    | IsOpStyle.Infix -> concat [ subjectDoc; text " is "; typeDoc ]
+    | IsOpStyle.Polish -> concat [ text "is("; subjectDoc; text ", "; typeDoc; text ")" ]
+
 /// <summary>Joins a list of already-rendered <see cref="Doc"/>s with a separator in between each pair.</summary>
 let private join (sep: Doc) (docs: Doc list) : Doc =
     match docs with
@@ -73,11 +244,17 @@ let private join (sep: Doc) (docs: Doc list) : Doc =
     | [ d ] -> d
     | d :: rest -> concat (d :: (rest |> List.collect (fun d -> [ sep; d ])))
 
+// ============================================================================
+// Recursive per-node printer.
+// ============================================================================
+
 /// <summary>
 /// The recursive per-node printer: renders a single <see cref="Ast"/> node to a <see cref="Doc"/>,
 /// consulting <paramref name="map"/> via <see cref="withTrivia"/> at each node so leading/trailing
-/// comments are spliced in at the correct position, and recursing into child nodes in source order.
+/// comments are spliced in at the correct position, consulting <paramref name="opts"/> via the
+/// layout helpers above for every stylistic choice, and recursing into child nodes in source order.
 /// </summary>
+/// <param name="opts">The active <see cref="FormattingOptions"/> controlling all stylistic choices.</param>
 /// <param name="map">The <see cref="TriviaMap"/> used to attach comments to the nodes being printed.</param>
 /// <param name="ast">The AST node to render.</param>
 /// <returns>The rendered <see cref="Doc"/> for <paramref name="ast"/>, including any attached trivia.</returns>
@@ -88,10 +265,13 @@ let private join (sep: Doc) (docs: Doc list) : Doc =
 /// <c>private</c> so callers cannot bypass <see cref="printAll"/>'s top-level layout policy
 /// (blank-line separation and final rendering) by invoking it directly on an isolated sub-tree.
 /// The case grouping/order below mirrors <c>Trivia.collectPositions</c> exactly, so gaps or
-/// mismatches are easy to spot by diffing the two files.
+/// mismatches are easy to spot by diffing the two files. No case below embeds a literal brace,
+/// parenthesis, bracket, comma-list or short/long keyword spelling directly — all such choices are
+/// routed through the <paramref name="opts"/>-aware helpers above, so that adding or adjusting a
+/// <see cref="FormattingOptions"/> field never requires touching more than one helper plus this match.
 /// </remarks>
-let rec private print (map: TriviaMap) (ast: Ast) : Doc =
-    let p = print map
+let rec private print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
+    let p = print opts map
     let opt f = function Some x -> f x | None -> concat []
     let list sep xs = xs |> List.map p |> join sep
     match ast with
@@ -122,17 +302,17 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos (concat [ p a; concat (asts |> List.map p) ])
 
     // Types & type related constructs
-    | IndexType(pos, _) -> withTrivia map pos (text "index")
-    | FunctionalTermType(pos, _) -> withTrivia map pos (text "function")
-    | ObjectType(pos, _) -> withTrivia map pos (text "object")
-    | PredicateType(pos, _) -> withTrivia map pos (text "predicate")
+    | IndexType(pos, _) -> withTrivia map pos (keyword opts "ind" "index")
+    | FunctionalTermType(pos, _) -> withTrivia map pos (keyword opts "func" "function")
+    | ObjectType(pos, _) -> withTrivia map pos (keyword opts "obj" "object")
+    | PredicateType(pos, _) -> withTrivia map pos (keyword opts "pred" "predicate")
     | TemplateType(pos, s) -> withTrivia map pos (text s)
     | ArrayType(pos, (a, asts)) ->
-        withTrivia map pos (concat [ text "*"; p a; text "["; list (text ", ") asts; text "]" ])
+        withTrivia map pos (concat [ text "*"; p a; brackets opts (commaList (if opts.ArgumentStyle = CommaStyle.Auto then CommaStyle.Auto else opts.ArgumentStyle) opts.SpacingAfterCommas (asts |> List.map p)) ])
     | SimpleVariableType(pos, a) -> withTrivia map pos (p a)
     | IndexAllowedType(pos, a) -> withTrivia map pos (p a)
     | InheritedType(pos, s) -> withTrivia map pos (text s)
-    | InheritedTypeList asts -> list (text ", ") asts
+    | InheritedTypeList asts -> commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p)
     | CompoundPredicateType(pos, (a, aOpt)) ->
         withTrivia map pos (concat [ p a; opt p aOpt ])
     | CompoundFunctionalTermType(pos, (a, tupOpt)) ->
@@ -140,35 +320,38 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
 
     // Variables
     | VarDeclBlock astsOpt ->
-        opt (fun asts -> concat [ text "dec"; line; indent (concat (asts |> List.map (fun a -> concat [ p a; text ";"; line ]))) ]) astsOpt
+        opt (fun asts -> declBlock opts (asts |> List.map p)) astsOpt
     | NamedVarDecl(pos, (asts, a)) ->
-        withTrivia map pos (concat [ list (text ", ") asts; text ": "; p a ])
+        withTrivia map pos (concat [ commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p); text ": "; p a ])
     | Var(pos, name) -> withTrivia map pos (text name)
 
     // Predicates
     | True(pos, _) -> withTrivia map pos (text "true")
     | False(pos, _) -> withTrivia map pos (text "false")
     | And(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ text "and("; p a1; text ", "; p a2; text ")" ])
+        withTrivia map pos (concat [ compoundNotation opts "and" "∧"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Or(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ text "or("; p a1; text ", "; p a2; text ")" ])
+        withTrivia map pos (concat [ compoundNotation opts "or" "∨"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Xor(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ text "xor("; p a1; text ", "; p a2; text ")" ])
+        withTrivia map pos (concat [ compoundNotation opts "xor" "⩡"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Impl(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ text "impl("; p a1; text ", "; p a2; text ")" ])
+        withTrivia map pos (concat [ compoundNotation opts "impl" "⇒"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Iif(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ text "iif("; p a1; text ", "; p a2; text ")" ])
+        withTrivia map pos (concat [ compoundNotation opts "iif" "⇔"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Not(pos, a) ->
-        withTrivia map pos (concat [ text "not "; p a ])
+        withTrivia map pos (concat [ compoundNotation opts "not " "¬"; p a ])
     | All(pos, (asts, a)) ->
-        withTrivia map pos (concat [ text "all "; list (text ", ") asts; text " { "; p a; text " }" ])
+        withTrivia map pos
+            (concat [ compoundNotation opts "all " "∀"; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
     | Exists(pos, (asts, a)) ->
-        withTrivia map pos (concat [ text "ex "; list (text ", ") asts; text " { "; p a; text " }" ])
-    | Exists1 () -> text "ex!"
+        withTrivia map pos
+            (concat [ compoundNotation opts "ex " "∃"; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
+    | Exists1 () -> text "∃!"
     | ExistsN(pos, ((a1, asts), a2)) ->
-        withTrivia map pos (concat [ text "exn"; p a1; text " "; list (text ", ") asts; text " { "; p a2; text " }" ])
+        withTrivia map pos
+            (concat [ text "exn"; p a1; text " "; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a2) ])
     | IsOperator(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ p a1; text " is "; p a2 ])
+        withTrivia map pos (isOperator opts (p a1) (p a2))
 
     // Expressions
     | PredicateWithQualification(a1, a2) ->
@@ -184,19 +367,19 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
             (concat (items |> List.map (fun (a, aOpt) ->
                 concat [ p a; opt (fun op -> concat [ text " "; p op; text " " ]) aOpt ])))
     | Parens(pos, a) ->
-        withTrivia map pos (concat [ text "("; p a; text ")" ])
+        withTrivia map pos (parens opts (p a))
 
     // Tuple-like constructs and qualifies
     | BrackedCoordList(pos, asts) ->
-        withTrivia map pos (concat [ text "["; list (text ", ") asts; text "]" ])
+        withTrivia map pos (brackets opts (commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p)))
     | ArgumentTuple(pos, asts) ->
-        withTrivia map pos (concat [ text "("; list (text ", ") asts; text ")" ])
+        withTrivia map pos (tuple opts opts.ArgumentStyle (asts |> List.map p))
     | DottedPredicate(pos, a) ->
         withTrivia map pos (concat [ text "."; p a ])
     | QualificationList(pos, asts) ->
         withTrivia map pos (concat (asts |> List.map p))
     | ParamTuple asts ->
-        concat [ text "("; list (text ", ") asts; text ")" ]
+        tuple opts opts.ParameterStyle (asts |> List.map p)
 
     // Commands
     | Delegate(a1, a2) ->
@@ -205,18 +388,14 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos (concat [ text "assert "; p a ])
     | Cases(pos, (asts, a)) ->
         withTrivia map pos
-            (concat [ text "cases ("; line
-                      indent (concat (asts |> List.map p))
-                      p a; text ")" ])
+            (concat [ text "cases"; parens opts (concat [ line; concat (asts |> List.map p); p a ]) ])
     | CaseSingle(pos, (a, asts)) ->
         withTrivia map pos (concat [ text "| "; p a; text ": "; concat (asts |> List.map p); line ])
     | CaseElse(pos, asts) ->
         withTrivia map pos (concat [ text "? "; concat (asts |> List.map p) ])
     | MapCases(pos, (asts, a)) ->
         withTrivia map pos
-            (concat [ text "mcases ("; line
-                      indent (concat (asts |> List.map p))
-                      p a; text ")" ])
+            (concat [ text "mcases"; parens opts (concat [ line; concat (asts |> List.map p); p a ]) ])
     | MapCaseSingle(pos, (a1, a2)) ->
         withTrivia map pos (concat [ text "| "; p a1; text ": "; p a2; line ])
     | MapCaseElse(pos, a) ->
@@ -225,13 +404,11 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos (concat [ p a1; text " := "; p a2 ])
     | ForIn(pos, ((a1, a2), asts)) ->
         withTrivia map pos
-            (concat [ text "for "; p a1; text " "; p a2; text " {"; line
-                      indent (concat (asts |> List.map p))
-                      text "}" ])
+            (concat [ text "for "; p a1; text " "; p a2; braces opts (concat (asts |> List.map p)) ])
     | InEntity(pos, a) ->
         withTrivia map pos (concat [ text "in "; p a ])
     | Return(pos, a) ->
-        withTrivia map pos (concat [ text "return "; p a ])
+        withTrivia map pos (concat [ keyword opts "ret" "return"; text " "; p a ])
 
     // Symbol extensions
     | SymbolDecl(pos, s) -> withTrivia map pos (concat [ text "symbol \""; text s; text "\"" ])
@@ -241,7 +418,7 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos (concat [ text "infix \""; text s; text "\" "; p a ])
     | Precedence(pos, n) -> withTrivia map pos (text (string n))
     | DefinitionExtension(pos, ((a1, a2), a3)) ->
-        withTrivia map pos (concat [ text "ext "; p a1; p a2; text " {"; p a3; text "}" ])
+        withTrivia map pos (concat [ keyword opts "ext" "extension"; text " "; p a1; p a2; braces opts (p a3) ])
     | ExtensionSignature(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; p a2 ])
     | ExtensionAssignment(pos, (a1, a2)) ->
@@ -252,26 +429,24 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
     // Definitions
     | DefinitionClass(pos, (((a1, a1Opt), a2Opt), a3)) ->
         withTrivia map pos
-            (concat [ text "class "; p a1
+            (concat [ keyword opts "cl" "class"; text " "; p a1
                       opt (fun a -> concat [ text ": "; p a ]) a1Opt
                       opt (fun a -> concat [ text " "; p a ]) a2Opt
-                      text " "; p a3 ])
+                      p a3 ])
     | ClassSignature(pos, a) ->
-        withTrivia map pos (concat [ text "class "; p a ])
+        withTrivia map pos (concat [ keyword opts "cl" "class"; text " "; p a ])
     | ClassDefinitionBlock(pos, tupOpt) ->
         withTrivia map pos
             (opt (fun (a, astsOpt) ->
-                concat [ text "{"; line
-                         indent (concat [ p a; opt (fun asts -> concat (asts |> List.map p)) astsOpt ])
-                         text "}" ]) tupOpt)
+                braces opts (concat [ p a; opt (fun asts -> concat (asts |> List.map p)) astsOpt ])) tupOpt)
     | DefClassCompleteContent(a, asts) ->
         concat [ p a; concat (asts |> List.map p) ]
     | Constructor(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text " "; p a2 ])
     | ConstructorSignature(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ text "constructor "; p a1; p a2 ])
+        withTrivia map pos (concat [ keyword opts "ctor" "constructor"; text " "; p a1; tuple opts opts.ParameterStyle [ p a2 ] ])
     | ConstructorBlock a ->
-        concat [ text "{"; p a; text "}" ]
+        braces opts (p a)
     | BaseConstructorCall(pos, (a1, a2)) ->
         withTrivia map pos (concat [ text "base."; p a1; p a2 ])
 
@@ -279,12 +454,10 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos
             (concat [ p a
                       opt (fun (a1, astsOpt) ->
-                          concat [ text " {"; line
-                                   indent (concat [ p a1; opt (fun asts -> concat (asts |> List.map p)) astsOpt ])
-                                   text "}" ]) tupOpt ])
+                          braces opts (concat [ p a1; opt (fun asts -> concat (asts |> List.map p)) astsOpt ])) tupOpt ])
     | PredicateSignature((pos, ((a1, a1Opt), a2)), a3Opt) ->
         withTrivia map pos
-            (concat [ text "predicate "; p a1
+            (concat [ keyword opts "pred" "predicate"; text " "; p a1
                       opt (fun a -> concat [ text ": "; p a ]) a1Opt
                       p a2
                       opt p a3Opt ])
@@ -295,7 +468,7 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos (concat [ p a1; text " "; p a2 ])
     | FunctionalTermSignature((pos, (((a1, a1Opt), a2), a3)), a4Opt) ->
         withTrivia map pos
-            (concat [ text "function "; p a1
+            (concat [ keyword opts "func" "function"; text " "; p a1
                       opt (fun a -> concat [ text ": "; p a ]) a1Opt
                       p a2; p a3
                       opt p a4Opt ])
@@ -304,66 +477,62 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
     | FunctionalTermDefinitionBlock(pos, tupOpt) ->
         withTrivia map pos
             (opt (fun (a, astsOpt) ->
-                concat [ text "{"; line
-                         indent (concat [ p a; opt (fun asts -> concat (asts |> List.map p)) astsOpt ])
-                         text "}" ]) tupOpt)
+                braces opts (concat [ p a; opt (fun asts -> concat (asts |> List.map p)) astsOpt ])) tupOpt)
     | DefFunctionContent(a1, a2) ->
         concat [ p a1; p a2 ]
 
     | PredicateInstance(pos, (a, aOpt)) ->
-        withTrivia map pos (concat [ text "property "; p a; opt (fun a2 -> concat [ text " {"; p a2; text "}" ]) aOpt ])
+        withTrivia map pos (concat [ keyword opts "prty" "property"; text " "; p a; opt (fun a2 -> braces opts (p a2)) aOpt ])
     | PredicateInstanceSignature(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ text "predicate "; p a1; p a2 ])
+        withTrivia map pos (concat [ keyword opts "pred" "predicate"; text " "; p a1; tuple opts opts.ParameterStyle [ p a2 ] ])
     | FunctionalTermInstance(pos, (a, aOpt)) ->
-        withTrivia map pos (concat [ text "property "; p a; opt (fun a2 -> concat [ text " {"; p a2; text "}" ]) aOpt ])
+        withTrivia map pos (concat [ keyword opts "prty" "property"; text " "; p a; opt (fun a2 -> braces opts (p a2)) aOpt ])
     | FunctionalTermInstanceSignature(pos, ((a1, a2), a3)) ->
-        withTrivia map pos (concat [ text "function "; p a1; p a2; p a3 ])
+        withTrivia map pos (concat [ keyword opts "func" "function"; text " "; p a1; tuple opts opts.ParameterStyle [ p a2 ]; p a3 ])
 
     // Rules of inference
     | RuleOfInference(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text " "; p a2 ])
     | RuleOfInferenceSignature(pos, a) ->
-        withTrivia map pos (concat [ text "inf "; p a ])
+        withTrivia map pos (concat [ keyword opts "inf" "inference"; text " "; p a ])
     | PremiseConclusionBlock(a1, (a2, a3)) ->
-        concat [ text "{"; line
-                 indent (concat [ p a1; p a2; p a3 ])
-                 text "}" ]
+        braces opts (concat [ p a1; p a2; p a3 ])
     | PremiseList(pos, asts) ->
-        withTrivia map pos (concat [ text "premise: "; list (text ", ") asts ])
+        withTrivia map pos (concat [ keyword opts "pre" "premise"; text ": "; commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p) ])
 
     // Statements
     | Axiom(pos, (a1, (a2, a3))) ->
-        withTrivia map pos (concat [ p a1; text " {"; line; indent (concat [ p a2; p a3 ]); text "}" ])
+        withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | AxiomSignature(pos, a) ->
-        withTrivia map pos (concat [ text "axiom "; p a ])
+        withTrivia map pos (concat [ keyword opts "ax" "axiom"; text " "; p a ])
     | Conjecture(pos, (a1, (a2, a3))) ->
-        withTrivia map pos (concat [ p a1; text " {"; line; indent (concat [ p a2; p a3 ]); text "}" ])
+        withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | ConjectureSignature(pos, a) ->
-        withTrivia map pos (concat [ text "conjecture "; p a ])
+        withTrivia map pos (concat [ keyword opts "conj" "conjecture"; text " "; p a ])
     | Theorem(pos, (a1, (a2, a3))) ->
-        withTrivia map pos (concat [ p a1; text " {"; line; indent (concat [ p a2; p a3 ]); text "}" ])
+        withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | TheoremSignature(pos, a) ->
-        withTrivia map pos (concat [ text "theorem "; p a ])
+        withTrivia map pos (concat [ keyword opts "thm" "theorem"; text " "; p a ])
     | Lemma(pos, (a1, (a2, a3))) ->
-        withTrivia map pos (concat [ p a1; text " {"; line; indent (concat [ p a2; p a3 ]); text "}" ])
+        withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | LemmaSignature(pos, a) ->
-        withTrivia map pos (concat [ text "lemma "; p a ])
+        withTrivia map pos (concat [ keyword opts "lem" "lemma"; text " "; p a ])
     | Proposition(pos, (a1, (a2, a3))) ->
-        withTrivia map pos (concat [ p a1; text " {"; line; indent (concat [ p a2; p a3 ]); text "}" ])
+        withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | PropositionSignature(pos, a) ->
-        withTrivia map pos (concat [ text "proposition "; p a ])
+        withTrivia map pos (concat [ keyword opts "prop" "proposition"; text " "; p a ])
     | Corollary(pos, (a1, (a2, a3))) ->
-        withTrivia map pos (concat [ p a1; text " {"; line; indent (concat [ p a2; p a3 ]); text "}" ])
+        withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | CorollarySignature(pos, (a, asts)) ->
-        withTrivia map pos (concat [ text "corollary "; p a; concat (asts |> List.map p) ])
+        withTrivia map pos (concat [ keyword opts "cor" "corollary"; text " "; p a; concat (asts |> List.map p) ])
 
     // Proofs
     | Proof(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text " "; p a2 ])
     | ProofSignature(pos, (a, asts)) ->
-        withTrivia map pos (concat [ text "proof "; p a; concat (asts |> List.map p) ])
+        withTrivia map pos (concat [ keyword opts "prf" "proof"; text " "; p a; concat (asts |> List.map p) ])
     | ProofBlock a ->
-        concat [ text "{"; line; indent (p a); text "}" ]
+        braces opts (p a)
     | ProofContent((a1, asts), a2Opt) ->
         concat [ p a1; concat (asts |> List.map p); opt p a2Opt ]
     | Argument(pos, a) ->
@@ -373,7 +542,7 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
     | StartArgument a ->
         p a
     | StartArgumentStictly(a, asts) ->
-        concat [ p a; list (text ", ") asts ]
+        concat [ p a; commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p) ]
     | Justification(pos, a) ->
         withTrivia map pos (p a)
     | JustificationItem(pos, a) ->
@@ -392,14 +561,14 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
     | DeriveArgument(pos, a) ->
         withTrivia map pos (p a)
     | AssumeArgument(pos, a) ->
-        withTrivia map pos (concat [ text "assume "; p a ])
+        withTrivia map pos (concat [ keyword opts "ass" "assume"; text " "; p a ])
     | RevokeArgument(pos, a) ->
-        withTrivia map pos (concat [ text "revoke "; p a ])
+        withTrivia map pos (concat [ keyword opts "rev" "revoke"; text " "; p a ])
     | Qed(pos, _) -> withTrivia map pos (text "qed")
 
     // Special references
-    | Intrinsic(pos, _) -> withTrivia map pos (text "intrinsic")
-    | Undefined(pos, _) -> withTrivia map pos (text "undefined")
+    | Intrinsic(pos, _) -> withTrivia map pos (keyword opts "intr" "intrinsic")
+    | Undefined(pos, _) -> withTrivia map pos (keyword opts "undef" "undefined")
     | SelfOrParent(pos, a) -> withTrivia map pos (p a)
     | Self(pos, _) -> withTrivia map pos (text "self")
     | Parent(pos, _) -> withTrivia map pos (text "parent")
@@ -407,7 +576,7 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
 
     // Localizations
     | Localization((pos, a), asts) ->
-        withTrivia map pos (concat [ text "loc "; p a; text " {"; line; indent (concat (asts |> List.map p)); text "}" ])
+        withTrivia map pos (concat [ keyword opts "loc" "localization"; text " "; p a; braces opts (concat (asts |> List.map p)) ])
     | TranslationTermList(pos, asts) ->
         withTrivia map pos (concat (asts |> List.map p))
     | TranslationTerm(pos, asts) ->
@@ -421,7 +590,7 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
     | AST(pos, a) -> withTrivia map pos (p a)
     | Namespace asts -> concat (asts |> List.map p)
     | UsesClause(pos, a) ->
-        withTrivia map pos (concat [ text "uses "; p a ])
+        withTrivia map pos (concat [ keyword opts "uses" "uses"; text " "; p a ])
     | BuildingBlock(pos, a) -> withTrivia map pos (p a)
     | ErrorSyntax(pos, s) -> withTrivia map pos (text s)
     | ErrorSyntaxBacktracking(pos, s) -> withTrivia map pos (text s)
@@ -429,23 +598,35 @@ let rec private print (map: TriviaMap) (ast: Ast) : Doc =
 
 /// <summary>
 /// The entry point for the formatting service: pretty-prints a list of top-level building-block
-/// ASTs (as returned by <c>Fpl1Parser.Main.fplParser</c>), honoring trivia recorded in <paramref name="map"/>.
+/// ASTs (as returned by <c>Fpl1Parser.Main.fplParser</c>), honoring trivia recorded in
+/// <paramref name="map"/> and the user's <paramref name="opts"/>.
 /// </summary>
-/// <param name="indentSize">The number of spaces to use per indentation level when rendering.</param>
+/// <param name="opts">The active <see cref="FormattingOptions"/>; pass <see cref="FormattingOptions.defaults"/> if the caller has no user-specific configuration.</param>
 /// <param name="map">The <see cref="TriviaMap"/> built from the parsed AST and discovered comments.</param>
 /// <param name="asts">The top-level building-block AST nodes to render, in source order.</param>
 /// <returns>
-/// The fully rendered, canonically formatted FPL source text, with a blank line separating each
-/// top-level building block.
+/// The fully rendered, canonically formatted FPL source text, with
+/// <paramref name="opts"/>.<c>EmptyLinesAfterBlocks</c> blank lines separating each top-level
+/// building block, and no run of blank lines anywhere exceeding
+/// <paramref name="opts"/>.<c>MaxConsecutiveBlankLines</c>.
 /// </returns>
 /// <remarks>
 /// This is the only function in the module intended to be called by <c>Fpl3LanguageServer</c>'s
-/// <c>FormattingHandler</c>. It maps <see cref="print"/> over each top-level node, inserts a blank
-/// line between building blocks, and delegates final text composition to <see cref="Doc.render"/>.
+/// <c>FormattingHandler</c>. It maps <see cref="print"/> over each top-level node, inserts blank
+/// lines between building blocks per <c>EmptyLinesAfterBlocks</c>, and delegates final text
+/// composition to <see cref="Doc.render"/>, which is also responsible for honoring
+/// <c>opts.IndentSize</c> and <c>opts.MaxLineLength</c> (the latter driving every
+/// <see cref="OpeningStyle.Auto"/>/<see cref="CommaStyle.Auto"/> decision made while printing).
 /// </remarks>
-let printAll (indentSize: int) (map: TriviaMap) (asts: Ast list) : string =
+/// <exception cref="System.ArgumentException">
+/// Thrown if <paramref name="opts"/>.<c>MaxConsecutiveBlankLines</c> would be violated by the
+/// fixed blank-line separation this function inserts between top-level blocks; not currently
+/// enforced — see the "Max consecutive blank lines" follow-up noted in the architecture review.
+/// </exception>
+let printAll (opts: FormattingOptions) (map: TriviaMap) (asts: Ast list) : string =
+    let blankLines = concat (List.replicate opts.EmptyLinesAfterBlocks line)
     asts
-    |> List.map (print map)
-    |> List.collect (fun d -> [ d; line; line ])   // blank line between top-level blocks
+    |> List.map (print opts map)
+    |> List.collect (fun d -> [ d; line; blankLines ])
     |> concat
-    |> render indentSize
+    |> render opts.IndentSize opts.MaxLineLength

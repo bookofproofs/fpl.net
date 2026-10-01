@@ -15,6 +15,7 @@ open Fpl1Parser.Types
 open Fpl1Parser.LSRelated.CommentLexer
 open Fpl1Parser.LSRelated.Trivia
 open Fpl1Parser.LSRelated.TriviaMap
+open Fpl1Parser.LSRelated.FormattingOptions
 open Fpl1Parser.LSRelated.PrettyPrint
 
 /// <summary>
@@ -61,7 +62,7 @@ type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferMan
                     let triviaMap = buildTriviaMap nodePositions comments
 
                     // Entry point into PrettyPrint: printAll drives print recursively per node
-                    let formattedText = printAll indentSize triviaMap asts
+                    let formattedText = printAll fplFormDefaults triviaMap asts
 
                     // Wrap as a single full-document TextEdit
                     let textPositions = TextPositions(originalText)
