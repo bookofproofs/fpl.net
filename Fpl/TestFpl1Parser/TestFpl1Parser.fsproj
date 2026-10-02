@@ -18,6 +18,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="SpecialPurpose\TestWhitespaceControl.fs" />
+        <Compile Include="LowLevel\TestVariableTypes.fs" />
+        <Compile Include="LowLevel\TestProofRelated.fs" />
         <Compile Include="LowLevel\TestStatements.fs" />
         <Compile Include="LowLevel\TestPredicatesSpecific.fs" />
         <Compile Include="LowLevel\TestFunctionalTermProperty.fs" />
@@ -32,6 +35,8 @@
         <Compile Include="LowLevel\TestClassInheritanceTypes.fs" />
         <Compile Include="LowLevel\TestQuantifiers.fs" />
         <Compile Include="LowLevel\TestExpression.fs" />
+        <Compile Include="BuildingBlocks\TestReferenceRules.fs" />
+        <Compile Include="BuildingBlocks\TestProof.fs" />
         <Compile Include="BuildingBlocks\TestTheoremLikeStatements.fs" />
         <Compile Include="BuildingBlocks\TestLocalization.fs" />
         <Compile Include="BuildingBlocks\TestDefinitionClass.fs" />
@@ -42,17 +47,6 @@
         <Compile Include="BuildingBlocks\TestAxioms.fs" />
         <Compile Include="TopLevel\TestDifferse.fs" />
         <Compile Include="MSTestSettings.fs" />
-        <Compile Include="TestProofs.fs" />
-        <Compile Include="TestInDomain.fs" />
-        <Compile Include="TestSubscripts.fs" />
-        <Compile Include="TestQualifierDollarDigits.fs" />
-        <Compile Include="TestQualifierExtensionDigits.fs" />
-        <Compile Include="TestQualifierPredicateIdentifier.fs" />
-        <Compile Include="TestQualifierSelf.fs" />
-        <Compile Include="TestQualifiersVars.fs" />
-        <Compile Include="TestReferenceRules.fs" />
-        <Compile Include="TestWhitespaceControl.fs" />
-        <Compile Include="TestVariableTypes.fs" />
         <Compile Include="ErrRecovery\TestErrDiagnosticsLowLevel.fs" />
         <Compile Include="ErrRecovery\TestRecovery.fs" />
         <Compile Include="LSRelated\PrettyPrint\Commons.fs" />

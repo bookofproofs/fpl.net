@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="CsvLineGrammar.fs" />
         <Compile Include="Debug.fs" />
         <Compile Include="Types.fs" />
         <Compile Include="Basic.fs" />

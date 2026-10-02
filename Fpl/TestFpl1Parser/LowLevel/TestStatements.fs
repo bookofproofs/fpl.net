@@ -1,4 +1,4 @@
-namespace TestFpl1Parser
+namespace TestFpl1Parser.LowLevel
 
 open FParsec
 open Fpl1Parser.Grammar
@@ -63,6 +63,18 @@ type TestStatements () =
     [<TestMethod>]
     member this.TestMapCasesSuccess (no:string, fplCode:string) =
         let result = run (mapCases .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("01", """in TestClass""")>]
+    [<DataRow("02", """in someVar""")>]
+    [<DataRow("03", """in self""")>]
+    [<DataRow("04", """in ClosedRange(from,to)""")>]
+    [<DataRow("05", """in T[x]""")>]
+    [<TestMethod>]
+    member this.TestInEntitySuccess (no:string, fplCode:string) =
+        let result = run (inEntity .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
