@@ -96,7 +96,7 @@ type FormattingOptions =
       DeclSemicolon: BlockStyle }
 
 /// <summary>The default FPL formatting preferences.</summary>
-let fplFormDefaults : FormattingOptions =
+let fplFormatDefaults : FormattingOptions =
     { IndentSize = 2
       BraceStyle = OpeningStyle.Allman
       MaxLineLength = 100

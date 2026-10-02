@@ -270,7 +270,7 @@ let private join (sep: Doc) (docs: Doc list) : Doc =
 /// routed through the <paramref name="opts"/>-aware helpers above, so that adding or adjusting a
 /// <see cref="FormattingOptions"/> field never requires touching more than one helper plus this match.
 /// </remarks>
-let rec private print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
+let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     let p = print opts map
     let opt f = function Some x -> f x | None -> concat []
     let list sep xs = xs |> List.map p |> join sep

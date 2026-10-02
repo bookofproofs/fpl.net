@@ -19,7 +19,9 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[parser]** Add utities supporting formatting service (AST traversal utility `collectPositions`, `TriviaMap` to attach comments from FPL code in to AST nodes) 
 - **[parser]** Add user-defined options supporting formatting service for the language server 
 - **[parser]** Add `Doc.collapseBlankLines` post-processing step to enforce `MaxConsecutiveBlankLines` in the formatting service
-- - **[language-server]** Add a and hook-up an initial formatting service for FPL 
+- **[language-server]** Add a and hook-up an initial formatting service for FPL 
+### Changed
+- **[parser]** consolidate unit test namespaces and convert single-case test methods to datarow-driven test methods (if not already the case)
 
 ## [v5.1.1] - 2026-09-27
 ### Added

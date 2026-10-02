@@ -62,7 +62,7 @@ type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferMan
                     let triviaMap = buildTriviaMap nodePositions comments
 
                     // Entry point into PrettyPrint: printAll drives print recursively per node
-                    let formattedText = printAll fplFormDefaults triviaMap asts
+                    let formattedText = printAll fplFormatDefaults triviaMap asts
 
                     // Wrap as a single full-document TextEdit
                     let textPositions = TextPositions(originalText)

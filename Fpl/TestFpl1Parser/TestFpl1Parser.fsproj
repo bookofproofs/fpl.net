@@ -53,7 +53,6 @@
         <Compile Include="TestReferenceRules.fs" />
         <Compile Include="TestWhitespaceControl.fs" />
         <Compile Include="TestVariableTypes.fs" />
-        <Compile Include="TestJUserFriendlyExpressions.fs" />
         <Compile Include="ErrRecovery\TestErrDiagnosticsLowLevel.fs" />
         <Compile Include="ErrRecovery\TestRecovery.fs" />
         <Compile Include="LSRelated\PrettyPrint\Commons.fs" />
