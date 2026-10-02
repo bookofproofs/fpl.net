@@ -1,4 +1,4 @@
-namespace TestFpl1Parser
+namespace TestFpl1Parser.BuildingBlocks
 
 open FParsec
 open Fpl1Parser.Grammar
@@ -25,7 +25,7 @@ type TestUsesClause () =
     [<DataRow("00", """uses Fpl.Test.fpl""")>]
     [<DataRow("01", """uses Fpl.Test*.fpl""")>]
     [<TestMethod>]
-    member this.TestUsesClause03 (no:string, fplCode:string) =
+    member this.TestUsesClauseFail (no:string, fplCode:string) =
         let result = run (usesClause .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual

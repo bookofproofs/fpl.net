@@ -1,4 +1,4 @@
-namespace TestFpl1Parser
+namespace TestFpl1Parser.ErrRecovery
 
 open FParsec
 open Fpl0Base.Errors.Diagnostics

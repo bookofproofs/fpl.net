@@ -7,12 +7,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
 [<TestClass>]
-type TestKeywordSpaces() =
-    let replaceWhiteSpace (input: string) =
-        let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
-        input.Split(whiteSpaceChars)
-            |> String.concat ""
-
+type TestWhitespaceControl() =
 
     [<TestMethod>]
     member this.TestSpacesIn () =
