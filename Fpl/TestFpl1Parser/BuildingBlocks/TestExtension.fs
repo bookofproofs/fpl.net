@@ -14,6 +14,10 @@ type TestExtension () =
     [<DataRow("04", """ext Digits x@/\d+/ -> obj {ret x}""")>]
     [<DataRow("05", """extension Digits x@/\d+/ -> S {return x}""")>]
     [<DataRow("06", """extension Alpha x@/[a-z]+/ -> T {return x}""")>]
+    [<DataRow("07", """ext Digits x @/\d+/ ->Nat {return x}""")>]
+    [<DataRow("08", """extension Digits x@ /\d+/ -> Nat { ret x}""")>]
+    [<DataRow("09", """extension Digits x @ /\d+/ -> Nat { return x}""")>]
+    [<DataRow("10", """ext Digits x@/\d+/->Nat{return x}""")>]
     [<TestMethod>]
     member this.TestExtensionSuccess (no:string, ext:string) =
         let result = run (definitionExtension .>> eof) ext

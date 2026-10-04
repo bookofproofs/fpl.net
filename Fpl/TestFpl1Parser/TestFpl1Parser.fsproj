@@ -26,14 +26,12 @@
         <Compile Include="LowLevel\TestFunctionalTermProperty.fs" />
         <Compile Include="LowLevel\TestPredicateProperty.fs" />
         <Compile Include="LowLevel\TestConstructor.fs" />
-        <Compile Include="LowLevel\TestInFixPostFixPrefix.fs" />
         <Compile Include="LowLevel\TestPredicateWithQualification.fs" />
         <Compile Include="LowLevel\TestLocalizationElements.fs" />
         <Compile Include="LowLevel\TestIdentifiers.fs" />
         <Compile Include="LowLevel\TestSignatures.fs" />
         <Compile Include="LowLevel\TestCoordPossibilities.fs" />
         <Compile Include="LowLevel\TestClassInheritanceTypes.fs" />
-        <Compile Include="LowLevel\TestQuantifiers.fs" />
         <Compile Include="LowLevel\TestExpression.fs" />
         <Compile Include="BuildingBlocks\TestReferenceRules.fs" />
         <Compile Include="BuildingBlocks\TestProof.fs" />

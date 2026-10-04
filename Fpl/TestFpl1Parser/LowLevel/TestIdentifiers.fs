@@ -99,14 +99,3 @@ type TestIdentifiers () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("01", """ext Digits x @/\d+/ ->Nat {return x}""")>]
-    [<DataRow("02", """extension Digits x@ /\d+/ -> Nat { ret x}""")>]
-    [<DataRow("03", """extension Digits x @ /\d+/ -> Nat { return x}""")>]
-    [<DataRow("04", """ext Digits x@/\d+/->Nat{return x}""")>]
-    [<TestMethod>]
-    member this.TestDefinitionExtensionSuccess (no:string, input:string) =
-        let result = run (definitionExtension .>> eof) input
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
