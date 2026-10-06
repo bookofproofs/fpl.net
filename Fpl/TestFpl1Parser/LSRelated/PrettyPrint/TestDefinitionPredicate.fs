@@ -39,3 +39,18 @@ type TestDefinitionPredicate () =
     member _.TestDefinitionPredicateSyntaxErrorFreeInput (no: string, fplCode: string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments definition fplCode
 
+    [<DataRow("01", """def pred T() {  }""")>] 
+    [<DataRow("02", """def pred T() { dec; }""")>]
+    [<DataRow("03", """def pred T() { dec a:obj ; }""")>] 
+    [<DataRow("05", """def pred T() { dec a:obj ; intrinsic }""")>] 
+    [<DataRow("06", """def pred T() { dec; intrinsic }""")>]
+    [<DataRow("08", """def pred T() { intrinsic dec; }""")>]
+    [<DataRow("09", """def pred T() { intrinsic dec a:obj ; }""")>] 
+    [<DataRow("11", """def pred T() { property func T() -> obj { dec a:obj ; return x } intrinsic property pred T() { true } }""")>]
+    [<DataRow("12", """def pred T() { property pred T() { true } true }""")>] 
+    [<DataRow("13", """def pred T() postfix "" {intr}""")>]
+    [<DataRow("14", """def pred T() infix "" 0 {intr}""")>]
+    [<DataRow("15", """def pred T() prefix "" {intr}""")>]
+    [<TestMethod>]
+    member this.TestDefinitionPredicateSyntaxErrorInput (no:string, fplCode:string) =
+        allAssertionsForSyntaxErrorInput fplCode

@@ -22,3 +22,9 @@ type TestExtension () =
     member _.TestDefinitionExtensionSyntaxErrorFreeInput (no: string, fplCode: string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments definitionExtension fplCode
 
+    [<DataRow("01", """ext Digits: x:=// {return x}""")>]
+    [<DataRow("02", """ext Alpha: x:=/[a-z]+ {return x}""")>]
+    [<DataRow("03", """ext Alpha: x:=[a-z]+/ {return x}""")>]
+    [<TestMethod>]
+    member this.TestDefinitionExtensionSyntaxErrorInput (no:string, fplCode:string) =
+        allAssertionsForSyntaxErrorInput fplCode

@@ -5,7 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open TestFpl1Parser.LSRelated.PrettyPrint.Commons
 
 [<TestClass>]
-type TestProof () =
+type TestAxioms () =
 
     [<DataRow("01", """proof Example4$1 {1. GreaterAB |- Greater(a,b) qed}""")>]
     [<DataRow("02", """prf AddIsUnique$1 {1: assume and(x,b) 2: trivial qed}""")>]
@@ -13,10 +13,6 @@ type TestProof () =
     [<DataRow("04", """proof T$1 {1. 2 |- false ∧ true}""")>]
     [<DataRow("05", """proof Example4$1 { 1. SomeCorollary$1 |- (a > b) qed }""")>]
     [<TestMethod>]
-    member _.TestProofSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsSyntaxErrorFreeInputWithoutComments proof fplCode
+    member _.TestAxiomSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments axiom fplCode
 
-    [<DataRow("01", """prf AddIsUnique$1 {1: assume pre 2: trivial}""")>]
-    [<TestMethod>]
-    member this.TestProofSyntaxErrorInput (no:string, fplCode:string) =
-        allAssertionsForSyntaxErrorInput fplCode

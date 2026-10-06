@@ -18,3 +18,8 @@ type TestUsesClause () =
     member _.TestUsesClauseSyntaxErrorFreeInput (no: string, fplCode: string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments usesClause fplCode
 
+    [<DataRow("00", """uses Fpl.Test.fpl""")>]
+    [<DataRow("01", """uses Fpl.Test*.fpl""")>]
+    [<TestMethod>]
+    member this.TestUsesClauseSyntaxErrorInput (no:string, fplCode:string) =
+        allAssertionsForSyntaxErrorInput fplCode

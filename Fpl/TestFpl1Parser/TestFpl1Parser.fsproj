@@ -68,6 +68,7 @@
         <Compile Include="LSRelated\PrettyPrint\TestExtension.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestUsesClause.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestAxioms.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestTopLevel.fs" />
     </ItemGroup>
 
 

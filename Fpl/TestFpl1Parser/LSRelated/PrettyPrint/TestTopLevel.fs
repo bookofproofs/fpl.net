@@ -1,15 +1,59 @@
-namespace TestFplParser.ErrRecovery
+namespace TestFpl1Parser.LSRelated.PrettyPrint
 
-open Fpl1Parser.Types
-open Fpl1Parser.Main
-open Fpl0Base.Errors.Diagnostics
+open Fpl1Parser.Grammar
 open Microsoft.VisualStudio.TestTools.UnitTesting
-
+open TestFpl1Parser.LSRelated.PrettyPrint.Commons
 
 [<TestClass>]
-type TestRecovery() =
+type TestTopLevel () =
 
+    [<DataRow("00", """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(true) ) }""")>]
+    [<DataRow("01", """def pred A() ext Test x@/\d+/->pred() {return A}""")>]
+    [<DataRow("02", """def cl A def pred T(a:obj) {is(a,A)}""")>]
+    [<DataRow("03", """def pred Equal(x,y:tpl) infix "=" 0 { delegate.Equal(x,y) } inf ExistsByExample{dec p:pred(d:obj, c:tpl); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {dec a:tpl x:obj; 1: and(is(x,M) , (a = $1)) 2. 1, byinf ExistsByExample |- true }""")>]
+    [<DataRow("04", """axiom SomeAxiom2 {true}""")>]
+    [<DataRow("05", """def cl TestId {ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} }""")>]
+    [<DataRow("06", """proof SomeFplTheorem$1 {1: trivial}""")>]
+    [<DataRow("07", """proof SomeFplTheorem$1 {1. 3 |- trivial}""")>]
+    [<DataRow("08", """def pred A() {false ∧ true}""")>]
+    [<DataRow("09", """inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(true,false) 2. 1, byinf AndCummutative |- false ∧ true}""")>]
+    [<DataRow("10", """def pred A() {f()}""")>]
+    [<DataRow("11", """proof T$1 {1: iif (a,b)}""")>]
+    [<DataRow("12", """loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("13", """def pred A() {y is M}""")>]
+    [<DataRow("14", """def pred T() { dec x,y,z:pred x:=true y:=true z:=true; and(and(x,y),z) }""")>]
+    [<DataRow("15", """loc true := !tex: "1" !eng: "true";""")>]
+    [<DataRow("16", """def pred A() {-(y + x' = @2 * x)'}""")>]
+    [<DataRow("17", """def pred A() {mcases (|($2 = $1) : $42 ? $1)}""")>]
+    [<DataRow("18", """def pred A() {dec n:ind cases (|($2 = $1) : n:=$42 ? n:=$1); true}""")>]
+    [<DataRow("19", """def pred T() { undef = undef }""")>]
+    [<DataRow("20", """def pred T1() { true } def pred T1a() { not x } def pred T1b() { not (x) } def pred T2() { false } def pred T3() { undef } def pred T4() { 1.x } def pred T5() { del.Test() } def pred T6() { $1 } def pred T7() { true } def pred T8() { Test$2$1 } def pred T9() { Test$1 } def pred T10() { Test } def pred T11() { v } def pred T12() { self } def pred T13() { 1 } def pred T11a() { v.x } def pred T12a() { self.x } def pred T10b() { Test() } def pred T11b() { v() } def pred T12b() { self() } def pred T13b() { @1() } def pred T10c() { Test(x,y) } def pred T11c() { v(x,y) } def pred T12c() { self(x,y) } def pred T13c() { @1(x,y) } def pred T10d() { Test[x,y] } def pred T11d() { v[x,y] } def pred T12d() { self[x,y] } def pred T13d() { @1[x.y] } def pred T10e() { Test(x,y).parent[a,b] } def pred T11e() { v(x,y).x[a,b] } def pred T12e() { self(x,y).@3[a,b] } def pred T13e() { @1(x,y).T[a,b] } def pred T10f() { Test[x,y].x(a,b) } def pred T11f() { v[x,y].x(a,b) } def pred T12f() { self[x,y].self(a,b) } def pred T13f() { @1[x.y].T(a,b) } def pred T14() { ∅ } def pred T15() { -x } def pred T16() { -(y + x = @2 * x) } def pred T17() { (y + x' = @2 * x)' } def pred T18() { ex x:Range, y:C, z:obj {and (and(a,b),c)} } def pred T19() { exn$1 x:obj {all y:N {true}} } def pred T20() { all x:obj {not x} } def pred T21() { and (and(x,y),z) } def pred T21a() { not x } def pred T21b() { not (x) } def pred T22() { xor (xor(x,y),z) } def pred T23() { or (or(x,y),z) } def pred T24() { iif (x,y) } def pred T25() { impl (x,y) } def pred T26() { is (x,Nat) } def cl T27 {ctor T27() {dec base.C(a, b, c, d); } }""")>]
+    [<DataRow("21", """def pred T1() { (x = y * z + 1) }""")>]
+    [<DataRow("22", """ext Digits x@/\d+/ -> R{return x} def pred T() {@1}""")>]
+    [<DataRow("23", """ext Alpha x@/[a-z]+/ -> A {return x} ext Digits x@/\d+/ -> B {return x} def pred T() {@123}""")>]
+    [<DataRow("24", """ext Alpha x@/[a-z]+/ -> A {return x} ext Digits x@/\d+/ -> B {return x} def pred T() {@abc}""")>]
+    [<DataRow("25", """extension Alpha x@/[a-z]+/ -> A {return x} def pred T() {@123}""")>]
+    [<DataRow("26", """extension Digits x@/\d+/ -> D {return x} def pred T() {@abc}""")>]
+    [<DataRow("27", """extension Alpha x@/[a-z]+/ -> A {return x} def pred T() {@abc}""")>]
+    [<DataRow("28", """extension Alpha x@/\d+/ -> obj {ret x} def pred T() {dec a:obj a:=@1; true}""")>]
+    [<TestMethod>]
+    member _.TestTopLevelSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments stdParser fplCode
 
+    [<DataRow("01", """def cl S                       def cl T {ctor T() {dec base. (); }}""")>]
+    [<DataRow("02", """proof SomeFplTheorem$1 {true. assume true}""")>]
+    [<DataRow("03", """proof SomeFplTheorem$1 {1. cases |- trivial}""")>]
+    [<DataRow("04", """proof SomeFplTheorem$1 {1 3 |- trivial}""")>]
+    [<DataRow("05", """proof SomeFplTheorem$1 {1 trivial}""")>]
+    [<DataRow("06", """proof SomeFplTheorem$1 {1 }""")>]
+    [<DataRow("06a", """proof SomeFplTheorem$1 {tpl. }""")>]
+    [<DataRow("06b", """proof SomeFplTheorem$1 {tpl: }""")>]
+    [<DataRow("06c", """proof SomeFplTheorem$1 {true. }""")>]
+    [<DataRow("06d", """proof SomeFplTheorem$1 {true: }""")>]
+    [<DataRow("07", """axiom s SomeAxiom2 {true}""")>]
+    [<DataRow("08", """def cl T {ctor T() {dec base. (); }}""")>]
+    [<DataRow("09", """def pred T() { (∀ x:obj {x is N} ∧ ¬∃ y:obj {y is M}) ∨ (¬∀ x:obj {x  N} ∧ ∃ y:obj {y is M}) }""")>]
+    [<DataRow("10", """def pred T() { a * b + (c d) }""")>]
     [<DataRow("del01", """def pred T() {del T()}""")>]
     [<DataRow("base01", """def cl S def cl T {ctor T() {dec base T(); }}""")>]
     [<DataRow("bb01", """loc  """)>]
@@ -25,55 +69,15 @@ type TestRecovery() =
     [<DataRow("bb10", """proof T$1 {100. assume true}""")>]
     [<DataRow("bb11", """def pred A() {dec n:ind cases (|($2 = $1) : n:=$42 ? n:=); true}""")>]
     [<DataRow("bb12", """def pred T() {}""")>]
-    [<TestMethod>]
-    member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string) =
-        diagnosticsContainer.Clear()
-        let result, success = fplParser fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.AreEqual<bool>(false, success)
-
-
-    [<DataRow("01", """def pred T() {}""", 1L, 14L)>]
-    [<DataRow("01a", """ def pred T() {}""", 1L, 15L)>]
-    [<DataRow("01b", """  def pred T() {}""", 1L, 16L)>]
-    [<DataRow("01c", """   def pred T() {}""", 1L, 17L)>]
-    [<DataRow("02a", """
-def pred T() {}""", 2L, 14L)>]
-    [<DataRow("02a", """
- def pred T() {}""", 2L, 15L)>]
-    [<DataRow("02b", """
-
-  def pred T() {}""", 3L, 16L)>]
-    [<TestMethod>]
-    member this.TestErrorRecoveryPositions(no:string, fplCode:string, errLin: int64, errCol: int64) =
-        diagnosticsContainer.Clear()
-        let result, _ = fplParser fplCode
-        let errBlock = result.Head
-        match errBlock with
-        | Ast.ErrorSyntax((pos1,_),_) ->
-            Assert.AreEqual<uint>((uint)errLin, (uint)pos1.Line)
-            Assert.AreEqual<uint>((uint)errCol, (uint)pos1.Column)
-        | _ ->
-            Assert.Fail("No error block found")
-
-    [<DataRow("01", """def pred T() {}""", 1)>]
-    [<DataRow("02", """xxxx def pred T() {}""", 2)>]
-    [<DataRow("02a", """ xxxx def pred T() {}""", 2)>]
-    [<DataRow("03", """xxxx def pred T() {true} yyyyy""", 3)>]
-    [<DataRow("03a", """ xxxx def pred T() {true} yyyyy""", 3)>]
-    [<DataRow("03b", """xxxx def pred T() {true} yyyyy """, 3)>]
-    [<DataRow("03c", """ xxxx def pred T() {true} yyyyy """, 3)>]
-    [<DataRow("04", """def pred T() {true} yyyyy""", 2)>]
-    [<DataRow("04a", """ def pred T() {true} yyyyy""", 2)>]
-    [<TestMethod>]
-    member this.TestErrorRecoveryBeforeOrAfterCode(no:string, fplCode:string, numbOfBlocks: int) =
-        diagnosticsContainer.Clear()
-        let result, success = fplParser fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.AreEqual<int>(numbOfBlocks, result.Length)
-
+    [<DataRow("01", """def pred T() {}""")>]
+    [<DataRow("02", """xxxx def pred T() {}""")>]
+    [<DataRow("02a", """ xxxx def pred T() {}""")>]
+    [<DataRow("03", """xxxx def pred T() {true} yyyyy""")>]
+    [<DataRow("03a", """ xxxx def pred T() {true} yyyyy""")>]
+    [<DataRow("03b", """xxxx def pred T() {true} yyyyy """)>]
+    [<DataRow("03c", """ xxxx def pred T() {true} yyyyy """)>]
+    [<DataRow("04", """def pred T() {true} yyyyy""")>]
+    [<DataRow("04a", """ def pred T() {true} yyyyy""")>]
     [<DataRow("uses00", """uses Fpl.Test.""")>]
     [<DataRow("uses01", """uses Fpl.Test alias """)>]
     [<DataRow("cl01", """def cl """)>]
@@ -104,14 +108,6 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("base01", """def cl S def cl T {ctor T() {dec base. (); }}""")>]
     [<DataRow("base02", """def cl S def cl T {ctor T() {dec base. (); }}""")>]
     [<DataRow("base03", """def cl S                       def cl T {ctor T() {dec base. (); }}""")>]
-    [<TestMethod>]
-    member this.TestMissingPascalCaseId(no:string, fplCode) =
-        diagnosticsContainer.Clear()
-        let result, success = fplParser fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.AreEqual<bool>(false, success)
-
     [<DataRow("ax01", "ax T true}")>]
     [<DataRow("thm01", "thm T true}")>]
     [<DataRow("lem01", "lem T true}")>]
@@ -125,14 +121,6 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("for01", "def pred T() {dec for x in y assert z};true}")>]
     [<DataRow("ctor01", "def cl T {ctor T() }}")>]
     [<DataRow("prf01", "prf T$1 1: trivial }")>]
-    [<TestMethod>]
-    member this.TestMissingOpeningBrace(no:string, fplCode) =
-        diagnosticsContainer.Clear()
-        let result, success = fplParser fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.AreEqual<bool>(false, success)
-
     [<DataRow("ax01", "ax T {true")>]
     [<DataRow("thm01", "thm T {true")>]
     [<DataRow("lem01", "lem T {true")>]
@@ -149,14 +137,6 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("propPred01", "def cl T {intr prty pred S() {intr }")>]
     [<DataRow("propFunc01", "def cl T {intr prty func S()->obj {intr }")>]
     [<DataRow("prf01", "prf T$1 {1: trivial ")>]
-    [<TestMethod>]
-    member this.TestMissingClosingBrace(no:string, fplCode) =
-        diagnosticsContainer.Clear()
-        let result, success = fplParser fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.AreEqual<bool>(false, success)
-
     [<DataRow("pred01", """def pred T)""")>]
     [<DataRow("func01", """def func T)->obj """)>]
     [<DataRow("ctor01", """def cl S def cl T {ctor T) {dec base.S(); }}""")>]
@@ -164,14 +144,6 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("propFunc01", """def cl S def cl T {intr prty func T)->obj }""")>]
     [<DataRow("del01", """def pred T() {del.T)}""")>]
     [<DataRow("base01", """def cl S def cl T {ctor T() {dec base.T); }}""")>]
-    [<TestMethod>]
-    member this.TestMissingOpeningParen(no:string, fplCode) =
-        diagnosticsContainer.Clear()
-        let result, success = fplParser fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.AreEqual<bool>(false, success)
-
     [<DataRow("pred01", """def pred T(""")>]
     [<DataRow("func01", """def func T(->obj """)>]
     [<DataRow("ctor01", """def cl S def cl T {ctor T( {dec base.S(); }}""")>]
@@ -180,47 +152,19 @@ def pred T() {}""", 2L, 14L)>]
     [<DataRow("del01", """def pred T() {del.T(}""")>]
     [<DataRow("base01", """def cl S def cl T {ctor T() {dec base.T(; }}""")>]
     [<DataRow("ref01", """def pred T() {S(}""")>]
-    [<TestMethod>]
-    member this.TestMissingClosingParen(no:string, fplCode) =
-        diagnosticsContainer.Clear()
-        let result, success = fplParser fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.AreEqual<bool>(false, success)
-
     [<DataRow("arrType01", """def pred T(a:*ind obj])""")>]
     [<DataRow("arrType02", """def pred T(a:*ind obj)""")>]
     [<DataRow("arrType03", """def pred T() {dec a:*ind obj]; true}""")>]
     [<DataRow("arrType04", """def pred T() {dec a:*ind obj; true}""")>]
-    [<TestMethod>]
-    member this.TestMissingOpeningBracket(no:string, fplCode) =
-        diagnosticsContainer.Clear()
-        let result, success = fplParser fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.AreEqual<bool>(false, success)
-
     [<DataRow("arrType01", """def pred T(a:*ind[obj)""")>]
     [<DataRow("arrType02", """def pred T(a:*ind obj)""")>]
     [<DataRow("arrType03", """def pred T() {dec a:*ind[obj; true}""")>]
     [<DataRow("arrType04", """def pred T() {dec a:*ind obj; true}""")>]
     [<DataRow("arrUsage01", """def pred T() {dec a:=x[b; true}""")>]
-    [<TestMethod>]
-    member this.TestMissingClosingBracket(no:string, fplCode) =
-        diagnosticsContainer.Clear()
-        let result, success = fplParser fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.AreEqual<bool>(false, success)
-
     [<DataRow("loc01", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x """)>]
     [<DataRow("loc02", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x def cl A""")>]
     [<DataRow("dec01", """def pred T() {dec x:obj true}""")>]
     [<DataRow("dec02", """def pred T() {dec x:obj true}""")>]
     [<TestMethod>]
-    member this.TestMissingSemicolon(no:string, fplCode) =
-        diagnosticsContainer.Clear()
-        let result, success = fplParser fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.AreEqual<bool>(false, success)
+    member this.TestTopLevelSyntaxErrorInput (no:string, fplCode:string) =
+        allAssertionsForSyntaxErrorInput fplCode
