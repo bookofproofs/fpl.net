@@ -48,7 +48,9 @@
         <Compile Include="ErrRecovery\TestErrDiagnosticsLowLevel.fs" />
         <Compile Include="ErrRecovery\TestRecovery.fs" />
         <Compile Include="LSRelated\PrettyPrint\Commons.fs" />
-        <Compile Include="LSRelated\PrettyPrint\TestLexicalAndKeywords.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestExpressions.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestDefinitionClass.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestDefinitionFunctionalTerm.fs" />
     </ItemGroup>
 
 

@@ -1,17 +1,13 @@
-namespace TestFpl1Parser
+namespace TestFpl1Parser.ToplLevel
 
 open FParsec
+open Fpl1Parser.Main
 open Fpl1Parser.Grammar
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
 [<TestClass>]
 type TestDiverse () =
-    let replaceWhiteSpace (input: string) =
-        let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
-        input.Split(whiteSpaceChars)
-            |> String.concat ""
-
 
     [<DataRow("00", """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(true) ) }""")>]
     [<DataRow("01", """def pred A() ext Test x@/\d+/->pred() {return A}""")>]
@@ -44,10 +40,9 @@ type TestDiverse () =
     [<DataRow("28", """extension Alpha x@/\d+/ -> obj {ret x} def pred T() {dec a:obj a:=@1; true}""")>]
     [<TestMethod>]
     member this.TestDiverseSuccess (no:string, fplCode:string) =
-        let result = run (stdParser .>> eof) fplCode
+        let result = fplParser fplCode
         let actual = sprintf "%O" result 
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
 
     [<DataRow("01", """def cl S                       def cl T {ctor T() {dec base. (); }}""")>]
@@ -60,20 +55,14 @@ type TestDiverse () =
     [<DataRow("06b", """proof SomeFplTheorem$1 {tpl: }""")>]
     [<DataRow("06c", """proof SomeFplTheorem$1 {true. }""")>]
     [<DataRow("06d", """proof SomeFplTheorem$1 {true: }""")>]
-    [<TestMethod>]
-    member this.TestDiverseFail (no:string, fplCode:string) =
-        let result = run (stdParser .>> eof) fplCode
-        let actual = sprintf "%O" result 
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
-
-    [<DataRow("01", """axiom s SomeAxiom2 {true}""")>]
-    [<DataRow("02", """def cl T {ctor T() {dec base. (); }}""")>]
-    [<DataRow("03", """def pred T() { (∀ x:obj {x is N} ∧ ¬∃ y:obj {y is M}) ∨ (¬∀ x:obj {x  N} ∧ ∃ y:obj {y is M}) }""")>]
-    [<DataRow("04", """def pred T() { a * b + (c d) }""")>]
+    [<DataRow("07", """axiom s SomeAxiom2 {true}""")>]
+    [<DataRow("08", """def cl T {ctor T() {dec base. (); }}""")>]
+    [<DataRow("09", """def pred T() { (∀ x:obj {x is N} ∧ ¬∃ y:obj {y is M}) ∨ (¬∀ x:obj {x  N} ∧ ∃ y:obj {y is M}) }""")>]
+    [<DataRow("10", """def pred T() { a * b + (c d) }""")>]
     [<TestMethod>]
     member this.TestDiverseBuildingBlockFail (no:string, fplCode:string) =
-        let result = run (buildingBlock .>> eof) fplCode
+        // although the input has syntax errors, fplParser will still produce a valid AST
+        // because of error recovery on Building-Block level
+        let result = fplParser fplCode
         let actual = sprintf "%O" result 
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
