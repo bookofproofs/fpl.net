@@ -44,30 +44,8 @@ type TestIdentifiers () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
-    [<DataRow("01", """x[@123]""")>]
-    [<DataRow("02", """x[y]""")>]
-    [<DataRow("03", """myField[@1 , n]""")>]
-    [<DataRow("04", """self[from , to]""")>]
-    [<DataRow("05", """tpls[from , to]""")>]
-    [<TestMethod>]
-    member this.TestPredicateWithQualificationSuccess (no:string, input:string) =
-        let result = run (predicateWithQualification .>> eof) input
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<DataRow("01", """theorem[from , to]""")>]
-    [<DataRow("02", """tplSetElem[from , to]""")>]
-    [<TestMethod>]
-    member this.TestPredicateWithQualificationFailure (no:string, input:string) =
-        let result = run (predicateWithQualification .>> eof) input
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
-
     [<DataRow("01", LiteralSelf)>]
     [<DataRow("02", LiteralParent)>]
-    [<DataRow("03", LiteralSelf)>]
     [<TestMethod>]
     member this.TestSelfOrParentSuccess (no:string, input:string) =
         let result = run (selfOrParent .>> eof) input

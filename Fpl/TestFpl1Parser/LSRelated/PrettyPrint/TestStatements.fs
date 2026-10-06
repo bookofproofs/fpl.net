@@ -1,8 +1,8 @@
-namespace TestFpl1Parser.LowLevel
+namespace TestFpl1Parser.LSRelated.PrettyPrint
 
-open FParsec
 open Fpl1Parser.Grammar
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open TestFpl1Parser.LSRelated.PrettyPrint.Commons
 
 [<TestClass>]
 type TestStatements () =
@@ -12,11 +12,8 @@ type TestStatements () =
     [<DataRow("03", """for n in Range($1,$4) { assert Equal(f(n),n) }""")>]
     [<DataRow("04", """for n in SomeType { x[n] := 1 }""")>]
     [<TestMethod>]
-    member this.TestForStatementSuccess (no:string, fplCode:string) =
-        let result = run (forStatement .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestForStatementForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments forStatement fplCode
 
     [<DataRow("01", @"@1 :=true")>]
     [<DataRow("02", @"@1:=true")>]
@@ -25,28 +22,19 @@ type TestStatements () =
     [<DataRow("05", """self := Zero()""")>]
     [<DataRow("06", """n:=mcases ( | (x = $1): false | (x = $2): true | (x = $3): false ? undef )""")>]
     [<TestMethod>]
-    member this.TestAssignmentStatementSuccess (no:string, fplCode:string) =
-        let result = run (assignmentStatement .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestAssignmentStatementForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments assignmentStatement fplCode
 
     [<DataRow("01", """del.Test(1,2)""")>]
     [<DataRow("02", """del.Decrement(x)""")>]
     [<TestMethod>]
-    member this.TestFplDelegateSuccess (no:string, fplCode:string) =
-        let result = run (fplDelegate .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestFplDelegateForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments fplDelegate fplCode
 
     [<DataRow("01", """assert all n:Set { In(n, self) }""")>]
     [<TestMethod>]
-    member this.TestAssertionStatementSuccess (no:string, fplCode:string) =
-        let result = run (assertionStatement .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestAssertionStatementForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments assertionStatement fplCode
 
     [<DataRow("01", """cases ( | Equal(x,0): self := Zero() | Equal(x,1): self := Succ(Zero()) | Equal(x,2): self := Succ(Succ(Zero())) ? self := Succ(del.Decrement(x)) )""")>]
     [<DataRow("02", """cases ( | Equal(n,0): result := m.NeutralElem() ? result := op( y, Exp( m(y,op), y, Sub(n,1)) ) )""")>]
@@ -54,19 +42,13 @@ type TestStatements () =
     [<DataRow("04", """cases ( | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember() ? self:=undefined )""")>]
     [<DataRow("05", """cases ( | (m = 0): result:= n | (Succ(m) = k): result:= Succ(Add(n,k)) ? result:= undef )""")>]
     [<TestMethod>]
-    member this.TestCasesStatementSuccess (no:string, fplCode:string) =
-        let result = run (casesStatement .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestCasesStatementForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments casesStatement fplCode
 
     [<DataRow("01", """mcases ( | (x = $1): false | (x = $2): true | (x = $3): false ? undef )""")>]
     [<TestMethod>]
-    member this.TestMapCasesSuccess (no:string, fplCode:string) =
-        let result = run (mapCases .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestMapCasesForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments mapCases fplCode
 
     [<DataRow("01", """in TestClass""")>]
     [<DataRow("02", """in someVar""")>]
@@ -74,8 +56,5 @@ type TestStatements () =
     [<DataRow("04", """in ClosedRange(from,to)""")>]
     [<DataRow("05", """in T[x]""")>]
     [<TestMethod>]
-    member this.TestInEntitySuccess (no:string, fplCode:string) =
-        let result = run (inEntity .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestInEntityForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments inEntity fplCode

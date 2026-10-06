@@ -102,8 +102,6 @@ type TestProofRelated () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
-
-
     [<DataRow(LiteralByCor, "$1", ":1")>]
     [<DataRow(LiteralByDef, "$1", ":1")>]
     [<DataRow(LiteralByAx, "$1", ":1")>]

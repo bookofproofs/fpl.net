@@ -5,22 +5,8 @@ open Fpl0Base.Primitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open TestFpl1Parser.LSRelated.PrettyPrint.Commons
 
-/// <summary>
-/// Category 1a/1b tests (see Commons) for the <c>expression</c> parser, against <c>FormattingOptions.fplFormatDefaults</c>.
-/// </summary>
-/// <remarks>
-/// All <c>DataRow</c> snippets below are reused verbatim from
-/// <c>TestFpl1Parser.LowLevel.TestExpression</c>'s <c>TestExpressionSuccess</c> and
-/// <c>TestExpressionFailure</c> data rows, per the project's heuristic of not inventing new
-/// snippets where an existing, already-validated fundus exists. Since <c>expression</c> is an
-/// individual grammar production with no notion of comments
-/// </remarks>
 [<TestClass>]
 type TestExpressions () =
-
-    // ------------------------------------------------------------------
-    // 1a: no syntax errors introduced by reformatting — using TestExpressionSuccess's data rows.
-    // ------------------------------------------------------------------
 
     [<DataRow("00", "(x = y * z + 1)")>]
     [<DataRow("01", "(x + 1)")>]

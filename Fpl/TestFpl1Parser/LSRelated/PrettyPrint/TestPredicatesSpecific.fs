@@ -1,9 +1,9 @@
-namespace TestFpl1Parser.LowLevel
+namespace TestFpl1Parser.LSRelated.PrettyPrint
 
-open FParsec
 open Fpl1Parser.Grammar
 open Fpl0Base.Primitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open TestFpl1Parser.LSRelated.PrettyPrint.Commons
 
 [<TestClass>]
 type TestPredicatesSpecific () =
@@ -16,55 +16,40 @@ type TestPredicatesSpecific () =
     [<DataRow("06", """arr[i]""")>]
     [<DataRow("07", LiteralParent)>]
     [<TestMethod>]
-    member this.TestPrimePredicateSuccess (no:string, fplCode:string) =
-        let result = run (primePredicate .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestPrimePredicateForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments primePredicate fplCode
 
     [<DataRow("01", """and(true,false)""")>]
     [<DataRow("02", """and ( true, true )""")>]
     [<DataRow("03", """and ( true, and( true, false))""")>]
     [<DataRow("04", """and ( and ( true, and( true, false)), true )""")>]
     [<TestMethod>]
-    member this.TestConjunctionSuccess (no:string, fplCode:string) =
-        let result = run (conjunction .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestConjunctionForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments conjunction fplCode
 
     [<DataRow("01", """or(true,false)""")>]
     [<DataRow("02", """or ( true, true )""")>]
     [<DataRow("03", """or ( true, or( true, false))""")>]
     [<DataRow("04", """or ( or ( true, or( true, false)), true )""")>]
     [<TestMethod>]
-    member this.TestDisjunctionSuccess (no:string, fplCode:string) =
-        let result = run (disjunction .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestDisjunctionForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments disjunction fplCode
 
     [<DataRow("01", """impl(true,false)""")>]
     [<DataRow("02", """impl ( true, true )""")>]
     [<DataRow("03", """impl ( true, impl( true, false))""")>]
     [<DataRow("04", """impl ( impl ( true, impl( true, false)), true )""")>]
     [<TestMethod>]
-    member this.TestImplicationSuccess (no:string, fplCode:string) =
-        let result = run (implication .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestImplicationForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments implication fplCode
 
     [<DataRow("01", """iif(true,false)""")>]
     [<DataRow("02", """iif ( true, true )""")>]
     [<DataRow("03", """iif ( true, iif( true, false))""")>]
     [<DataRow("04", """iif ( iif ( true, iif( true, false)), true )""")>]
     [<TestMethod>]
-    member this.TestEquivalenceSuccess (no:string, fplCode:string) =
-        let result = run (equivalence .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestEquivalenceForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments equivalence fplCode
 
     [<DataRow("01", """xor(true,false)""")>]
     [<DataRow("02", """xor ( true, true )""")>]
@@ -72,11 +57,8 @@ type TestPredicatesSpecific () =
     [<DataRow("03", """xor ( true, xor( true, false))""")>]
     [<DataRow("04", """xor ( xor ( true, xor( true, false)), true )""")>]
     [<TestMethod>]
-    member this.TestExclusiveOrSuccess (no:string, fplCode:string) =
-        let result = run (exclusiveOr .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestExclusiveOrForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments exclusiveOr fplCode
 
     [<DataRow("01", """Zero()""")>]
     [<DataRow("02", """self(i)""")>]
@@ -121,21 +103,8 @@ type TestPredicatesSpecific () =
     [<DataRow("b04", """self[from , to]""")>]
     [<DataRow("b05", """tpls[from , to]""")>]
     [<TestMethod>]
-    member this.TestPredicateWithQualificationSuccess (no:string, fplCode:string) =
-        let result = run (predicateWithQualification .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<DataRow("01", """x[$3(),$2]""")>]
-    [<DataRow("01", """theorem[from , to]""")>]
-    [<DataRow("02", """tplSetElem[from , to]""")>]
-    [<TestMethod>]
-    member this.TestPredicateWithQualificationFailure (no:string, fplCode:string) =
-        let result = run (predicateWithQualification .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+    member _.TestPredicateWithQualificationForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments predicateWithQualification fplCode
 
     [<DataRow("01", """not (true)""")>]
     [<DataRow("02", """not (iif ( true, not (false)))""")>]
@@ -143,11 +112,8 @@ type TestPredicatesSpecific () =
     [<DataRow("04", """not (iif ( iif ( true, iif( true, false)), not (true) ))""")>]
     [<DataRow("05", """not all x,y:N { (x >< y) }""")>]
     [<TestMethod>]
-    member this.TestNegationSuccess (no:string, fplCode:string) =
-        let result = run (negation .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestNegationForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments negation fplCode
 
     [<DataRow("01", """is(x, Nat)""")>]
     [<DataRow("02", """is(1, Set)""")>]
@@ -161,24 +127,8 @@ type TestPredicatesSpecific () =
     [<DataRow("10", """is(true, ind)""")>]
     [<DataRow("11", """is(false, ind)""")>]
     [<TestMethod>]
-    member this.TestIsOperatorSuccess (no:string, fplCode:string) =
-        let result = run (isOperator .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<DataRow("01", """all x,y,z:obj {true}""")>]
-    [<DataRow("02", """all x,y,z:obj {not (iif ( true, not false))}""")>]
-    [<DataRow("03", """all x,y,z:obj {not (iif ( iif( true, false), true))}""")>]
-    [<DataRow("04", """all x:obj {not (iif ( iif ( true, iif( true, false)), not (true) ))}""")>]
-    [<DataRow("05", """all x:Range, y:C, z:obj {and (and (a,b),c)}""")>]
-    [<DataRow("06", """all x:Real, y:pred, z:func {and (and(a,b),c)}""")>]
-    [<TestMethod>]
-    member this.TestAllSuccess (no:string, fplCode:string) =
-        let result = run (all .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestIsOperatorForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments isOperator fplCode
 
     [<DataRow("01", """ex x,y,z:func {true}""")>]
     [<DataRow("02", """ex x,y,z:ind {not (iif ( true, not (false)))}""")>]
@@ -187,22 +137,16 @@ type TestPredicatesSpecific () =
     [<DataRow("05", """ex x:Range, y:C, z:obj {and (a,and(b,c))}""")>]
     [<DataRow("06", """ex x:Real, y:pred, z:func {and (and(a,b),c)}""")>]
     [<TestMethod>]
-    member this.TestExistsSuccess (no:string, fplCode:string) =
-        let result = run (exists .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestExistsForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments exists fplCode
 
     [<DataRow("01", """exn$0 x:obj { true}""")>]
     [<DataRow("02", """exn$1 x:Nat {not (iif ( true, not (false)))}""")>]
     [<DataRow("03", """exn$2 x,y,z:obj {not (iif ( iif( true, false), true))}""")>]
     [<DataRow("04", """exn$3 x:obj { not (iif ( iif ( true, iif( true, false)), not (true) )) }""")>]
     [<TestMethod>]
-    member this.TestExistsTimesNSuccess (no:string, fplCode:string) =
-        let result = run (existsTimesN .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestExistsTimesNForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments existsTimesN fplCode
 
     [<DataRow("01", """( x = 1 )""")>]
     [<DataRow("02", """( x = y = z )""")>]
@@ -210,8 +154,6 @@ type TestPredicatesSpecific () =
     [<DataRow("04", """( x + y / z = abc )""")>]
     [<DataRow("05", """( ((x) + y) / z = abc )""")>]
     [<TestMethod>]
-    member this.TestInfixExprSuccess (no:string, fplCode:string) =
-        let result = run (pInfixExpr .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestPInfixExprNForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments pInfixExpr fplCode
+
