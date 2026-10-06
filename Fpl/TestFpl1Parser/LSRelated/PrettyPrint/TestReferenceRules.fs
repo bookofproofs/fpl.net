@@ -19,6 +19,6 @@ type TestReferenceRules () =
     [<DataRow("09", """inf ExistsByExample {dec c: obj; pre: true con: true}""")>]
     [<DataRow("10", """inf PrecedingResults {dec a,b: pred; pre: a, b con: and(a,b)}""")>]
     [<TestMethod>]
-    member _.TestRuleOfInferenceForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments ruleOfInference fplCode
+    member _.TestRuleOfInferenceSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments ruleOfInference fplCode
 

@@ -11,34 +11,34 @@ type TestIdentifiers () =
     [<DataRow("01", """Fpl.Test alias MyAlias""")>]
     [<DataRow("02", """Fpl.Test""")>]
     [<TestMethod>]
-    member _.TestTheoryNamespaceForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments theoryNamespace fplCode
+    member _.TestTheoryNamespaceSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments theoryNamespace fplCode
 
     [<DataRow("01", """uses  Fpl.Test alias MyAlias uses Fpl.Test uses Fpl.Test.Test1 """)>]
     [<DataRow("02", """uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel""")>]
     [<DataRow("03", """uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel alias ZF uses  Fpl.Arithmetics.Peano alias A""")>]
     [<DataRow("04", """uses Fpl.Commons *""")>]
     [<TestMethod>]
-    member _.TestFplNamespaceForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments fplNamespace fplCode
+    member _.TestFplNamespaceSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments fplNamespace fplCode
 
     [<DataRow("01", """ThisIsMyIdentifier""")>]
     [<TestMethod>]
-    member _.TesPredicateIdentifierForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments predicateIdentifier fplCode
+    member _.TesPredicateIdentifierSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments predicateIdentifier fplCode
 
     [<DataRow("01", LiteralSelf)>]
     [<DataRow("02", LiteralParent)>]
     [<TestMethod>]
-    member _.TestSelfOrParentForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments selfOrParent fplCode
+    member _.TestSelfOrParentSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments selfOrParent fplCode
 
     [<DataRow("01", """xyz""")>]
     [<TestMethod>]
-    member _.TestVariableForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments variable fplCode
+    member _.TestVariableSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments variable fplCode
 
     [<DataRow("01", """Digits """)>]
     [<TestMethod>]
-    member _.TestExtensionNameForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments extensionName fplCode
+    member _.TestExtensionNameSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments extensionName fplCode

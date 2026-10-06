@@ -18,6 +18,6 @@ type TestProperty () =
     [<DataRow("pred06", """property pred X() { intr }""")>]
     [<DataRow("pred07", """prty pred T() {true}""")>]
     [<TestMethod>]
-    member _.TestDefinitionPropertyForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments definitionProperty fplCode
+    member _.TestDefinitionPropertySyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments definitionProperty fplCode
 

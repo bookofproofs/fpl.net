@@ -11,6 +11,6 @@ type TestLocalization () =
     [<DataRow("02", """localization iif(x,y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y ;""")>]
     [<DataRow("03", """loc NotEqual(x,y) := !tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y ;""")>]
     [<TestMethod>]
-    member _.TestLocalizationForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments localization fplCode
+    member _.TestLocalizationSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments localization fplCode
 

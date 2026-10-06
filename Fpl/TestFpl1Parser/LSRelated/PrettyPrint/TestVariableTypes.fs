@@ -47,6 +47,6 @@ type TestVariableTypes () =
     [<DataRow("37", "tplTest")>]
     [<DataRow("38", "*tplTest[ind,ind,ind]")>]
     [<TestMethod>]
-    member _.TestVariableTypeForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments variableType fplCode
+    member _.TestVariableTypeSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments variableType fplCode
 

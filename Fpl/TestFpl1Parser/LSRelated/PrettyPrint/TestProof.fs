@@ -13,6 +13,6 @@ type TestProof () =
     [<DataRow("04", """proof T$1 {1. 2 |- false ∧ true}""")>]
     [<DataRow("05", """proof Example4$1 { 1. SomeCorollary$1 |- (a > b) qed }""")>]
     [<TestMethod>]
-    member _.TestProofForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments proof fplCode
+    member _.TestProofSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments proof fplCode
 

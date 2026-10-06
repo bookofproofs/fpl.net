@@ -192,7 +192,7 @@ module Commons =
 
 
     /// <summary>Runs all tests assertions for syntax-free input without comments (used for individual parsers to avoid duplicating the same DataRow test for each test separately).</summary>
-    let allAssertionsForSyntaxErrorFreeInputWithoutComments (parser: Parser<Ast, unit>) (fplCode: string) =
+    let allAssertionsSyntaxErrorFreeInputWithoutComments (parser: Parser<Ast, unit>) (fplCode: string) =
         // 1a test: no syntax errors introduced by reformatting
         assertRoundTripsWithoutSyntaxErrors parser fplCode
         // 1b test: idempotency test for syntax-error-free input

@@ -15,6 +15,6 @@ type TestUsesClause () =
     [<DataRow("06", """uses TestNamespace alias T1""")>]
     [<DataRow("07", """uses TestNamespace1.TestNamespace2 alias T2""")>]
     [<TestMethod>]
-    member _.TestUsesClauseForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments usesClause fplCode
+    member _.TestUsesClauseSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments usesClause fplCode
 

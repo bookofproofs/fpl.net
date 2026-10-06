@@ -9,5 +9,5 @@ type TestClassInheritanceTypes () =
 
     [<DataRow("02", """SomeClass""")>]
     [<TestMethod>]
-    member _.TestInheritedTypeForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments inheritedType fplCode
+    member _.TestInheritedTypeSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments inheritedType fplCode

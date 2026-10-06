@@ -14,20 +14,20 @@ type TestProofRelated() =
     [<DataRow("04", """1. 4, byinf ModusPonens |- """)>]
     [<DataRow("05", """1. 1,2,  3 |- """)>]
     [<TestMethod>]
-    member _.TestJustificationForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments justification fplCode
+    member _.TestJustificationSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments justification fplCode
 
     [<DataRow("01", LiteralTrivial)>]
     [<DataRow("02", """and(a,b)""")>]
     [<TestMethod>]
-    member _.TestDerivedArgumentForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments derivedArgument fplCode
+    member _.TestDerivedArgumentSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments derivedArgument fplCode
 
     [<DataRow("01", LiteralTrivial)>]
     [<DataRow("02", """and(a,b)""")>]
     [<TestMethod>]
-    member _.TestArgumentInferenceForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments argumentInference fplCode
+    member _.TestArgumentInferenceSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments argumentInference fplCode
 
     [<DataRow("01", "1: and(a,b)")>]
     [<DataRow("02", "1: revoke 2")>]
@@ -38,8 +38,8 @@ type TestProofRelated() =
     [<DataRow("07", "1: assume true")>]
     [<DataRow("08", "1: revoke 2")>]
     [<TestMethod>]
-    member _.TestJustifiedArgumentForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments justifiedArgument fplCode
+    member _.TestJustifiedArgumentSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments justifiedArgument fplCode
 
     [<DataRow(LiteralByCor, "$1", ":1")>]
     [<DataRow(LiteralByDef, "$1", ":1")>]
@@ -58,10 +58,10 @@ type TestProofRelated() =
     [<DataRow(LiteralByAx, "", "")>]
     [<DataRow(LiteralByInf, "", "")>]
     [<TestMethod>]
-    member _.TestJustificationItemForSyntaxErrorFreeInput (no: string, keyword:string, corRef:string, argRef:string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments justificationItem $"{keyword} A{corRef}{argRef}"
+    member _.TestJustificationItemSyntaxErrorFreeInput (no: string, keyword:string, corRef:string, argRef:string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments justificationItem $"{keyword} A{corRef}{argRef}"
 
     [<DataRow("bydef x")>]
     [<TestMethod>]
-    member _.TestJustificationItemByDefForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments justificationItem fplCode
+    member _.TestJustificationItemByDefSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments justificationItem fplCode

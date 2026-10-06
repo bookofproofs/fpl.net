@@ -12,8 +12,8 @@ type TestStatements () =
     [<DataRow("03", """for n in Range($1,$4) { assert Equal(f(n),n) }""")>]
     [<DataRow("04", """for n in SomeType { x[n] := 1 }""")>]
     [<TestMethod>]
-    member _.TestForStatementForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments forStatement fplCode
+    member _.TestForStatementSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments forStatement fplCode
 
     [<DataRow("01", @"@1 :=true")>]
     [<DataRow("02", @"@1:=true")>]
@@ -22,19 +22,19 @@ type TestStatements () =
     [<DataRow("05", """self := Zero()""")>]
     [<DataRow("06", """n:=mcases ( | (x = $1): false | (x = $2): true | (x = $3): false ? undef )""")>]
     [<TestMethod>]
-    member _.TestAssignmentStatementForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments assignmentStatement fplCode
+    member _.TestAssignmentStatementSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments assignmentStatement fplCode
 
     [<DataRow("01", """del.Test(1,2)""")>]
     [<DataRow("02", """del.Decrement(x)""")>]
     [<TestMethod>]
-    member _.TestFplDelegateForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments fplDelegate fplCode
+    member _.TestFplDelegateSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments fplDelegate fplCode
 
     [<DataRow("01", """assert all n:Set { In(n, self) }""")>]
     [<TestMethod>]
-    member _.TestAssertionStatementForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments assertionStatement fplCode
+    member _.TestAssertionStatementSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments assertionStatement fplCode
 
     [<DataRow("01", """cases ( | Equal(x,0): self := Zero() | Equal(x,1): self := Succ(Zero()) | Equal(x,2): self := Succ(Succ(Zero())) ? self := Succ(del.Decrement(x)) )""")>]
     [<DataRow("02", """cases ( | Equal(n,0): result := m.NeutralElem() ? result := op( y, Exp( m(y,op), y, Sub(n,1)) ) )""")>]
@@ -42,13 +42,13 @@ type TestStatements () =
     [<DataRow("04", """cases ( | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember() ? self:=undefined )""")>]
     [<DataRow("05", """cases ( | (m = 0): result:= n | (Succ(m) = k): result:= Succ(Add(n,k)) ? result:= undef )""")>]
     [<TestMethod>]
-    member _.TestCasesStatementForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments casesStatement fplCode
+    member _.TestCasesStatementSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments casesStatement fplCode
 
     [<DataRow("01", """mcases ( | (x = $1): false | (x = $2): true | (x = $3): false ? undef )""")>]
     [<TestMethod>]
-    member _.TestMapCasesForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments mapCases fplCode
+    member _.TestMapCasesSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments mapCases fplCode
 
     [<DataRow("01", """in TestClass""")>]
     [<DataRow("02", """in someVar""")>]
@@ -56,5 +56,5 @@ type TestStatements () =
     [<DataRow("04", """in ClosedRange(from,to)""")>]
     [<DataRow("05", """in T[x]""")>]
     [<TestMethod>]
-    member _.TestInEntityForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments inEntity fplCode
+    member _.TestInEntitySyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments inEntity fplCode

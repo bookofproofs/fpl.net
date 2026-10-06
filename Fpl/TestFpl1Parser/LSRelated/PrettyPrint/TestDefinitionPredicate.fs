@@ -36,6 +36,6 @@ type TestDefinitionPredicate () =
     [<DataRow("27", """def pred Successor(x: Nat) postfix "'" { intr }""")>]
     [<DataRow("28", """def pred Smaller(x,y: Nat) infix "<" 0 { intr }""")>]
     [<TestMethod>]
-    member _.TestDefinitionPredicateForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments definition fplCode
+    member _.TestDefinitionPredicateSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments definition fplCode
 

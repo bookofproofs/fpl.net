@@ -23,8 +23,8 @@ type TestDefinitionClass () =
     [<DataRow("13", """def class SomeClass :Nat1,Nat2, Nat3,Nat3 { intrinsic }""")>]
     [<DataRow("14", """def cl TestId { ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} ctor TestId(x:ind) {} }""")>]
     [<TestMethod>]
-    member this.TestDefinitionClassWithoutSyntaxErrors (no:string, fplCode:string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments definition fplCode
+    member this.TestDefinitionClassSyntaxErrorFreeInput (no:string, fplCode:string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments definition fplCode
 
 
     [<DataRow("01", """def class FieldPowerN: Obj { }""")>]
@@ -38,6 +38,6 @@ type TestDefinitionClass () =
     [<DataRow("09", """def class FieldPowerN: Set { FieldPowerN() { dec a:obj base.Obj() ; self } optional pred T() { true } FieldPowerN() { dec base.T1() ; self } mand func T() -> obj { dec a:obj ; return x } }""")>]
     [<DataRow("10", """def class FieldPowerN: Set { optional pred T() { true } FieldPowerN() { dec a:obj self.T1() ; self } }""")>]
     [<TestMethod>]
-    member this.TestDefinitionClassIdempotentWithSyntaxErrorInput (no:string, fplCode:string) =
+    member this.TestDefinitionClassSyntaxErrorInput (no:string, fplCode:string) =
         allAssertionsForSyntaxErrorInput fplCode
 

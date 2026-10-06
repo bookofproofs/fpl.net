@@ -13,6 +13,6 @@ type TestAxioms () =
     [<DataRow("04", """proof T$1 {1. 2 |- false ∧ true}""")>]
     [<DataRow("05", """proof Example4$1 { 1. SomeCorollary$1 |- (a > b) qed }""")>]
     [<TestMethod>]
-    member _.TestAxiomForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments axiom fplCode
+    member _.TestAxiomSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments axiom fplCode
 

@@ -10,20 +10,20 @@ type TestLocalizationElements () =
     [<DataRow("01", """x "\Leftrightarrow" y """)>]
     [<DataRow("02", """"\neg(" x ")" """)>]
     [<TestMethod>]
-    member _.TestEbnfTermForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments ebnfTerm fplCode
+    member _.TestEbnfTermSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments ebnfTerm fplCode
 
     [<DataRow("01", """x "\Leftrightarrow" y """)>]
     [<DataRow("02", """"\neg(" x ")" """)>]
     [<DataRow("03", """x "\Leftrightarrow" y | x "\Rightarrow" y """)>]
     [<DataRow("04", """"\neg(" x ")" | x "\Rightarrow" y """)>]
     [<TestMethod>]
-    member _.TestEbnfTranslForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments ebnfTransl fplCode
+    member _.TestEbnfTranslSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments ebnfTransl fplCode
 
     [<DataRow("01", """!tex: x "\Leftrightarrow" y """)>]
     [<DataRow("02", """!tex: x "\Leftrightarrow" y | x "\Rightarrow" y """)>]
     [<TestMethod>]
-    member _.TestLanguageForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments language fplCode
+    member _.TestLanguageSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments language fplCode
 

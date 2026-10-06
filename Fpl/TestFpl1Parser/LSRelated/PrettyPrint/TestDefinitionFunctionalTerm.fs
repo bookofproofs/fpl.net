@@ -55,8 +55,8 @@ type TestDefinitionFunctionalTerm () =
     [<DataRow("45", """def func Add (x,y: Nat) -> Nat infix "+" 2 { intr }""")>]
     [<DataRow("46", """def func Minus(x: Nat) -> Nat prefix "-" { intr }""")>]
     [<TestMethod>]
-    member this.TestDefinitionFunctionalTermForSyntaxErrorFreeInput (no:string, fplCode:string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments definition fplCode
+    member this.TestDefinitionFunctionalTermSyntaxErrorFreeInput (no:string, fplCode:string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments definition fplCode
 
 
     [<DataRow("01", """def func T() -> obj {  }""")>] 
@@ -70,6 +70,6 @@ type TestDefinitionFunctionalTerm () =
     [<DataRow("12", """def func T() -> obj { property pred T() { true } return x }""")>]
     [<DataRow("13", """def function DoubleSuccessor postfix "''" (x: N) -> N { returtttt }""")>]
     [<TestMethod>]
-    member this.TestDefinitionFunctionalTermForSyntaxErrorInput (no:string, fplCode:string) =
+    member this.TestDefinitionFunctionalTermSyntaxErrorInput (no:string, fplCode:string) =
         allAssertionsForSyntaxErrorInput fplCode
 

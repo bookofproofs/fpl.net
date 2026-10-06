@@ -18,6 +18,6 @@ type TestCoordPossibilities () =
     [<DataRow("09", """[PascalCaseId.PascalCaseId()]""")>]
     [<DataRow("10", """[PascalCaseId.PascalCaseId().PascalCaseId()]""")>]
     [<TestMethod>]
-    member _.TestPCoordsForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments bracketedCoords fplCode
+    member _.TestPCoordsSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments bracketedCoords fplCode
 

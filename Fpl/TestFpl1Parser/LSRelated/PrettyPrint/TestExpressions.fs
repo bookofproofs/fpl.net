@@ -539,6 +539,6 @@ type TestExpressions () =
     [<DataRow("quant29", """exn$3  x:ind {not (iif ( iif ( true, iif( true, false)), not true ))}""")>]
     [<DataRow("quant30", """ex x:Real {true}""")>]
     [<TestMethod>]
-    member _.TestExpressionForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments expression fplCode
+    member _.TestExpressionSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments expression fplCode
 

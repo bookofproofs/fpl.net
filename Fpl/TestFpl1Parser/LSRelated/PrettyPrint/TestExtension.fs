@@ -19,6 +19,6 @@ type TestExtension () =
     [<DataRow("10", """ext Digits x@/\d+/->Nat{return x}""")>]
 
     [<TestMethod>]
-    member _.TestDefinitionExtensionForSyntaxErrorFreeInput (no: string, fplCode: string) =
-        allAssertionsForSyntaxErrorFreeInputWithoutComments definitionExtension fplCode
+    member _.TestDefinitionExtensionSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsSyntaxErrorFreeInputWithoutComments definitionExtension fplCode
 
