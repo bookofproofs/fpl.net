@@ -1,5 +1,6 @@
 namespace TestFpl1Parser.LSRelated.PrettyPrint
 
+open System
 open Fpl1Parser.Grammar
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open TestFpl1Parser.LSRelated.PrettyPrint.Commons
@@ -22,26 +23,9 @@ type TestDefinitionClass () =
     [<DataRow("13", """def class SomeClass :Nat1,Nat2, Nat3,Nat3 { intrinsic }""")>]
     [<DataRow("14", """def cl TestId { ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} ctor TestId(x:ind) {} }""")>]
     [<TestMethod>]
-    member this.TestDefinitionClassWithoutSyntaxErrorsRoundTrips (no:string, fplCode:string) =
-        assertRoundTripsWithoutSyntaxErrors definition fplCode
+    member this.TestDefinitionClassWithoutSyntaxErrors (no:string, fplCode:string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments definition fplCode
 
-    [<DataRow("01", """definition class FieldPowerN: Obj { intr }""")>]
-    [<DataRow("02", """definition class FieldPowerN: Set { ctor FieldPowerN() { dec base.Obj() ; } }""")>]
-    [<DataRow("03", """definition class FieldPowerN: Set { dec x: obj ; constructor FieldPowerN() { dec base.Obj() ; } }""")>]
-    [<DataRow("04", """definition cl FieldPowerN: Set { dec a:obj ; ctor FieldPowerN() { dec base.Obj() ; } }""")>]
-    [<DataRow("05", """definition cl FieldPowerN: Set { ctor FieldPowerN() { dec base.Obj() ; } }""")>]
-    [<DataRow("06", """definition cl FieldPowerN: Set { ctor FieldPowerN() { dec base.Obj() ; } constructor FieldPowerN() { dec base.T1() ; } }""")>]
-    [<DataRow("07", """definition cl FieldPowerN: Set { ctor FieldPowerN() { dec base.Obj() ; } ctor FieldPowerN() { dec base.T1() ; } property func T() -> obj { dec a:obj ; return x } property pred T() { true } }""")>]
-    [<DataRow("08", """definition cl FieldPowerN: Set { ctor FieldPowerN() { dec base.T1() ; } property pred T() { true } }""")>]
-    [<DataRow("09", """def class FieldPowerN: Typ1, Typ2, Typ3 { intrinsic }""")>]
-    [<DataRow("10", """def class FieldPowerN: Typ1 { intrinsic }""")>]
-    [<DataRow("11", """def class FieldPowerN: Typ1 { intrinsic property func T() -> obj { dec a:obj ; return x } property pred T() { true } }""")>]
-    [<DataRow("12", """def class SomeClass:Nat1 ,Nat2Nat3,Nat3 { intrinsic }""")>]
-    [<DataRow("13", """def class SomeClass :Nat1,Nat2, Nat3,Nat3 { intrinsic }""")>]
-    [<DataRow("14", """def cl TestId { ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} ctor TestId(x:ind) {} }""")>]
-    [<TestMethod>]
-    member this.TestDefinitionClassIdempotentWithoutSyntaxErrorInput (no:string, fplCode:string) =
-        assertIdempotent definition fplCode
 
     [<DataRow("01", """def class FieldPowerN: Obj { }""")>]
     [<DataRow("02", """def class FieldPowerN: Set { dec:; intr }""")>]
@@ -55,4 +39,5 @@ type TestDefinitionClass () =
     [<DataRow("10", """def class FieldPowerN: Set { optional pred T() { true } FieldPowerN() { dec a:obj self.T1() ; self } }""")>]
     [<TestMethod>]
     member this.TestDefinitionClassIdempotentWithSyntaxErrorInput (no:string, fplCode:string) =
-        assertFullPipelineIdempotent fplCode
+        allAssertionsForSyntaxErrorInput fplCode
+

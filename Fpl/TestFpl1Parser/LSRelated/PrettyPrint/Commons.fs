@@ -11,7 +11,19 @@ open Fpl1Parser.LSRelated.PrettyPrint
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 /// <summary>
-/// Shared pipeline helpers for pretty-print tests.
+/// Shared pipeline helpers for pretty-print tests, covering the following test cases: 
+/// <item> 
+/// 1a: Per-Ast-node test: no syntax error introduced by reformatting
+/// </item>
+/// <item> 
+/// 1b: Per-Ast-node test: idempotency
+/// </item>
+/// <item> 
+/// 1b: Per-Ast-node test: comment-preservation / placement
+/// </item>
+/// <item> 
+/// 2a - 2c: Same as 1a - 1c, but for Per-formattingOptions-field Tests
+/// </item>
 /// </summary>
 /// <remarks>
 /// Two independent pipelines are exposed, matching the two situations a pretty-print test can be in:
@@ -44,11 +56,11 @@ module Commons =
     // Individual-parser pipeline — for 1a/1b/2a/2b only (comment-free snippets).
     // ========================================================================
 
-    /// <summary>Runs <paramref name="parser"/> on <paramref name="code"/>, asserting success, and returns the <c>Ast</c>.</summary>
-    let parseOrFail (parser: Parser<Ast, unit>) (code: string) : Ast =
-        match run (parser .>> eof) code with
+    /// <summary>Runs <paramref name="parser"/> on <paramref name="fplCode"/>, asserting success, and returns the <c>Ast</c>.</summary>
+    let private parseOrFail (parser: Parser<Ast, unit>) (fplCode: string) : Ast =
+        match run (parser .>> eof) fplCode with
         | Success(ast, _, _) -> ast
-        | Failure(msg, _, _) -> failwith $"Expected a successful parse of '{code}' but got: {msg}"
+        | Failure(msg, _, _) -> failwith $"Expected a successful parse of '{fplCode}' but got: {msg}"
 
     /// <summary>Prints an already-parsed single node with no trivia attached (individual-parser pipeline never has comments).</summary>
     let private printAstWith (opts: FormattingOptions) (ast: Ast) : string =
@@ -56,61 +68,61 @@ module Commons =
         print opts map ast
         |> render opts.IndentSize opts.MaxLineLength
 
-    /// <summary>Parses <paramref name="code"/> with <paramref name="parser"/> and renders it via <c>print</c>, using <paramref name="opts"/>.</summary>
-    let printNodeViaParserWith (opts: FormattingOptions) (parser: Parser<Ast, unit>) (code: string) : string =
-        parseOrFail parser code |> printAstWith opts
+    /// <summary>Parses <paramref name="fplCode"/> with <paramref name="parser"/> and renders it via <c>print</c>, using <paramref name="opts"/>.</summary>
+    let private printNodeViaParserWith (opts: FormattingOptions) (parser: Parser<Ast, unit>) (fplCode: string) : string =
+        parseOrFail parser fplCode |> printAstWith opts
 
-    /// <summary>Parses <paramref name="code"/> with <paramref name="parser"/> and renders it via <c>print</c>, using <c>fplFormatDefaults</c>.</summary>
-    let printNodeViaParser (parser: Parser<Ast, unit>) (code: string) : string =
-        printNodeViaParserWith fplFormatDefaults parser code
+    /// <summary>Parses <paramref name="fplCode"/> with <paramref name="parser"/> and renders it via <c>print</c>, using <c>fplFormatDefaults</c>.</summary>
+    let private printNodeViaParser (parser: Parser<Ast, unit>) (fplCode: string) : string =
+        printNodeViaParserWith fplFormatDefaults parser fplCode
 
     /// <summary>
     /// Category 1a/2a (individual-parser variant): re-parses the rendered output with the same
     /// <paramref name="parser"/> and asserts it still succeeds.
     /// </summary>
-    let assertRoundTripsWithoutSyntaxErrorsWith (opts: FormattingOptions) (parser: Parser<Ast, unit>) (code: string) =
-        let rendered = printNodeViaParserWith opts parser code
+    let private assertRoundTripsWithoutSyntaxErrorsWith (opts: FormattingOptions) (parser: Parser<Ast, unit>) (fplCode: string) =
+        let rendered = printNodeViaParserWith opts parser fplCode
         match run (parser .>> eof) rendered with
         | Success _ -> ()
         | Failure(msg, _, _) ->
             Assert.Fail($"Reformatted output failed to re-parse: {msg}{Environment.NewLine}--- rendered ---{Environment.NewLine}{rendered}")
 
     /// <summary>Category 1a (individual-parser variant) using <c>fplFormatDefaults</c>.</summary>
-    let assertRoundTripsWithoutSyntaxErrors (parser: Parser<Ast, unit>) (code: string) =
-        assertRoundTripsWithoutSyntaxErrorsWith fplFormatDefaults parser code
+    let private assertRoundTripsWithoutSyntaxErrors (parser: Parser<Ast, unit>) (fplCode: string) =
+        assertRoundTripsWithoutSyntaxErrorsWith fplFormatDefaults parser fplCode
 
     /// <summary>
     /// Category 1b/2b (individual-parser variant): format → parse-the-output → format again; the two
     /// renderings must match.
     /// </summary>
-    let assertIdempotentWith (opts: FormattingOptions) (parser: Parser<Ast, unit>) (code: string) =
-        let firstPass = printNodeViaParserWith opts parser code
+    let private assertIdempotentWith (opts: FormattingOptions) (parser: Parser<Ast, unit>) (fplCode: string) =
+        let firstPass = printNodeViaParserWith opts parser fplCode
         let secondPass = printNodeViaParserWith opts parser firstPass
         Assert.AreEqual(firstPass, secondPass, "Expected pretty-printing to be idempotent after one reformat.")
 
     /// <summary>Category 1b (individual-parser variant) using <c>fplFormatDefaults</c>.</summary>
-    let assertIdempotent (parser: Parser<Ast, unit>) (code: string) =
-        assertIdempotentWith fplFormatDefaults parser code
+    let private assertIdempotent (parser: Parser<Ast, unit>) (fplCode: string) =
+        assertIdempotentWith fplFormatDefaults parser fplCode
 
     // ========================================================================
     // Full-pipeline (fplParser + printAll) — usable for 1a/1b/2a/2b, and REQUIRED for 1c/2c.
     // ========================================================================
 
     /// <summary>
-    /// Runs <c>Fpl1Parser.Main.fplParser</c> on <paramref name="code"/>, builds the <c>TriviaMap</c>
-    /// from the *original* (un-stripped) <paramref name="code"/>, and renders via <c>printAll</c>.
+    /// Runs <c>Fpl1Parser.Main.fplParser</c> on <paramref name="fplCode"/>, builds the <c>TriviaMap</c>
+    /// from the *original* (un-stripped) <paramref name="fplCode"/>, and renders via <c>printAll</c>.
     /// </summary>
     /// <returns>The rendered text, plus the clean-parse success flag returned by <c>fplParser</c>.</returns>
-    let formatViaFplParserWith (opts: FormattingOptions) (code: string) : string * bool =
-        let asts, success = Fpl1Parser.Main.fplParser code
-        let comments = findComments code
+    let private formatViaFplParserWith (opts: FormattingOptions) (fplCode: string) : string * bool =
+        let asts, success = Fpl1Parser.Main.fplParser fplCode
+        let comments = findComments fplCode
         let positions = asts |> List.collect Fpl1Parser.LSRelated.Trivia.getAllPositions
         let map = buildTriviaMap positions comments
         printAll opts map asts, success
 
     /// <summary>Full pipeline using <c>fplFormatDefaults</c>.</summary>
-    let formatViaFplParser (code: string) : string * bool =
-        formatViaFplParserWith fplFormatDefaults code
+    let private formatViaFplParser (fplCode: string) : string * bool =
+        formatViaFplParserWith fplFormatDefaults fplCode
 
     /// <summary>True if any top-level ast produced by <c>fplParser</c> is a syntax-error placeholder.</summary>
     let private isErrorAst (ast: Ast) =
@@ -118,20 +130,9 @@ module Commons =
         | ErrorSyntax _ | ErrorSyntaxBacktracking _ | ErrorSyntaxChain _ -> true
         | _ -> false
 
-    /// <summary>
-    /// Category 1a/2a (full-pipeline variant): formats <paramref name="code"/> via <c>fplParser</c> +
-    /// <c>printAll</c>, then re-parses the *output* and asserts a clean parse (no error-recovery
-    /// placeholders).
-    /// </summary>
-    let assertFullPipelineRoundTripsWithoutSyntaxErrors (code: string) =
-        let formatted, _ = formatViaFplParser code
-        let asts, success = Fpl1Parser.Main.fplParser formatted
-        Assert.IsTrue(success, $"Expected a clean re-parse of the reformatted output but got error recovery:{Environment.NewLine}{formatted}")
-        Assert.IsFalse(asts |> List.exists isErrorAst, $"Expected no error-syntax nodes in the re-parsed, reformatted output:{Environment.NewLine}{formatted}")
-
     /// <summary>Category 1b/2b (full-pipeline variant): format → format-again; the two outputs must match.</summary>
-    let assertFullPipelineIdempotent (code: string) =
-        let firstPass, _ = formatViaFplParser code
+    let private assertFullPipelineIdempotent (fplCode: string) =
+        let firstPass, _ = formatViaFplParser fplCode
         let secondPass, _ = formatViaFplParser firstPass
         Assert.AreEqual(firstPass, secondPass, "Expected printAll to be idempotent after one reformat.")
 
@@ -142,10 +143,10 @@ module Commons =
     /// <summary>
     /// Category 1c/2c: asserts that <paramref name="commentText"/> appears on the line immediately
     /// preceding the first line containing <paramref name="anchorText"/> in the <c>printAll</c> output
-    /// of <paramref name="code"/> (i.e. attached as leading trivia of the node rendering <paramref name="anchorText"/>).
+    /// of <paramref name="fplCode"/> (i.e. attached as leading trivia of the node rendering <paramref name="anchorText"/>).
     /// </summary>
-    let assertLeadingCommentAdjacent (code: string) (commentText: string) (anchorText: string) =
-        let rendered, _ = formatViaFplParser code
+    let private assertLeadingCommentAdjacent (fplCode: string) (commentText: string) (anchorText: string) =
+        let rendered, _ = formatViaFplParser fplCode
         let lines = toLines rendered
         match lines |> Array.tryFindIndex (fun l -> l.Contains(anchorText: string)) with
         | None -> Assert.Fail($"Expected rendered output to contain anchor '{anchorText}' but got:{Environment.NewLine}{rendered}")
@@ -157,11 +158,11 @@ module Commons =
 
     /// <summary>
     /// Category 1c/2c: asserts that <paramref name="commentText"/> appears on the same rendered line
-    /// as, and after, <paramref name="anchorText"/> in the <c>printAll</c> output of <paramref name="code"/>
+    /// as, and after, <paramref name="anchorText"/> in the <c>printAll</c> output of <paramref name="fplCode"/>
     /// (i.e. attached as trailing trivia of the node rendering <paramref name="anchorText"/>).
     /// </summary>
-    let assertTrailingCommentSameLine (code: string) (anchorText: string) (commentText: string) =
-        let rendered, _ = formatViaFplParser code
+    let private assertTrailingCommentSameLine (fplCode: string) (anchorText: string) (commentText: string) =
+        let rendered, _ = formatViaFplParser fplCode
         let lines = toLines rendered
         match lines |> Array.tryFindIndex (fun l -> l.Contains(anchorText: string)) with
         | None -> Assert.Fail($"Expected rendered output to contain anchor '{anchorText}' but got:{Environment.NewLine}{rendered}")
@@ -172,3 +173,34 @@ module Commons =
             Assert.IsTrue(
                 commentPos > anchorPos,
                 $"Expected trailing comment '{commentText}' to appear after anchor '{anchorText}' on the same rendered line, but line was: '{line}'{Environment.NewLine}--- full rendered ---{Environment.NewLine}{rendered}")
+
+
+    let private assertCommentPreservationPlacement (fplCode: string) =
+        let anchorText = "/*anchor*/"
+
+        // Leading comment: "/*anchor*/" immediately precedes fplCode (no blank line), so it attaches
+        // as leading trivia to the same node and renders on its own line directly above the fplCode.
+        // "// leading comment" is pretended one line further up and must land immediately above it.
+        let withLeadingComment = sprintf "// leading comment%s%s%s" Environment.NewLine anchorText fplCode
+        assertLeadingCommentAdjacent withLeadingComment "// leading comment" anchorText
+
+        // Trailing comment: "/*anchor*/" is appended inline right after fplCode, so it attaches as
+        // trailing trivia to the last token and renders on the same line. "// trailing comment" is
+        // appended immediately after it and must land on the same line, after the anchor.
+        let withTrailingComment = sprintf "%s %s // trailing comment" fplCode anchorText
+        assertTrailingCommentSameLine withTrailingComment anchorText "// trailing comment"
+
+
+    /// <summary>Runs all tests assertions for syntax-free input without comments (used for individual parsers to avoid duplicating the same DataRow test for each test separately).</summary>
+    let allAssertionsForSyntaxErrorFreeInputWithoutComments (parser: Parser<Ast, unit>) (fplCode: string) =
+        // 1a test: no syntax errors introduced by reformatting
+        assertRoundTripsWithoutSyntaxErrors parser fplCode
+        // 1b test: idempotency test for syntax-error-free input
+        assertIdempotent parser fplCode
+
+    /// <summary>Runs all tests assertions for syntax-free input (used to avoid duplicating the same DataRow test in different unit tests).</summary>
+    let allAssertionsForSyntaxErrorInput (fplCode: string) =
+        // 1b test: idempotency test for syntax-error input
+        assertFullPipelineIdempotent fplCode
+        // 1c test: comment preservation / placement for syntax-error input
+        assertCommentPreservationPlacement fplCode

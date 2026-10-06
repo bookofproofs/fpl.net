@@ -429,7 +429,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     // Definitions
     | DefinitionClass(pos, (((a1, a1Opt), a2Opt), a3)) ->
         withTrivia map pos
-            (concat [ keyword opts "cl" "class"; text " "; p a1
+            (concat [ keyword opts "def" "definition"; text " "; p a1
                       opt (fun a -> concat [ text ": "; p a ]) a1Opt
                       opt (fun a -> concat [ text " "; p a ]) a2Opt
                       p a3 ])
@@ -465,7 +465,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
         concat [ p a1; p a2 ]
 
     | DefinitionFunctionalTerm(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ p a1; text " "; p a2 ])
+        withTrivia map pos (concat [ keyword opts "def" "definition"; text " "; p a1; text " "; p a2 ])
     | FunctionalTermSignature((pos, (((a1, a1Opt), a2), a3)), a4Opt) ->
         withTrivia map pos
             (concat [ keyword opts "func" "function"; text " "; p a1
