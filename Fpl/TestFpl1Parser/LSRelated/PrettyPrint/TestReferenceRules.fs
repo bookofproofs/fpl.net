@@ -1,11 +1,12 @@
-namespace TestFpl1Parser.BuildingBlocks
+namespace TestFpl1Parser.LSRelated.PrettyPrint
 
-open FParsec
 open Fpl1Parser.Grammar
+open Fpl0Base.Primitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open TestFpl1Parser.LSRelated.PrettyPrint.Commons
 
 [<TestClass>]
-type TestReferenceRules() =
+type TestReferenceRules () =
 
     [<DataRow("01", """inf ModusPonens { dec a:obj p,q: pred; premise: and (p, impl (p,q) ) conclusion: q }""")>]
     [<DataRow("02", """inference ModusTollens { dec a:obj p,q: pred; premise: and (not (q), impl(p,q) ) conclusion: not (p) }""")>]
@@ -18,8 +19,6 @@ type TestReferenceRules() =
     [<DataRow("09", """inf ExistsByExample {dec c: obj; pre: true con: true}""")>]
     [<DataRow("10", """inf PrecedingResults {dec a,b: pred; pre: a, b con: and(a,b)}""")>]
     [<TestMethod>]
-    member this.TestRuleOfInferenceSuccess (no:string, fplCode:string) =
-        let result = run (ruleOfInference .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestRuleOfInferenceForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments ruleOfInference fplCode
+

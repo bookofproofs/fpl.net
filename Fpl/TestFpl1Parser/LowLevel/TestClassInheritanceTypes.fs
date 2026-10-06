@@ -9,7 +9,6 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 type TestClassInheritanceTypes () =
 
     [<DataRow("02", """SomeClass""")>]
-    [<DataRow("03", """SomeClass""")>]
     [<TestMethod>]
     member this.TestInheritedTypeSuccess (no:string, input:string) =
         let result = run (inheritedType .>> eof) input

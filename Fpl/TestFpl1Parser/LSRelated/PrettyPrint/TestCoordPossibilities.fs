@@ -1,10 +1,8 @@
-namespace TestFpl1Parser.LowLevel
+namespace TestFpl1Parser.LSRelated.PrettyPrint
 
-open FParsec
 open Fpl1Parser.Grammar
-open Fpl0Base.Primitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
-
+open TestFpl1Parser.LSRelated.PrettyPrint.Commons
 
 [<TestClass>]
 type TestCoordPossibilities () =
@@ -20,11 +18,6 @@ type TestCoordPossibilities () =
     [<DataRow("09", """[PascalCaseId.PascalCaseId()]""")>]
     [<DataRow("10", """[PascalCaseId.PascalCaseId().PascalCaseId()]""")>]
     [<TestMethod>]
-    member this.TestCoordinateSuccess (no:string, input:string) =
-        let result = run (bracketedCoords .>> eof) input
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-
+    member _.TestPCoordsForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments bracketedCoords fplCode
 

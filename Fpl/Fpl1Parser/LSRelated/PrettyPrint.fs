@@ -452,7 +452,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
 
     | DefinitionPredicate(pos, (a, tupOpt)) ->
         withTrivia map pos
-            (concat [ p a
+            (concat [ keyword opts "def" "definition"; text " "; p a
                       opt (fun (a1, astsOpt) ->
                           braces opts (concat [ p a1; opt (fun asts -> concat (asts |> List.map p)) astsOpt ])) tupOpt ])
     | PredicateSignature((pos, ((a1, a1Opt), a2)), a3Opt) ->

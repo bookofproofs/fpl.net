@@ -46,6 +46,7 @@
         <Compile Include="ErrRecovery\TestErrDiagnosticsLowLevel.fs" />
         <Compile Include="ErrRecovery\TestRecovery.fs" />
         <Compile Include="LSRelated\PrettyPrint\Commons.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestVariableTypes.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestProofRelated.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestStatements.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestPredicatesSpecific.fs" />
@@ -54,14 +55,19 @@
         <Compile Include="LSRelated\PrettyPrint\TestLocalizationElements.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestIdentifiers.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestSignatures.fs" />
-        <Compile Include="LSRelated\PrettyPrint\TestVariableTypes - Copy (4).fs" />
-        <Compile Include="LSRelated\PrettyPrint\TestVariableTypes - Copy (3).fs" />
-        <Compile Include="LSRelated\PrettyPrint\TestVariableTypes - Copy (2).fs" />
-        <Compile Include="LSRelated\PrettyPrint\TestVariableTypes - Copy.fs" />
-        <Compile Include="LSRelated\PrettyPrint\TestVariableTypes.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestCoordPossibilities.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestClassInheritanceTypes.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestExpressions.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestReferenceRules.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestProof.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestTheoremLikeStatements.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestLocalization.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestDefinitionClass.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestDefinitionPredicate.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestDefinitionFunctionalTerm.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestExtension.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestUsesClause.fs" />
+        <Compile Include="LSRelated\PrettyPrint\TestAxioms.fs" />
     </ItemGroup>
 
 

@@ -1,8 +1,8 @@
-namespace TestFpl1Parser.BuildingBlocks
+namespace TestFpl1Parser.LSRelated.PrettyPrint
 
-open FParsec
 open Fpl1Parser.Grammar
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open TestFpl1Parser.LSRelated.PrettyPrint.Commons
 
 [<TestClass>]
 type TestDefinitionPredicate () =
@@ -36,27 +36,6 @@ type TestDefinitionPredicate () =
     [<DataRow("27", """def pred Successor(x: Nat) postfix "'" { intr }""")>]
     [<DataRow("28", """def pred Smaller(x,y: Nat) infix "<" 0 { intr }""")>]
     [<TestMethod>]
-    member this.TestDefinitionPredicateSuccess (no:string, fplCode:string) =
-        let result = run (definition .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+    member _.TestDefinitionPredicateForSyntaxErrorFreeInput (no: string, fplCode: string) =
+        allAssertionsForSyntaxErrorFreeInputWithoutComments definition fplCode
 
-    [<DataRow("01", """def pred T() {  }""")>] // a predicate cannot be empty
-    [<DataRow("02", """def pred T() { dec; }""")>] // a predicate cannot be empty with dec
-    [<DataRow("03", """def pred T() { dec a:obj ; }""")>] // a predicate cannot be empty with spec 
-    [<DataRow("05", """def pred T() { dec a:obj ; intrinsic }""")>] // a predicate cannot be intrinsic with some preceding spec or dec 
-    [<DataRow("06", """def pred T() { dec; intrinsic }""")>] // a predicate cannot be intrinsic with some preceding spec or dec 
-    [<DataRow("08", """def pred T() { intrinsic dec; }""")>] // a predicate cannot be intrinsic with some following declarations or specifications 
-    [<DataRow("09", """def pred T() { intrinsic dec a:obj ; }""")>] // a predicate cannot be intrinsic with some following declarations or specifications 
-    [<DataRow("11", """def pred T() { property func T() -> obj { dec a:obj ; return x } intrinsic property pred T() { true } }""")>] // a predicate cannot be intrinsic with some preceding properties 
-    [<DataRow("12", """def pred T() { property pred T() { true } true }""")>] // properties cannot precede a predicate within a predicate definition 
-    [<DataRow("13", """def pred T() postfix "" {intr}""")>]
-    [<DataRow("14", """def pred T() infix "" 0 {intr}""")>]
-    [<DataRow("15", """def pred T() prefix "" {intr}""")>]
-    [<TestMethod>]
-    member this.TestDefinitionPredicateFailure (no:string, fplCode:string) =
-        let result = run (definition .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
