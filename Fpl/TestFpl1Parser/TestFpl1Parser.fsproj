@@ -69,6 +69,12 @@
         <Compile Include="LSRelated\PrettyPrint\TestUsesClause.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestAxioms.fs" />
         <Compile Include="LSRelated\PrettyPrint\TestTopLevel.fs" />
+        <Compile Include="LSRelated\PrettyPrint\FormattingOptions\TestFormattingOptionsBraceParenStyle.fs" />
+        <Compile Include="LSRelated\PrettyPrint\FormattingOptions\TestFormattingOptionsCommaStyle.fs" />
+        <Compile Include="LSRelated\PrettyPrint\FormattingOptions\TestFormattingOptionsSpacing.fs" />
+        <Compile Include="LSRelated\PrettyPrint\FormattingOptions\TestFormattingOptionsKeywordNotation.fs" />
+        <Compile Include="LSRelated\PrettyPrint\FormattingOptions\TestFormattingOptionsBlankLines.fs" />
+        <Compile Include="LSRelated\PrettyPrint\FormattingOptions\TestFormattingOptionsDeclSemicolon.fs" />
     </ItemGroup>
 
 

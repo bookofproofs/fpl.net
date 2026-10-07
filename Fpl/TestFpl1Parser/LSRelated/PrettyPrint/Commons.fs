@@ -190,7 +190,6 @@ module Commons =
         let withTrailingComment = sprintf "%s %s // trailing comment" fplCode anchorText
         assertTrailingCommentSameLine withTrailingComment anchorText "// trailing comment"
 
-
     /// <summary>Runs all tests assertions for syntax-free input without comments (used for individual parsers to avoid duplicating the same DataRow test for each test separately).</summary>
     let allAssertionsSyntaxErrorFreeInputWithoutComments (parser: Parser<Ast, unit>) (fplCode: string) =
         // 1a test: no syntax errors introduced by reformatting
@@ -204,3 +203,67 @@ module Commons =
         assertFullPipelineIdempotent fplCode
         // 1c test: comment preservation / placement for syntax-error input
         assertCommentPreservationPlacement fplCode
+
+    /// <summary>Category 1c/2c (opts-parameterized): asserts leading-comment adjacency using <paramref name="opts"/> instead of <c>fplFormatDefaults</c>.</summary>
+    let private assertLeadingCommentAdjacentWith (opts: FormattingOptions) (fplCode: string) (commentText: string) (anchorText: string) =
+        let rendered, _ = formatViaFplParserWith opts fplCode
+        let lines = toLines rendered
+        match lines |> Array.tryFindIndex (fun l -> l.Contains(anchorText: string)) with
+        | None -> Assert.Fail($"Expected rendered output to contain anchor '{anchorText}' but got:{Environment.NewLine}{rendered}")
+        | Some 0 -> Assert.Fail($"Expected a preceding line for leading comment '{commentText}' but anchor was on the first line.")
+        | Some i ->
+            Assert.IsTrue(
+                lines.[i - 1].Contains(commentText: string),
+                $"Expected line immediately preceding anchor '{anchorText}' to contain leading comment '{commentText}', but it was: '{lines.[i - 1]}'{Environment.NewLine}--- full rendered ---{Environment.NewLine}{rendered}")
+
+    /// <summary>Category 1c/2c (opts-parameterized): asserts trailing-comment placement using <paramref name="opts"/> instead of <c>fplFormatDefaults</c>.</summary>
+    let private assertTrailingCommentSameLineWith (opts: FormattingOptions) (fplCode: string) (anchorText: string) (commentText: string) =
+        let rendered, _ = formatViaFplParserWith opts fplCode
+        let lines = toLines rendered
+        match lines |> Array.tryFindIndex (fun l -> l.Contains(anchorText: string)) with
+        | None -> Assert.Fail($"Expected rendered output to contain anchor '{anchorText}' but got:{Environment.NewLine}{rendered}")
+        | Some i ->
+            let line = lines.[i]
+            let anchorPos = line.IndexOf(anchorText: string)
+            let commentPos = line.IndexOf(commentText: string)
+            Assert.IsTrue(
+                commentPos > anchorPos,
+                $"Expected trailing comment '{commentText}' to appear after anchor '{anchorText}' on the same rendered line, but line was: '{line}'{Environment.NewLine}--- full rendered ---{Environment.NewLine}{rendered}")
+
+    /// <summary>Category 2c: comment preservation / placement for a given <paramref name="opts"/>.</summary>
+    let private assertCommentPreservationPlacementWith (opts: FormattingOptions) (fplCode: string) =
+        let anchorText = "/*anchor*/"
+        let withLeadingComment = sprintf "// leading comment%s%s%s" Environment.NewLine anchorText fplCode
+        assertLeadingCommentAdjacentWith opts withLeadingComment "// leading comment" anchorText
+
+        let withTrailingComment = sprintf "%s %s // trailing comment" fplCode anchorText
+        assertTrailingCommentSameLineWith opts withTrailingComment anchorText "// trailing comment"
+
+
+    /// <summary>Category 2b (full-pipeline variant, opts-parameterized): format → format-again using <paramref name="opts"/>; the two outputs must match.</summary>
+    let private assertFullPipelineIdempotentWith (opts: FormattingOptions) (fplCode: string) =
+        let firstPass, _ = formatViaFplParserWith opts fplCode
+        let secondPass, _ = formatViaFplParserWith opts firstPass
+        Assert.AreEqual(firstPass, secondPass, "Expected printAll to be idempotent after one reformat (with custom FormattingOptions).")
+
+    /// <summary>
+    /// Category 2a (full-pipeline variant): formats <paramref name="fplCode"/> under <paramref name="opts"/>,
+    /// then re-runs the full pipeline on the *rendered* output and asserts it still parses cleanly
+    /// (i.e. reformatting did not introduce any new syntax errors).
+    /// </summary>
+    let private assertFullPipelineRoundTripsWithoutSyntaxErrorsWith (opts: FormattingOptions) (fplCode: string) =
+        let rendered, originalSuccess = formatViaFplParserWith opts fplCode
+        Assert.IsTrue(originalSuccess, $"Expected clean parse for '{fplCode}' prior to asserting 2a/2b/2c under custom FormattingOptions.")
+        let _, reparseSuccess = formatViaFplParserWith opts rendered
+        Assert.IsTrue(
+            reparseSuccess,
+            $"Expected reformatted output to be free of syntax errors under custom FormattingOptions:{Environment.NewLine}{rendered}")
+
+    /// <summary>Runs all 2a/2b/2c assertions for a representative snippet under a given non-default <paramref name="opts"/>.</summary>
+    let allAssertionsForFormattingOptions (opts: FormattingOptions) (fplCode: string) =
+        // 2a test: no syntax errors introduced by reformatting under custom opts
+        assertFullPipelineRoundTripsWithoutSyntaxErrorsWith opts fplCode
+        // 2b test: idempotency under custom opts
+        assertFullPipelineIdempotentWith opts fplCode
+        // 2c test: comment preservation / placement under custom opts
+        assertCommentPreservationPlacementWith opts fplCode
