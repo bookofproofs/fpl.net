@@ -16,6 +16,7 @@ open Fpl1Parser.Types
 open Fpl1Parser.LSRelated.CommentLexer
 open Fpl1Parser.LSRelated.Trivia
 open Fpl1Parser.LSRelated.TriviaMap
+open Fpl1Parser.LSRelated.FormattingOptions
 open Fpl1Parser.LSRelated.PrettyPrint
 open Fpl3LanguageServer.ServiceFormatting.SettingsPull
 
@@ -62,18 +63,13 @@ type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferMan
                     // Merge comments + node positions into a lookup table
                     let triviaMap = buildTriviaMap nodePositions comments
 
-                    // Pull the client's current formatting preferences on every request, rather
-                    // than relying solely on workspace/didChangeConfiguration having been received
-                    // (not all clients reliably send that push notification). Also refresh
-                    // SettingsStore so other consumers see the latest value too.
-                    let options =
-                        try
-                            let pulled = pullCurrentOptions languageServer.Configuration
-                            settingsStore.Update(pulled)
-                            pulled
-                        with ex ->
-                            logException languageServer ex "FormattingHandler.Handle (pullCurrentOptions)"
-                            settingsStore.Current
+                    // Pull the client's current formatting preferences on every request via a raw
+                    // workspace/configuration request, rather than relying on a cached
+                    // SettingsStore value (which is only ever updated by the unreliable
+                    // workspace/didChangeConfiguration push path). Also refresh SettingsStore so
+                    // other consumers see the latest value too.
+                    let! options = pullCurrentOptionsAsync languageServer settingsStore.Current
+                    settingsStore.Update(options)
 
                     // Entry point into PrettyPrint: printAll drives print recursively per node
                     let formattedText = printAll options triviaMap asts

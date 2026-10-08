@@ -21,10 +21,12 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[parser]** Add user-defined options supporting formatting service for the language server 
 - **[parser]** Add `Doc.collapseBlankLines` post-processing step to enforce `MaxConsecutiveBlankLines` in the formatting service
 - **[language-server]** Add a and hook-up an initial formatting service for FPL 
-- **[language-server]** Wire user-configured `FormattingOptions` through to the formatting service: new `SettingsStore` singleton, `SettingsTranslation` module translating client JSON payloads into `FormattingOptions`, and a `FormattingConfigurationHandler` reacting to `workspace/didChangeConfiguration` and pulling initial settings via `workspace/configuration` on startup, replacing the previously hardcoded `fplFormatDefaults`
+- **[language-server]** Wire user-configured `FormattingOptions` through to the formatting service: new `SettingsStore` singleton, `SettingsTranslation` module translating client JSON payloads into `FormattingOptions`, and a `SettingsPull` module issuing a live `workspace/configuration` request on every `textDocument/formatting` request, replacing the previously hardcoded `fplFormatDefaults`
 ### Changed
 - **[parser]** consolidate unit test namespaces and convert single-case test methods to datarow-driven test methods (if not already the case)
-
+### Fixed
+- **[language-server]** Corrected FPL formatting settings not taking effect after being changed in the Settings UI: settings are now pulled fresh via a direct `workspace/configuration` request on each formatting request, instead of relying on the `OmniSharp.Extensions.LanguageServer` `IConfiguration` cache and `workspace/didChangeConfiguration` push notifications, which `vscode-languageclient` does not reliably send without additional dynamic capability registration
+ 
 ## [v5.1.1] - 2026-09-27
 ### Added
 - **[vscode]** New release 5.1.1, automate syncing and checking vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files

@@ -17,6 +17,7 @@ open Fpl3LanguageServer.ServiceAutoCompletion.Handler
 open Fpl3LanguageServer.ServiceFormatting.Handler
 open Fpl3LanguageServer.ServiceFormatting.ConfigurationHandler
 open Fpl3LanguageServer.ServiceFormatting.SettingsPull
+open Fpl1Parser.LSRelated.FormattingOptions
 
 let private configureServices (services: IServiceCollection) =
     services.AddSingleton<BufferManager>() |> ignore
@@ -64,10 +65,11 @@ let main _ =
                                 // Best-effort initial pull; FormattingHandler re-pulls on every
                                 // request regardless, so this just seeds SettingsStore early for
                                 // any other consumer.
-                                try
-                                    settingsStore.Update(pullCurrentOptions languageServer.Configuration)
-                                with ex ->
-                                    logException languageServer ex "OnInitialize.Configuration"
+                                task {
+                                    let! options = pullCurrentOptionsAsync languageServer fplFormatDefaults
+                                    settingsStore.Update(options)
+                                }
+                                |> ignore
 
                                 Task.CompletedTask
                             | _ -> raise (Exception("Failed to cast s to LanguageServer")))
