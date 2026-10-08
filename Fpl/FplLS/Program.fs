@@ -1,11 +1,10 @@
-module FplLS.Program
 
 open System
 open System.Threading.Tasks
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Logging
 open Newtonsoft.Json.Linq
-open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open OmniSharp.Extensions.LanguageServer.Server
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.SymbolTable.Storage.Heap
@@ -27,6 +26,19 @@ let private configureServices (services: IServiceCollection) =
     services.AddSingleton<SettingsStore>() |> ignore
     services.AddSingleton<FormattingHandler>() |> ignore
     services.AddSingleton<FormattingConfigurationHandler>() |> ignore
+
+/// <summary>
+/// Converts the <c>fplExtension.format</c> section of the client-provided
+/// <see cref="IConfiguration"/> into a flat <see cref="JObject"/> (one property per leaf key),
+/// suitable for <see cref="SettingsTranslation.translate"/>.
+/// </summary>
+let private formatSectionToJObject (configuration: IConfiguration) : JToken =
+    let section = configuration.GetSection("fplExtension").GetSection("format")
+    let result = JObject()
+    for child in section.GetChildren() do
+        if not (isNull child.Value) then
+            result.[child.Key] <- JValue(child.Value :> obj)
+    result :> JToken
 
 [<EntryPoint>]
 let main _ =
@@ -68,25 +80,12 @@ let main _ =
                                 // silently to fplFormatDefaults (already seeded in SettingsStore)
                                 // if the client doesn't support workspace/configuration or the
                                 // request fails for any reason.
-                                task {
-                                    try
-                                        let configParams =
-                                            ConfigurationParams(
-                                                Items =
-                                                    Container<ConfigurationItem>(
-                                                        [| ConfigurationItem(Section = "fplExtension.format") |]))
-
-                                        let! result = languageServer.Workspace.RequestConfiguration(configParams, Threading.CancellationToken.None)
-
-                                        result
-                                        |> Seq.tryHead
-                                        |> Option.iter (fun (section: JToken) ->
-                                            let options = translate fplFormatDefaults section
-                                            settingsStore.Update(options))
-                                    with ex ->
-                                        logException languageServer ex "OnInitialize.RequestConfiguration"
-                                }
-                                |> ignore
+                                try
+                                    let formatSection = formatSectionToJObject languageServer.Configuration
+                                    let options = translate fplFormatDefaults formatSection
+                                    settingsStore.Update(options)
+                                with ex ->
+                                    logException languageServer ex "OnInitialize.Configuration"
 
                                 Task.CompletedTask
                             | _ -> raise (Exception("Failed to cast s to LanguageServer")))

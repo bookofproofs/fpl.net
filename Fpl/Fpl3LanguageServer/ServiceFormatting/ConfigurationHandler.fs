@@ -1,4 +1,3 @@
-/// <summary>
 /// Handles the client-pushed <c>workspace/didChangeConfiguration</c> notification, translating
 /// the <c>fplExtension.format</c> section of the payload into a
 /// <see cref="Fpl1Parser.LSRelated.FormattingOptions.FormattingOptions"/> value and storing it in
@@ -8,9 +7,12 @@ module Fpl3LanguageServer.ServiceFormatting.ConfigurationHandler
 
 open System.Threading
 open System.Threading.Tasks
+open MediatR
 open Newtonsoft.Json.Linq
+open OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open OmniSharp.Extensions.LanguageServer.Protocol.Server
+open OmniSharp.Extensions.LanguageServer.Protocol.Workspace
 open Fpl3LanguageServer.Buffers.Logging
 open Fpl3LanguageServer.Buffers.SettingsStore
 open Fpl1Parser.LSRelated.FormattingOptions
@@ -40,6 +42,8 @@ let private extractFormatSection (settings: JToken) : JToken =
 /// </summary>
 type FormattingConfigurationHandler(languageServer: ILanguageServer, settingsStore: SettingsStore) =
 
+    let mutable capability = DidChangeConfigurationCapability()
+
     interface IDidChangeConfigurationHandler with
 
         member _.Handle(request: DidChangeConfigurationParams, cancellationToken: CancellationToken) : Task<Unit> =
@@ -52,3 +56,9 @@ type FormattingConfigurationHandler(languageServer: ILanguageServer, settingsSto
                 logException languageServer ex "FormattingConfigurationHandler.Handle"
 
             Unit.Task
+
+        member _.GetRegistrationOptions() : obj =
+            null
+
+        member _.SetCapability(cap: DidChangeConfigurationCapability) =
+            capability <- cap
