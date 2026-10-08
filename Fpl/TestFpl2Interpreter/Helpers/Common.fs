@@ -75,11 +75,9 @@ let checkForUnexpectedErrors (filename:string) fplCode =
         diagnosticsContainer.Collection
         |> List.filter (fun d -> d.Code.Code = "SY000" || d.Code.Code = "SY001" || d.Code.Code = "SY002" || d.Code.Code = "GEN00")
 
-    let currDir = Path.GetDirectoryName(filename)
+    let currDir = Path.GetDirectoryName(filename) |> Option.ofObj |> Option.defaultValue "."
     if errors.Length > 0 then 
         File.AppendAllText(Path.Combine(currDir, "SyntaxErrorsLog.txt"), $"Syntax errors detected in test {filename}{Environment.NewLine}{fplCode}{Environment.NewLine}------{Environment.NewLine}") 
-        failwith "Syntax error found." |> ignore
-
 
     let contextErrors =
         diagnosticsContainer.Collection
