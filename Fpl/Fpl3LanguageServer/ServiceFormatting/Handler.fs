@@ -16,8 +16,8 @@ open Fpl1Parser.Types
 open Fpl1Parser.LSRelated.CommentLexer
 open Fpl1Parser.LSRelated.Trivia
 open Fpl1Parser.LSRelated.TriviaMap
-open Fpl1Parser.LSRelated.FormattingOptions
 open Fpl1Parser.LSRelated.PrettyPrint
+open Fpl3LanguageServer.ServiceFormatting.SettingsPull
 
 /// <summary>
 /// Handles textDocument/formatting requests, delegating to the FPL pretty-printer
@@ -62,8 +62,21 @@ type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferMan
                     // Merge comments + node positions into a lookup table
                     let triviaMap = buildTriviaMap nodePositions comments
 
+                    // Pull the client's current formatting preferences on every request, rather
+                    // than relying solely on workspace/didChangeConfiguration having been received
+                    // (not all clients reliably send that push notification). Also refresh
+                    // SettingsStore so other consumers see the latest value too.
+                    let options =
+                        try
+                            let pulled = pullCurrentOptions languageServer.Configuration
+                            settingsStore.Update(pulled)
+                            pulled
+                        with ex ->
+                            logException languageServer ex "FormattingHandler.Handle (pullCurrentOptions)"
+                            settingsStore.Current
+
                     // Entry point into PrettyPrint: printAll drives print recursively per node
-                    let formattedText = printAll settingsStore.Current triviaMap asts
+                    let formattedText = printAll options triviaMap asts
 
                     // Wrap as a single full-document TextEdit
                     let textPositions = TextPositions(originalText)

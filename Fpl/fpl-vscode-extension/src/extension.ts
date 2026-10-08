@@ -60,7 +60,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             debug: { command: relPathToDotnet, args: [relPathToServerDll] }
         };
 
-        const clientOptions: LanguageClientOptions = { documentSelector: [{ scheme: 'file', language: 'fpl' }] };
+        const clientOptions: LanguageClientOptions = {
+            documentSelector: [{ scheme: 'file', language: 'fpl' }],
+            synchronize: {
+                configurationSection: 'fplExtension'
+            }
+        };
 
         client = new LanguageClient('fpl-vscode-extension', 'FPL Language Server', serverOptions, clientOptions);
 

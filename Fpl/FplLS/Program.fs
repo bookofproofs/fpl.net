@@ -2,9 +2,9 @@
 open System
 open System.Threading.Tasks
 open Microsoft.Extensions.DependencyInjection
-open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Logging
 open Newtonsoft.Json.Linq
+open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open OmniSharp.Extensions.LanguageServer.Server
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.SymbolTable.Storage.Heap
@@ -16,8 +16,7 @@ open Fpl3LanguageServer.ServicesDiagnostics.Diags
 open Fpl3LanguageServer.ServiceAutoCompletion.Handler
 open Fpl3LanguageServer.ServiceFormatting.Handler
 open Fpl3LanguageServer.ServiceFormatting.ConfigurationHandler
-open Fpl3LanguageServer.ServiceFormatting.SettingsTranslation
-open Fpl1Parser.LSRelated.FormattingOptions
+open Fpl3LanguageServer.ServiceFormatting.SettingsPull
 
 let private configureServices (services: IServiceCollection) =
     services.AddSingleton<BufferManager>() |> ignore
@@ -26,19 +25,6 @@ let private configureServices (services: IServiceCollection) =
     services.AddSingleton<SettingsStore>() |> ignore
     services.AddSingleton<FormattingHandler>() |> ignore
     services.AddSingleton<FormattingConfigurationHandler>() |> ignore
-
-/// <summary>
-/// Converts the <c>fplExtension.format</c> section of the client-provided
-/// <see cref="IConfiguration"/> into a flat <see cref="JObject"/> (one property per leaf key),
-/// suitable for <see cref="SettingsTranslation.translate"/>.
-/// </summary>
-let private formatSectionToJObject (configuration: IConfiguration) : JToken =
-    let section = configuration.GetSection("fplExtension").GetSection("format")
-    let result = JObject()
-    for child in section.GetChildren() do
-        if not (isNull child.Value) then
-            result.[child.Key] <- JValue(child.Value :> obj)
-    result :> JToken
 
 [<EntryPoint>]
 let main _ =
@@ -75,15 +61,11 @@ let main _ =
                                         PathEquivalentUri(x.Uri.AbsoluteUri),
                                         bufferManager.GetBuffer(x.Uri)))
 
-                                // Best-effort pull of the client's current `fplExtension.format`
-                                // settings before any formatting request can arrive. Falls back
-                                // silently to fplFormatDefaults (already seeded in SettingsStore)
-                                // if the client doesn't support workspace/configuration or the
-                                // request fails for any reason.
+                                // Best-effort initial pull; FormattingHandler re-pulls on every
+                                // request regardless, so this just seeds SettingsStore early for
+                                // any other consumer.
                                 try
-                                    let formatSection = formatSectionToJObject languageServer.Configuration
-                                    let options = translate fplFormatDefaults formatSection
-                                    settingsStore.Update(options)
+                                    settingsStore.Update(pullCurrentOptions languageServer.Configuration)
                                 with ex ->
                                     logException languageServer ex "OnInitialize.Configuration"
 
