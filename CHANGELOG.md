@@ -16,10 +16,12 @@ Each entry is tagged with the part(s) of the solution it affects:
 ## [Unreleased]
 ### Added
 - **[vscode]** Minor fixes in docs (e.g., broken links, and consistency check last CHANGE and RELEASE versions and dates)
+- **[vscode]** Contribute `fplExtension.format.*` settings (one per `FormattingOptions` field) to the Settings UI, enabling user configuration of the FPL formatting service
 - **[parser]** Add utities supporting formatting service (AST traversal utility `collectPositions`, `TriviaMap` to attach comments from FPL code in to AST nodes) 
 - **[parser]** Add user-defined options supporting formatting service for the language server 
 - **[parser]** Add `Doc.collapseBlankLines` post-processing step to enforce `MaxConsecutiveBlankLines` in the formatting service
 - **[language-server]** Add a and hook-up an initial formatting service for FPL 
+- **[language-server]** Wire user-configured `FormattingOptions` through to the formatting service: new `SettingsStore` singleton, `SettingsTranslation` module translating client JSON payloads into `FormattingOptions`, and a `FormattingConfigurationHandler` reacting to `workspace/didChangeConfiguration` and pulling initial settings via `workspace/configuration` on startup, replacing the previously hardcoded `fplFormatDefaults`
 ### Changed
 - **[parser]** consolidate unit test namespaces and convert single-case test methods to datarow-driven test methods (if not already the case)
 

@@ -9,6 +9,7 @@ open Fpl0Base.Errors.Diagnostics
 open Fpl3LanguageServer.Buffers.BuffMgr
 open Fpl3LanguageServer.Buffers.Logging
 open Fpl3LanguageServer.Buffers.TextPos
+open Fpl3LanguageServer.Buffers.SettingsStore
 open Fpl1Parser.Main
 open System.Collections.Generic
 open Fpl1Parser.Types
@@ -22,7 +23,7 @@ open Fpl1Parser.LSRelated.PrettyPrint
 /// Handles textDocument/formatting requests, delegating to the FPL pretty-printer
 /// to compute a full-document text edit that reformats the buffer.
 /// </summary>
-type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferManager) =
+type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferManager, settingsStore: SettingsStore) =
 
     let documentSelector = DocumentSelector(DocumentFilter(Pattern = "**/*.fpl"))
 
@@ -62,7 +63,7 @@ type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferMan
                     let triviaMap = buildTriviaMap nodePositions comments
 
                     // Entry point into PrettyPrint: printAll drives print recursively per node
-                    let formattedText = printAll fplFormatDefaults triviaMap asts
+                    let formattedText = printAll settingsStore.Current triviaMap asts
 
                     // Wrap as a single full-document TextEdit
                     let textPositions = TextPositions(originalText)

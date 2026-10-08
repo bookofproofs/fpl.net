@@ -9,6 +9,7 @@
         <Compile Include="Buffers\Logging.fs" />
         <Compile Include="Buffers\TextPos.fs" />
         <Compile Include="Buffers\BuffMgr.fs" />
+        <Compile Include="Buffers\SettingsStore.fs" />
         <Compile Include="Buffers\DocSync.fs" />
         <Compile Include="ServiceDiagnostics\Diags.fs" />
         <Compile Include="ServiceAutoCompletion\Item.fs" />
@@ -48,7 +49,9 @@
         <Compile Include="ServiceAutoCompletion\ItemChoices.fs" />
         <Compile Include="ServiceAutoCompletion\Main.fs" />
         <Compile Include="ServiceAutoCompletion\Handler.fs" />
+        <Compile Include="ServiceFormatting\SettingsTranslation.fs" />
         <Compile Include="ServiceFormatting\Handler.fs" />
+        <Compile Include="ServiceFormatting\ConfigurationHandler.fs" />
     </ItemGroup>
 
     <ItemGroup>
