@@ -51,7 +51,7 @@ type FormattingConfigurationHandler(languageServer: ILanguageServer, settingsSto
                 logMsg languageServer "Task<Unit>" "FormattingConfigurationHandler.Handle"
                 let formatSection = extractFormatSection request.Settings
                 let options = translate fplFormatDefaults formatSection
-                settingsStore.Update(options)
+                settingsStore.UpdateOptions(options)
             with ex ->
                 logException languageServer ex "FormattingConfigurationHandler.Handle"
 

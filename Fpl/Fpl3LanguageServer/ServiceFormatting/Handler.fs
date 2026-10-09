@@ -69,7 +69,7 @@ type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferMan
                     // workspace/didChangeConfiguration push path). Also refresh SettingsStore so
                     // other consumers see the latest value too.
                     let! options = pullCurrentOptionsAsync languageServer settingsStore.Current
-                    settingsStore.Update(options)
+                    settingsStore.UpdateOptions(options)
 
                     // Entry point into PrettyPrint: printAll drives print recursively per node
                     let formattedText = printAll options triviaMap asts

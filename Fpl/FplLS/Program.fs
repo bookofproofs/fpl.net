@@ -67,7 +67,7 @@ let main _ =
                                 // any other consumer.
                                 task {
                                     let! options = pullCurrentOptionsAsync languageServer fplFormatDefaults
-                                    settingsStore.Update(options)
+                                    settingsStore.UpdateOptions(options)
                                 }
                                 |> ignore
 

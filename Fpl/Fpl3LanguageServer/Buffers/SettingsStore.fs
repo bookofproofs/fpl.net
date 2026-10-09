@@ -22,5 +22,5 @@ type SettingsStore() =
     member _.Current = current
 
     /// <summary>Replaces the currently active formatting preferences.</summary>
-    member _.Update(opts: FormattingOptions) =
+    member _.UpdateOptions(opts: FormattingOptions) =
         current <- opts
