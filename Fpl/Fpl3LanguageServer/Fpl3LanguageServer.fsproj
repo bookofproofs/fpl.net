@@ -52,7 +52,6 @@
         <Compile Include="ServiceFormatting\SettingsTranslation.fs" />
         <Compile Include="ServiceFormatting\SettingsPull.fs" />
         <Compile Include="ServiceFormatting\Handler.fs" />
-        <Compile Include="ServiceFormatting\ConfigurationHandler.fs" />
     </ItemGroup>
 
     <ItemGroup>
