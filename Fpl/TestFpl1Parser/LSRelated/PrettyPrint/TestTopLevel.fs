@@ -168,3 +168,13 @@ type TestTopLevel () =
     [<TestMethod>]
     member this.TestTopLevelSyntaxErrorInput (no:string, fplCode:string) =
         allAssertionsForSyntaxErrorInput fplCode
+
+    [<DataRow("01", """ax ZeroIsNat {  } /* some comment */ def cl A""", "/* some comment */")>]
+    [<DataRow("02", """def class FieldPowerN: Obj { /* some comment */  }""", "/* some comment */")>]
+    [<DataRow("03", """def function DoubleSuccessor  (x: N /* some comment */ ) -> N { returtttt }""", "/* some comment */")>]
+    [<DataRow("04", """def pred T() { property /* some comment */ pred T() { true } true } """, "/* some comment */")>]
+    [<DataRow("05", """ext Alpha: x:=[a-z]+/ {/* some comment */ return x}""", "/* some comment */")>]
+    [<DataRow("06", """uses /* some comment */ Fpl.Test.fpl""", "/* some comment */")>]
+    [<TestMethod>]
+    member this.TestSyntaxErrorCommentSurvival (no:string, fplCode:string, commentText:string) =
+        assertCommentVerbatimForSyntaxErrorInput commentText fplCode

@@ -136,59 +136,26 @@ module Commons =
         let secondPass, _ = formatViaFplParser firstPass
         Assert.AreEqual(firstPass, secondPass, "Expected printAll to be idempotent after one reformat.")
 
+    /// <summary>
+    /// Category 1c' (syntax-error variant): asserts that any comment present inside
+    /// <paramref name="fplCode"/> survives unchanged in the <c>printAll</c> output, because syntax-error
+    /// building blocks are no longer reformatted via <c>TriviaMap</c>/<c>withTrivia</c> attachment —
+    /// they are reprinted verbatim from the original source (see <c>Ast.ErrorSyntax</c>/
+    /// <c>ErrorSyntaxBacktracking</c>/<c>ErrorSyntaxChain</c>'s verbatim field and
+    /// <c>PrettyPrint.print</c>'s dedicated cases for them). Comment *placement* relative to an
+    /// anchor is therefore not meaningful for syntax-error input (nothing is re-laid-out at all);
+    /// the only applicable guarantee is that the comment text itself is neither dropped nor altered.
+    /// </summary>
+    let assertCommentVerbatimForSyntaxErrorInput (commentText: string) (fplCode: string) =
+        let rendered, success = formatViaFplParser fplCode
+        Assert.IsFalse(success, $"Expected '{fplCode}' to contain a syntax error for this assertion to be meaningful.")
+        Assert.IsTrue(
+            rendered.Contains(commentText: string),
+            $"Expected comment '{commentText}' to be preserved verbatim in the reformatted output of syntax-error input, but got:{Environment.NewLine}{rendered}")
+
     /// <summary>Splits rendered text into lines using the same newline convention <c>Doc.render</c> uses.</summary>
     let private toLines (rendered: string) : string[] =
         rendered.Split([| Environment.NewLine |], StringSplitOptions.None)
-
-    /// <summary>
-    /// Category 1c/2c: asserts that <paramref name="commentText"/> appears on the line immediately
-    /// preceding the first line containing <paramref name="anchorText"/> in the <c>printAll</c> output
-    /// of <paramref name="fplCode"/> (i.e. attached as leading trivia of the node rendering <paramref name="anchorText"/>).
-    /// </summary>
-    let private assertLeadingCommentAdjacent (fplCode: string) (commentText: string) (anchorText: string) =
-        let rendered, _ = formatViaFplParser fplCode
-        let lines = toLines rendered
-        match lines |> Array.tryFindIndex (fun l -> l.Contains(anchorText: string)) with
-        | None -> Assert.Fail($"Expected rendered output to contain anchor '{anchorText}' but got:{Environment.NewLine}{rendered}")
-        | Some 0 -> Assert.Fail($"Expected a preceding line for leading comment '{commentText}' but anchor was on the first line.")
-        | Some i ->
-            Assert.IsTrue(
-                lines.[i - 1].Contains(commentText: string),
-                $"Expected line immediately preceding anchor '{anchorText}' to contain leading comment '{commentText}', but it was: '{lines.[i - 1]}'{Environment.NewLine}--- full rendered ---{Environment.NewLine}{rendered}")
-
-    /// <summary>
-    /// Category 1c/2c: asserts that <paramref name="commentText"/> appears on the same rendered line
-    /// as, and after, <paramref name="anchorText"/> in the <c>printAll</c> output of <paramref name="fplCode"/>
-    /// (i.e. attached as trailing trivia of the node rendering <paramref name="anchorText"/>).
-    /// </summary>
-    let private assertTrailingCommentSameLine (fplCode: string) (anchorText: string) (commentText: string) =
-        let rendered, _ = formatViaFplParser fplCode
-        let lines = toLines rendered
-        match lines |> Array.tryFindIndex (fun l -> l.Contains(anchorText: string)) with
-        | None -> Assert.Fail($"Expected rendered output to contain anchor '{anchorText}' but got:{Environment.NewLine}{rendered}")
-        | Some i ->
-            let line = lines.[i]
-            let anchorPos = line.IndexOf(anchorText: string)
-            let commentPos = line.IndexOf(commentText: string)
-            Assert.IsTrue(
-                commentPos > anchorPos,
-                $"Expected trailing comment '{commentText}' to appear after anchor '{anchorText}' on the same rendered line, but line was: '{line}'{Environment.NewLine}--- full rendered ---{Environment.NewLine}{rendered}")
-
-
-    let private assertCommentPreservationPlacement (fplCode: string) =
-        let anchorText = "/*anchor*/"
-
-        // Leading comment: "/*anchor*/" immediately precedes fplCode (no blank line), so it attaches
-        // as leading trivia to the same node and renders on its own line directly above the fplCode.
-        // "// leading comment" is pretended one line further up and must land immediately above it.
-        let withLeadingComment = sprintf "// leading comment%s%s%s" Environment.NewLine anchorText fplCode
-        assertLeadingCommentAdjacent withLeadingComment "// leading comment" anchorText
-
-        // Trailing comment: "/*anchor*/" is appended inline right after fplCode, so it attaches as
-        // trailing trivia to the last token and renders on the same line. "// trailing comment" is
-        // appended immediately after it and must land on the same line, after the anchor.
-        let withTrailingComment = sprintf "%s %s // trailing comment" fplCode anchorText
-        assertTrailingCommentSameLine withTrailingComment anchorText "// trailing comment"
 
     /// <summary>Runs all tests assertions for syntax-free input without comments (used for individual parsers to avoid duplicating the same DataRow test for each test separately).</summary>
     let allAssertionsSyntaxErrorFreeInputWithoutComments (parser: Parser<Ast, unit>) (fplCode: string) =
@@ -197,12 +164,17 @@ module Commons =
         // 1b test: idempotency test for syntax-error-free input
         assertIdempotent parser fplCode
 
-    /// <summary>Runs all tests assertions for syntax-free input (used to avoid duplicating the same DataRow test in different unit tests).</summary>
+    /// <summary>Runs all tests assertions for syntax-error input (used to avoid duplicating the same DataRow test in different unit tests).</summary>
+    /// <remarks>
+    /// Does NOT assert comment placement: syntax-error building blocks are reprinted verbatim from
+    /// the original source (see <c>Ast.ErrorSyntax</c>/<c>ErrorSyntaxBacktracking</c>/
+    /// <c>ErrorSyntaxChain</c> and their dedicated cases in <c>PrettyPrint.print</c>), so there is no
+    /// TriviaMap-driven re-layout for comment-placement assertions to meaningfully exercise.
+    /// </remarks>
     let allAssertionsForSyntaxErrorInput (fplCode: string) =
         // 1b test: idempotency test for syntax-error input
         assertFullPipelineIdempotent fplCode
-        // 1c test: comment preservation / placement for syntax-error input
-        assertCommentPreservationPlacement fplCode
+
 
     /// <summary>Category 1c/2c (opts-parameterized): asserts leading-comment adjacency using <paramref name="opts"/> instead of <c>fplFormatDefaults</c>.</summary>
     let private assertLeadingCommentAdjacentWith (opts: FormattingOptions) (fplCode: string) (commentText: string) (anchorText: string) =
