@@ -249,6 +249,39 @@ let private computeIndex (pos: Position) (lines: string array) inputLength =
         int64 inputLength
 
 /// <summary>
+/// Computes a 1-based FParsec <see cref="Position"/> (Index/Line/Column) for a given zero-based
+/// character <paramref name="index"/> within <paramref name="text"/>.
+/// </summary>
+/// <param name="text">The text <paramref name="index"/> is relative to.</param>
+/// <param name="index">The zero-based character offset to convert. Clamped to <c>text.Length</c>.</param>
+/// <returns>
+/// A <see cref="Position"/> whose <c>Index</c> is the clamped <paramref name="index"/> and whose
+/// <c>Line</c>/<c>Column</c> are computed by counting <see cref="Environment.NewLine"/> occurrences
+/// up to that offset, consistent with how <see cref="computeIndex"/> (its inverse) and
+/// <c>Fpl1Parser.Main</c>'s <c>origLines = input.Split(Environment.NewLine)</c> already interpret
+/// line boundaries elsewhere in this error-recovery pipeline.
+/// </returns>
+/// <remarks>
+/// This is the single shared implementation for turning a plain character offset (as produced by,
+/// e.g., keyword-based chunking over <c>string.Substring</c> indices) into the <see cref="Position"/>
+/// values expected by AST nodes; avoid re-implementing this conversion at additional call sites.
+/// </remarks>
+let indexToPosition (text: string) (index: int) : Position =
+    let clampedIndex = max 0 (min index text.Length)
+    let prefix = text.Substring(0, clampedIndex)
+    let lineBreaks =
+        Regex.Matches(prefix, Regex.Escape(Environment.NewLine))
+        |> Seq.cast<Match>
+        |> Seq.toList
+    let line = lineBreaks.Length + 1
+    let lastBreakEnd =
+        match lineBreaks with
+        | [] -> 0
+        | _ -> let m = List.last lineBreaks in m.Index + m.Length
+    let column = clampedIndex - lastBreakEnd + 1
+    Position("", int64 clampedIndex, int64 line, int64 column)
+
+/// <summary>
 /// Removes from an FParsec error message line substrings in the process of preparing a line of an FPL diagnostic message.
 /// </summary>
 let private removeFParsecErrorStringsFromFplDiagnostics (line:string) =
@@ -358,17 +391,3 @@ let getErrorNodes (errorMsg:string) origLines origLength (blockSpan: Positions) 
         else
             Ast.ErrorSyntaxChain(((pos, pos), maxPos), blockSpan, (collapseExpectingBlock errMsg, $"{chainId}.{(i+1).ToString()}"), verbatimForThisNode)
     )
-/// <summary>
-/// Pretty-prints an FPL abstract syntax tree back into canonically formatted FPL source text,
-/// following the project's indentation and spacing conventions.
-/// </summary>
-/// <param name="indentSize">Number of spaces used per indentation level.</param>
-/// <param name="ast">Root AST node(s) to format.</param>
-/// <returns>Canonically formatted FPL source code.</returns>
-/// <remarks>Reuses fplParser (already error-tolerant) to get Ast list from the buffer text — this means formatting works even for a syntax error code.
-///</remarks>
-let prettyPrint (indentSize: int) (asts: Ast list) : string =
-    // Walk the Ast union (Fpl1Parser.Types.Ast), emitting text with a StringBuilder,
-    // tracking indentation depth and applying the same style used elsewhere
-    // (block braces, statement separators, etc.)
-    failwith "TODO: implement AST-driven pretty printer"

@@ -47,34 +47,6 @@ let private getMatches (pattern: string) (input: string) =
     |> Seq.toList
 
 /// <summary>
-/// Computes a 1-based FParsec <see cref="Position"/> for a given character <paramref name="index"/>
-/// within <paramref name="text"/>.
-/// </summary>
-/// <param name="text">The text the index is relative to.</param>
-/// <param name="index">The zero-based character offset to convert.</param>
-/// <returns>
-/// A <see cref="Position"/> whose <c>Index</c> is <paramref name="index"/> and whose <c>Line</c>/
-/// <c>Column</c> are computed by counting newlines up to that offset.
-/// </returns>
-/// <remarks>
-/// Used to translate the plain character offsets produced by the keyword-based chunking in
-/// <see cref="getParseableInputAndErrorNodes"/> (which operates on <see cref="string.Substring"/>
-/// indices) into the <see cref="Position"/> values expected by <c>Ast.ErrorSyntax*</c>'s block-span
-/// fields.
-/// </remarks>
-let private positionFromIndex (text: string) (index: int) : Position =
-    let clampedIndex = min index text.Length
-    let prefix = text.Substring(0, clampedIndex)
-    let lineBreaks = Regex.Matches(prefix, Environment.NewLine) |> Seq.cast<Match> |> Seq.toList
-    let line = lineBreaks.Length + 1
-    let lastBreakEnd =
-        match lineBreaks with
-        | [] -> 0
-        | _ -> let m = List.last lineBreaks in m.Index + m.Length
-    let column = clampedIndex - lastBreakEnd + 1
-    Position("", int64 clampedIndex, int64 line, int64 column)
-
-/// <summary>
 /// Run the full AST parser on the provided remainder and collect diagnostics for that chunk.
 /// </summary>
 /// <param name="input">Text representing the remainder to parse.</param>
@@ -137,7 +109,7 @@ let private getParseableInputAndErrorNodes input (originalFplCode: string) origL
         originalFplCode.Substring(clampedStart, clampedLen)
 
     let blockSpanOf (start: int) (len: int) : Positions =
-        positionFromIndex input start, positionFromIndex input (start + len)
+        indexToPosition input start, indexToPosition input (start + len)
 
     // Helper to produce chunk, maskedChunk and the 'remainder' used for diagnostics
     let getChunkMaskedAndRemainder i =
@@ -287,7 +259,7 @@ let fplParser fplCode =
             // Whole document is unparseable even after chunked recovery: there is no
             // keyword-delimited building-block span to speak of, so the "block" is the entire
             // (comment-stripped) input, and its verbatim text is the entire original source.
-            let wholeDocSpan : Positions = positionFromIndex input 0, positionFromIndex input input.Length
+            let wholeDocSpan : Positions = indexToPosition input 0, indexToPosition input input.Length
             getErrorNodes errorMsg origLines origLength wholeDocSpan fplCode, false
 
 /// <summary>
