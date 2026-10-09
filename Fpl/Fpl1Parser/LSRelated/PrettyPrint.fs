@@ -444,7 +444,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | Constructor(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text " "; p a2 ])
     | ConstructorSignature(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ keyword opts "ctor" "constructor"; text " "; p a1; tuple opts opts.ParameterStyle [ p a2 ] ])
+        withTrivia map pos (concat [ keyword opts "ctor" "constructor"; text " "; p a1; p a2 ])
     | ConstructorBlock a ->
         braces opts (p a)
     | BaseConstructorCall(pos, (a1, a2)) ->
@@ -484,11 +484,11 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | PredicateInstance(pos, (a, aOpt)) ->
         withTrivia map pos (concat [ keyword opts "prty" "property"; text " "; p a; opt (fun a2 -> braces opts (p a2)) aOpt ])
     | PredicateInstanceSignature(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ keyword opts "pred" "predicate"; text " "; p a1; tuple opts opts.ParameterStyle [ p a2 ] ])
+        withTrivia map pos (concat [ keyword opts "pred" "predicate"; text " "; p a1; p a2 ])
     | FunctionalTermInstance(pos, (a, aOpt)) ->
         withTrivia map pos (concat [ keyword opts "prty" "property"; text " "; p a; opt (fun a2 -> braces opts (p a2)) aOpt ])
     | FunctionalTermInstanceSignature(pos, ((a1, a2), a3)) ->
-        withTrivia map pos (concat [ keyword opts "func" "function"; text " "; p a1; tuple opts opts.ParameterStyle [ p a2 ]; p a3 ])
+        withTrivia map pos (concat [ keyword opts "func" "function"; text " "; p a1; p a2; p a3 ])
 
     // Rules of inference
     | RuleOfInference(pos, (a1, a2)) ->
