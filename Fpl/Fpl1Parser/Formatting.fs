@@ -309,7 +309,21 @@ let masked (input:String) =
 /// Transforms an FParsec syntax error message (including the complex ones with parser backtracking)
 /// into a list of BuildingBlockError ast nodes that are aggregated by error position they occur.
 /// </summary>
-let getErrorNodes (errorMsg:string) origLines origLength = 
+/// <param name="errorMsg">The raw FParsec error message produced for the faulty chunk.</param>
+/// <param name="origLines">The original (comment-stripped) input split into lines, used to compute indices.</param>
+/// <param name="origLength">The length of the original (comment-stripped) input.</param>
+/// <param name="blockSpan">
+/// The source span (start/end <see cref="Position"/>) of the enclosing building block in which
+/// this error occurred, as determined by the caller's chunking logic.
+/// </param>
+/// <param name="verbatim">
+/// The verbatim FPL source text of the enclosing building block, captured from the original
+/// (un-stripped) source so the formatting service can reprint it unchanged. Every returned node
+/// shares this exact same <paramref name="blockSpan"/>; only the first node in a chain carries
+/// non-empty verbatim text (see <see cref="Ast.ErrorSyntaxChain"/>) to avoid the formatting
+/// service reprinting the same faulty block once per chained diagnostic.
+/// </param>
+let getErrorNodes (errorMsg:string) origLines origLength (blockSpan: Positions) (verbatim: string) = 
     let firstResult = 
         errorMsg
         |> insertLightning
@@ -333,14 +347,17 @@ let getErrorNodes (errorMsg:string) origLines origLength =
 
     firstResult
     |> List.mapi (fun i (pos, errMsg) ->
+        // Only the first link of a chain carries the verbatim block text; every other link
+        // (including the non-chained SY000/SY001 single-node cases, which are always "first")
+        // gets "" so the formatting service never reprints the same faulty block twice.
+        let verbatimForThisNode = if i = 0 then verbatim else ""
         if errMsg.StartsWith("SY000:") then
-            Ast.ErrorSyntax((pos, pos), collapseExpectingBlock errMsg)
+            Ast.ErrorSyntax((pos, pos), blockSpan, collapseExpectingBlock errMsg, verbatimForThisNode)
         elif errMsg.StartsWith("SY001:") then
-            Ast.ErrorSyntaxBacktracking((pos, pos), collapseExpectingBlock errMsg)
+            Ast.ErrorSyntaxBacktracking((pos, pos), blockSpan, collapseExpectingBlock errMsg, verbatimForThisNode)
         else
-            Ast.ErrorSyntaxChain(((pos, pos), maxPos), (collapseExpectingBlock errMsg, $"{chainId}.{(i+1).ToString()}"))
+            Ast.ErrorSyntaxChain(((pos, pos), maxPos), blockSpan, (collapseExpectingBlock errMsg, $"{chainId}.{(i+1).ToString()}"), verbatimForThisNode)
     )
-
 /// <summary>
 /// Pretty-prints an FPL abstract syntax tree back into canonically formatted FPL source text,
 /// following the project's indentation and spacing conventions.

@@ -512,9 +512,9 @@ let rec collectPositions (acc: List<Positions>) (ast: Ast) =
     | BuildingBlock(p, a) ->
         add p
         collectPositions acc a
-    | ErrorSyntax(p, _) -> add p
-    | ErrorSyntaxBacktracking(p, _) -> add p
-    | ErrorSyntaxChain((p, _), _) -> add p
+    | ErrorSyntax(p, _, _, _) -> add p
+    | ErrorSyntaxBacktracking(p, _, _, _) -> add p
+    | ErrorSyntaxChain((p, _), _, _, _) -> add p
 
 /// <summary>
 /// Convenience entry point that walks the entire tree rooted at <paramref name="ast"/> and returns

@@ -244,6 +244,32 @@ let private join (sep: Doc) (docs: Doc list) : Doc =
     | [ d ] -> d
     | d :: rest -> concat (d :: (rest |> List.collect (fun d -> [ sep; d ])))
 
+/// <summary>
+/// Renders a block of raw, already-formatted source text verbatim, splitting on line breaks so
+/// each physical line becomes its own <see cref="Doc.Text"/> node joined by <see cref="line"/>.
+/// </summary>
+/// <param name="raw">The verbatim text to emit (may be empty, in which case nothing is rendered).</param>
+/// <returns>
+/// <see cref="concat"/> of per-line <see cref="text"/> nodes, or <c>concat []</c> when
+/// <paramref name="raw"/> is empty.
+/// </returns>
+/// <remarks>
+/// Used exclusively for <c>Ast.ErrorSyntax</c>/<c>ErrorSyntaxBacktracking</c>/<c>ErrorSyntaxChain</c>
+/// verbatim-reprint text: unlike every other case in <see cref="print"/>, this text is raw source
+/// copied byte-for-byte from the original input rather than built up from sub-<c>Doc</c>s, so a
+/// single <see cref="text"/> call would corrupt <see cref="Doc.render"/>'s line/indentation
+/// tracking if the text itself contains embedded newlines. Splitting here keeps each resulting
+/// <see cref="Doc.Text"/> single-line, as every other call site in this module already assumes.
+/// </remarks>
+let private verbatimBlock (raw: string) : Doc =
+    if System.String.IsNullOrEmpty raw then
+        concat []
+    else
+        raw.Split([| "\r\n"; "\n" |], System.StringSplitOptions.None)
+        |> Array.map text
+        |> Array.toList
+        |> join line
+
 // ============================================================================
 // Recursive per-node printer.
 // ============================================================================
@@ -592,10 +618,16 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | UsesClause(pos, a) ->
         withTrivia map pos (concat [ keyword opts "uses" "uses"; text " "; p a ])
     | BuildingBlock(pos, a) -> withTrivia map pos (p a)
-    | ErrorSyntax(pos, s) -> withTrivia map pos (text s)
-    | ErrorSyntaxBacktracking(pos, s) -> withTrivia map pos (text s)
-    | ErrorSyntaxChain((pos, _), (s, _)) -> withTrivia map pos (text s)
-
+    // Verbatim reprint: unlike every other case above, these three carry raw, already-formatted
+    // source text captured from the faulty building block by Fpl1Parser.Main's error recovery, so
+    // withTrivia (which would consult the TriviaMap by the *error* position, not the block span,
+    // and re-inject comments already present verbatim in the captured text) is deliberately not
+    // applied here to avoid duplicating comments. Chain links after the first carry "" (see
+    // Fpl1Parser.Formatting.getErrorNodes) and render as nothing, so a multi-link SY002 chain
+    // reprints its enclosing block exactly once.
+    | ErrorSyntax(_, _, _, verbatim) -> verbatimBlock verbatim
+    | ErrorSyntaxBacktracking(_, _, _, verbatim) -> verbatimBlock verbatim
+    | ErrorSyntaxChain(_, _, _, verbatim) -> verbatimBlock verbatim
 /// <summary>
 /// The entry point for the formatting service: pretty-prints a list of top-level building-block
 /// ASTs (as returned by <c>Fpl1Parser.Main.fplParser</c>), honoring trivia recorded in

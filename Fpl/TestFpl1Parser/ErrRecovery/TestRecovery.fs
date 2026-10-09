@@ -51,7 +51,7 @@ def pred T() {}""", 2L, 14L)>]
         let result, _ = fplParser fplCode
         let errBlock = result.Head
         match errBlock with
-        | Ast.ErrorSyntax((pos1,_),_) ->
+        | Ast.ErrorSyntax((pos1,_),_,_,_) ->
             Assert.AreEqual<uint>((uint)errLin, (uint)pos1.Line)
             Assert.AreEqual<uint>((uint)errCol, (uint)pos1.Column)
         | _ ->
