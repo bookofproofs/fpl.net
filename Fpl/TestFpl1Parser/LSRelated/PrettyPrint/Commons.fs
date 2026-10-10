@@ -104,6 +104,39 @@ module Commons =
     let private assertIdempotent (parser: Parser<Ast, unit>) (fplCode: string) =
         assertIdempotentWith fplFormatDefaults parser fplCode
 
+    /// <summary>
+    /// Category 1a'' (individual-parser variant): asserts that each of <paramref name="anchorTexts"/>
+    /// starts its own line (i.e. is the first non-whitespace content on that line) in the rendered
+    /// output of <paramref name="fplCode"/> via <paramref name="parser"/>, and that no two anchors
+    /// share the same line.
+    /// </summary>
+    /// <remarks>
+    /// Regression guard for missing-separator defects between consecutive items in a list that is
+    /// supposed to be laid out one-per-line regardless of brace/grouping style (e.g. successive
+    /// <c>property</c> declarations inside a building block). A bare idempotency assertion cannot
+    /// catch this class of bug, since a wrongly-concatenated rendering (e.g. two properties stuck
+    /// together on one line) can still be stable under a second reformat; this helper instead checks
+    /// that each anchor actually begins its own, distinct rendered line.
+    /// </remarks>
+    let assertEachOnOwnLine (parser: Parser<Ast, unit>) (anchorTexts: string list) (fplCode: string) =
+        let rendered = printNodeViaParser parser fplCode
+        let lines = rendered.Split([| Environment.NewLine |], StringSplitOptions.None)
+        let lineIndexOf (anchor: string) =
+            lines
+            |> Array.tryFindIndex (fun l -> l.TrimStart().StartsWith(anchor: string))
+        let indices =
+            anchorTexts
+            |> List.map (fun anchor ->
+                match lineIndexOf anchor with
+                | Some i -> i
+                | None ->
+                    Assert.Fail($"Expected anchor '{anchor}' to start its own line, but no such line was found in:{Environment.NewLine}{rendered}")
+                    -1)
+        let distinctCount = indices |> List.distinct |> List.length
+        Assert.AreEqual(
+            List.length anchorTexts, distinctCount,
+            $"Expected each of {anchorTexts} to occupy a distinct line, but some anchors shared the same line in:{Environment.NewLine}{rendered}")
+
     // ========================================================================
     // Full-pipeline (fplParser + printAll) — usable for 1a/1b/2a/2b, and REQUIRED for 1c/2c.
     // ========================================================================

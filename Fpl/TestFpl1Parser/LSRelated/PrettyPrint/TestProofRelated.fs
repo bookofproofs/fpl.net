@@ -41,27 +41,27 @@ type TestProofRelated() =
     member _.TestJustifiedArgumentSyntaxErrorFreeInput (no: string, fplCode: string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments justifiedArgument fplCode
 
-    [<DataRow(LiteralByCor, "$1", ":1")>]
-    [<DataRow(LiteralByDef, "$1", ":1")>]
-    [<DataRow(LiteralByAx, "$1", ":1")>]
-    [<DataRow(LiteralByInf, "$1", ":1")>]
-    [<DataRow(LiteralByCor, "$1", "")>]
-    [<DataRow(LiteralByDef, "$1", "")>]
-    [<DataRow(LiteralByAx, "$1", "")>]
-    [<DataRow(LiteralByInf, "$1", "")>]
-    [<DataRow(LiteralByCor, "", ":1")>]
-    [<DataRow(LiteralByDef, "", ":1")>]
-    [<DataRow(LiteralByAx, "", ":1")>]
-    [<DataRow(LiteralByInf, "", "")>]
-    [<DataRow(LiteralByCor, "", "")>]
-    [<DataRow(LiteralByDef, "", "")>]
-    [<DataRow(LiteralByAx, "", "")>]
-    [<DataRow(LiteralByInf, "", "")>]
+    [<DataRow("00", LiteralByCor, "$1", ":1")>]
+    [<DataRow("01", LiteralByDef, "$1", ":1")>]
+    [<DataRow("02", LiteralByAx, "$1", ":1")>]
+    [<DataRow("03", LiteralByInf, "$1", ":1")>]
+    [<DataRow("04", LiteralByCor, "$1", "")>]
+    [<DataRow("05", LiteralByDef, "$1", "")>]
+    [<DataRow("06", LiteralByAx, "$1", "")>]
+    [<DataRow("07", LiteralByInf, "$1", "")>]
+    [<DataRow("08", LiteralByCor, "", ":1")>]
+    [<DataRow("09", LiteralByDef, "", ":1")>]
+    [<DataRow("10", LiteralByAx, "", ":1")>]
+    [<DataRow("11", LiteralByInf, "", "")>]
+    [<DataRow("12", LiteralByCor, "", "")>]
+    [<DataRow("13", LiteralByDef, "", "")>]
+    [<DataRow("14", LiteralByAx, "", "")>]
+    [<DataRow("15", LiteralByInf, "", "")>]
     [<TestMethod>]
     member _.TestJustificationItemSyntaxErrorFreeInput (no: string, keyword:string, corRef:string, argRef:string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments justificationItem $"{keyword} A{corRef}{argRef}"
 
-    [<DataRow("bydef x")>]
+    [<DataRow("00", "bydef x")>]
     [<TestMethod>]
     member _.TestJustificationItemByDefSyntaxErrorFreeInput (no: string, fplCode: string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments justificationItem fplCode

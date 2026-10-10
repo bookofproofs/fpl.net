@@ -8,7 +8,7 @@ open TestFpl1Parser.LSRelated.PrettyPrint.Commons
 [<TestClass>]
 type TestReferenceRules () =
 
-    [<DataRow("01", """inf ModusPonens { dec a:obj p,q: pred; premise: and (p, impl (p,q) ) conclusion: q }""")>]
+    [<DataRow("01", """inf ModusPonens { dec p,q: pred; premise: and (p, impl (p,q) ) conclusion: q }""")>]
     [<DataRow("02", """inference ModusTollens { dec a:obj p,q: pred; premise: and (not (q), impl(p,q) ) conclusion: not (p) }""")>]
     [<DataRow("03", """inf HypotheticalSyllogism { dec a:obj  p,q,r: pred; premise: and (impl(p,q), impl(q,r)) conclusion: impl(p,r) }""")>]
     [<DataRow("04", """inference DisjunctiveSyllogism { dec a:obj p,q: pred; premise: and (not (p), or(p,q)) conclusion: q }""")>]

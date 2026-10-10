@@ -85,3 +85,8 @@ type TestDefinitionFunctionalTerm () =
     [<TestMethod>]
     member this.TestDefinitionFunctionalTermSignatureSeparatesMappedTypeFromUserDefinedSymbol (no:string, fplCode:string, expectedFragment:string) =
         assertFragmentsPresent definition [ expectedFragment ] fplCode
+
+    [<DataRow("49", """def func T() -> obj { ret x prty func T1() -> obj { ret y } prty func T2() -> obj { ret z } }""", "prty func T1", "prty func T2")>]
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTermMultiplePropertiesEachOnOwnLine (no:string, fplCode:string, firstPropertyAnchor:string, secondPropertyAnchor:string) =
+        assertEachOnOwnLine definition [ firstPropertyAnchor; secondPropertyAnchor ] fplCode
