@@ -444,7 +444,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos (concat [ text "infix \""; text s; text "\" "; p a ])
     | Precedence(pos, n) -> withTrivia map pos (text (string n))
     | DefinitionExtension(pos, ((a1, a2), a3)) ->
-        withTrivia map pos (concat [ keyword opts "ext" "extension"; text " "; p a1; p a2; braces opts (p a3) ])
+        withTrivia map pos (concat [ keyword opts "ext" "extension"; text " "; p a1; text " "; p a2; braces opts (p a3) ])
     | ExtensionSignature(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; p a2 ])
     | ExtensionAssignment(pos, (a1, a2)) ->
@@ -609,7 +609,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | TranslationTermList(pos, asts) ->
         withTrivia map pos (concat (asts |> List.map p))
     | TranslationTerm(pos, asts) ->
-        withTrivia map pos (concat (asts |> List.map p))
+        withTrivia map pos (join (text " ") (asts |> List.map p))
     | Language(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text ": "; p a2 ])
     | LanguageCode(pos, s) -> withTrivia map pos (text s)
