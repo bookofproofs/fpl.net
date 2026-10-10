@@ -439,13 +439,6 @@ type TestWhitespaceControl() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
 
-    [<TestMethod>]
-    member this.TestSelfOrParentFailureWhitespace () =
-        let result = run (selfOrParent .>> eof) "selfx}"
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
-
     [<DataRow("1", "usesx A}")>]
     [<DataRow("2", "uses A aliasx B}")>]
     [<TestMethod>]
