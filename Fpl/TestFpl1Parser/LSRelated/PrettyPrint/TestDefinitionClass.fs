@@ -22,6 +22,7 @@ type TestDefinitionClass () =
     [<DataRow("12", """def class SomeClass:Nat1 ,Nat2Nat3,Nat3 { intrinsic }""")>]
     [<DataRow("13", """def class SomeClass :Nat1,Nat2, Nat3,Nat3 { intrinsic }""")>]
     [<DataRow("14", """def cl TestId { ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} ctor TestId(x:ind) {} }""")>]
+    [<DataRow("15", """def cl T { intr prty func T1() -> obj { ret y } }""")>]
     [<TestMethod>]
     member this.TestDefinitionClassSyntaxErrorFreeInput (no:string, fplCode:string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments definition fplCode

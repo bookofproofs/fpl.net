@@ -464,7 +464,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | ClassDefinitionBlock(pos, tupOpt) ->
         withTrivia map pos
             (opt (fun (a, astsOpt) ->
-                braces opts (concat [ p a; opt (fun asts -> concat (asts |> List.map p)) astsOpt ])) tupOpt)
+                braces opts (concat [ p a; opt (fun asts -> concat (asts |> List.map (fun a -> concat [ line; p a ]))) astsOpt ])) tupOpt)
     | DefClassCompleteContent(a, asts) ->
         concat [ p a; concat (asts |> List.map p) ]
     | Constructor(pos, (a1, a2)) ->
@@ -480,7 +480,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos
             (concat [ keyword opts "def" "definition"; text " "; p a
                       opt (fun (a1, astsOpt) ->
-                          braces opts (concat [ p a1; opt (fun asts -> concat (asts |> List.map p)) astsOpt ])) tupOpt ])
+                          braces opts (concat [ p a1; opt (fun asts -> concat (asts |> List.map (fun a -> concat [ line; p a ]))) astsOpt ])) tupOpt ])
     | PredicateSignature((pos, ((a1, a1Opt), a2)), a3Opt) ->
         withTrivia map pos
             (concat [ keyword opts "pred" "predicate"; text " "; p a1
@@ -503,7 +503,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | FunctionalTermDefinitionBlock(pos, tupOpt) ->
         withTrivia map pos
             (opt (fun (a, astsOpt) ->
-                braces opts (concat [ p a; opt (fun asts -> concat (asts |> List.map p)) astsOpt ])) tupOpt)
+                braces opts (concat [ p a; opt (fun asts -> concat (asts |> List.map (fun a -> concat [ line; p a ]))) astsOpt ])) tupOpt)
     | DefFunctionContent(a1, a2) ->
         concat [ p a1; p a2 ]
 

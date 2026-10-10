@@ -54,6 +54,7 @@ type TestDefinitionFunctionalTerm () =
     [<DataRow("44", """definition func T : A , B , C ()->obj { dec x:obj; return x }""")>]
     [<DataRow("45", """def func Add (x,y: Nat) -> Nat infix "+" 2 { intr }""")>]
     [<DataRow("46", """def func Minus(x: Nat) -> Nat prefix "-" { intr }""")>]
+    [<DataRow("47", """def func T() -> obj { ret x prty func T1() -> obj { ret y } }""")>]
     [<TestMethod>]
     member this.TestDefinitionFunctionalTermSyntaxErrorFreeInput (no:string, fplCode:string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments definition fplCode
