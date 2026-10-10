@@ -90,12 +90,12 @@ let variableList = (sepBy1 variable comma) .>> IW
 /// <summary>
 /// Parser for the positional token 'self', producing <c>Ast.Self</c>.
 /// </summary>
-let keywordSelf = positions (skipString LiteralSelf) .>> IW |>> Ast.Self <!> "Self"
+let keywordSelf = positions (skipString LiteralSelf) |>> Ast.Self <!> "Self"
 
 /// <summary>
 /// Parser for the positional token 'parent', producing <c>Ast.Parent</c>.
 /// </summary>
-let keywordParent = positions (skipString LiteralParent) .>> IW |>> Ast.Parent <!> "Parent"
+let keywordParent = positions (skipString LiteralParent) |>> Ast.Parent <!> "Parent"
 
 /// <summary>
 /// Parser for the 'base' class reference keyword (used in constructor calls).
@@ -674,7 +674,14 @@ statementListRef.Value <- many statement
 /// <summary>
 /// Parser for optional specification (bracketed coords or argument tuple).
 /// </summary>
-let optionalSpecification = opt (choice [bracketedCoords; argumentTuple])
+/// <remarks>
+/// Whitespace preceding the bracket/paren is consumed only when a specification actually
+/// follows; wrapping in <c>attempt</c> ensures that if neither '(' nor '[' is found, the
+/// optional leading whitespace is backtracked too, leaving it available for other parsers
+/// that may require it afterward (e.g. <c>isOp</c>'s significant whitespace before 'is', or
+/// a following dotted-predicate's leading '.').
+/// </remarks>
+let optionalSpecification = opt (attempt (IW >>. (choice [bracketedCoords; argumentTuple])))
 
 /// <summary>
 /// Parser that pairs an identifier with an optional specification producing <c>Ast.PredicateWithOptSpecification</c>.

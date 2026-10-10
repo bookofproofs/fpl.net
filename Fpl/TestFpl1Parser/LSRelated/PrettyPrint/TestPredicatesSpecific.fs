@@ -116,16 +116,27 @@ type TestPredicatesSpecific () =
         allAssertionsSyntaxErrorFreeInputWithoutComments negation fplCode
 
     [<DataRow("01", """is(x, Nat)""")>]
+    [<DataRow("01a", """x is Nat""")>]
     [<DataRow("02", """is(1, Set)""")>]
+    [<DataRow("02a", """2 is Set""")>]
     [<DataRow("03", """is(One, Set)""")>]
+    [<DataRow("03a", """One is Set""")>]
     [<DataRow("04", """is(T.X.Y, Set)""")>]
+    [<DataRow("04a", """T.X.Y is Set""")>]
     [<DataRow("05", """is(self, Set)""")>]
+    [<DataRow("05a", """self is Set""")>]
     [<DataRow("06", """is(parent, Set)""")>]
+    [<DataRow("06a", """parent is Set""")>]
     [<DataRow("07", """is(A$1, Set)""")>]
+    [<DataRow("07a", """A$1 is Set""")>]
     [<DataRow("08", """is($1, ind)""")>]
+    [<DataRow("08a", """$1 is ind""")>]
     [<DataRow("09", """is(undef, ind)""")>]
+    [<DataRow("09a", """undef is ind""")>]
     [<DataRow("10", """is(true, ind)""")>]
+    [<DataRow("10a", """true is ind""")>]
     [<DataRow("11", """is(false, ind)""")>]
+    [<DataRow("11a", """false is ind""")>]
     [<TestMethod>]
     member _.TestIsOperatorSyntaxErrorFreeInput (no: string, fplCode: string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments isOperator fplCode
