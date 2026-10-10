@@ -706,7 +706,7 @@ let dollarDigitList = many1 dollarDigits
 /// <summary>
 /// Parser for referencing identifiers with dollar digits producing <c>Ast.ReferencingIdentifier</c>.
 /// </summary>
-let referencingIdentifier = positions (predicateIdentifier .>>. dollarDigitList) .>> IW |>> Ast.ReferencingIdentifier <!> "ReferencingIdentifier"
+let referencingIdentifier = positions (predicateIdentifier .>>. dollarDigitList) |>> Ast.ReferencingIdentifier <!> "ReferencingIdentifier"
 
 /// <summary>
 /// Parser to reference proofs or corollaries producing <c>Ast.ReferenceToProofOrCorollary</c>.
@@ -882,10 +882,11 @@ let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarati
 /// Parser for the 'is' operator forms; returns pair (predicate, type) representation.
 /// </summary>
 let isOp = choice [
-        attempt ((choice [predicateWithQualification; refArgumentIdentifier; primePredicate ] .>> SW .>> keywordIs) .>>. (SW >>. variableType))
+        attempt ((refArgumentIdentifier .>> SW .>> keywordIs) .>>. (SW >>. variableType))
+        attempt ((predicateWithQualification .>> SW .>> keywordIs) .>>. (SW >>. variableType))
+        attempt ((primePredicate .>> SW .>> keywordIs) .>>. (SW >>. variableType))
         (keywordIs >>. attemptSW >>. leftParen >>. predicate) .>>. (comma >>. variableType) .>> rightParen
     ]
-
 /// <summary>
 /// Parser that wraps isOp into positioned <c>Ast.IsOperator</c>.
 /// </summary>
