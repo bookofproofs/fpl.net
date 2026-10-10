@@ -605,19 +605,19 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
 
     // Localizations
     | Localization((pos, a), asts) ->
-        withTrivia map pos (concat [ keyword opts "loc" "localization"; text " "; p a; braces opts (concat (asts |> List.map p)) ])
+        withTrivia map pos (concat [ keyword opts "loc" "localization"; text " "; p a; text " := "; join (text " ") (asts |> List.map p); text ";" ])
     | TranslationTermList(pos, asts) ->
         withTrivia map pos (join (text " | ") (asts |> List.map p))
     | TranslationTerm(pos, asts) ->
         withTrivia map pos (join (text " ") (asts |> List.map p))
     | Language(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ p a1; text ": "; p a2 ])
+        withTrivia map pos (concat [ text "!"; p a1; text ": "; p a2 ])
     | LanguageCode(pos, s) -> withTrivia map pos (text s)
     | LocalizationString(pos, s) -> withTrivia map pos (concat [ text "\""; text s; text "\"" ])
 
     // TopLevel
     | AST(pos, a) -> withTrivia map pos (p a)
-    | Namespace asts -> concat (asts |> List.map p)
+    | Namespace asts -> concat (asts |> List.map (fun a -> concat [ p a; line ]))
     | UsesClause(pos, a) ->
         withTrivia map pos (concat [ keyword opts "uses" "uses"; text " "; p a ])
     | BuildingBlock(pos, a) -> withTrivia map pos (p a)
