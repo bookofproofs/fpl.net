@@ -274,3 +274,22 @@ module Commons =
                 1, occurrences,
                 $"Expected fragment '{fragment}' to appear exactly once in the reformatted output of syntax-error input, but it appeared {occurrences} time(s). Rendered:{Environment.NewLine}{rendered}")
 
+    /// <summary>
+    /// Category 1a' (individual-parser variant): asserts that every one of <paramref name="expectedFragments"/>
+    /// appears, verbatim, somewhere in the rendered output of <paramref name="fplCode"/> via <paramref name="parser"/>.
+    /// </summary>
+    /// <remarks>
+    /// Regression guard for missing-separator defects (e.g. a mapped return type printed directly
+    /// adjacent to a following <c>postfix</c>/<c>prefix</c>/<c>infix</c> declaration with no space in
+    /// between, such as <c>"Natinfix"</c>). A bare idempotency assertion cannot catch this class of
+    /// bug, since a wrongly-concatenated rendering can still be stable under a second reformat; this
+    /// helper instead checks that expected word-boundaries/separators actually produced the intended
+    /// substrings.
+    /// </remarks>
+    let assertFragmentsPresent (parser: Parser<Ast, unit>) (expectedFragments: string list) (fplCode: string) =
+        let rendered = printNodeViaParser parser fplCode
+        for fragment in expectedFragments do
+            Assert.IsTrue(
+                rendered.Contains(fragment: string),
+                $"Expected fragment '{fragment}' to appear in the reformatted output, but got:{Environment.NewLine}{rendered}")
+

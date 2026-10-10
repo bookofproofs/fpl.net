@@ -486,7 +486,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
             (concat [ keyword opts "pred" "predicate"; text " "; p a1
                       opt (fun a -> concat [ text ": "; p a ]) a1Opt
                       p a2
-                      opt p a3Opt ])
+                      opt (fun a -> concat [ text " "; p a ]) a3Opt ])
     | DefPredicateContent(a1, a2) ->
         concat [ p a1; p a2 ]
 
@@ -497,7 +497,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
             (concat [ keyword opts "func" "function"; text " "; p a1
                       opt (fun a -> concat [ text ": "; p a ]) a1Opt
                       p a2; p a3
-                      opt p a4Opt ])
+                      opt (fun a -> concat [ text " "; p a ]) a4Opt ])
     | Mapping(pos, a) ->
         withTrivia map pos (concat [ text "-> "; p a ])
     | FunctionalTermDefinitionBlock(pos, tupOpt) ->

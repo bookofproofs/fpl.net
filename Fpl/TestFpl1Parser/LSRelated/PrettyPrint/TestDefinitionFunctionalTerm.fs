@@ -53,8 +53,13 @@ type TestDefinitionFunctionalTerm () =
     [<DataRow("43", """definition func T: A, B, C()->obj { dec x:obj; return x }""")>]
     [<DataRow("44", """definition func T : A , B , C ()->obj { dec x:obj; return x }""")>]
     [<DataRow("45", """def func Add (x,y: Nat) -> Nat infix "+" 2 { intr }""")>]
+    [<DataRow("45a", """def func Add (x,y: Nat) -> obj infix "+" 2 { intr }""")>]
     [<DataRow("46", """def func Minus(x: Nat) -> Nat prefix "-" { intr }""")>]
-    [<DataRow("47", """def func T() -> obj { ret x prty func T1() -> obj { ret y } }""")>]
+    [<DataRow("46a", """def func Minus(x: Nat) -> ind prefix "-" { intr }""")>]
+    [<DataRow("47", """def func Succ(x: Nat) -> Nat postfix "'" { intr }""")>]
+    [<DataRow("47a", """def func Succ(x: Nat) -> pred postfix "'" { intr }""")>]
+    [<DataRow("48", """def func T() -> obj { ret x prty func T1() -> obj { ret y } }""")>]
+    [<DataRow("49", """def func T() -> obj { ret x prty func T1() -> obj { ret y } prty func T2() -> obj { ret z } }""")>]
     [<TestMethod>]
     member this.TestDefinitionFunctionalTermSyntaxErrorFreeInput (no:string, fplCode:string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments definition fplCode
@@ -74,3 +79,9 @@ type TestDefinitionFunctionalTerm () =
     member this.TestDefinitionFunctionalTermSyntaxErrorInput (no:string, fplCode:string) =
         allAssertionsForSyntaxErrorInput fplCode
 
+    [<DataRow("45", """def func Add (x,y: Nat) -> Nat infix "+" 2 { intr }""", "Nat infix")>]
+    [<DataRow("46", """def func Minus(x: Nat) -> Nat prefix "-" { intr }""", "Nat prefix")>]
+    [<DataRow("47", """def func Succ(x: Nat) -> Nat postfix "'" { intr }""", "Nat postfix")>]
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTermSignatureSeparatesMappedTypeFromUserDefinedSymbol (no:string, fplCode:string, expectedFragment:string) =
+        assertFragmentsPresent definition [ expectedFragment ] fplCode
