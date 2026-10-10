@@ -607,7 +607,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | Localization((pos, a), asts) ->
         withTrivia map pos (concat [ keyword opts "loc" "localization"; text " "; p a; braces opts (concat (asts |> List.map p)) ])
     | TranslationTermList(pos, asts) ->
-        withTrivia map pos (concat (asts |> List.map p))
+        withTrivia map pos (join (text " | ") (asts |> List.map p))
     | TranslationTerm(pos, asts) ->
         withTrivia map pos (join (text " ") (asts |> List.map p))
     | Language(pos, (a1, a2)) ->
