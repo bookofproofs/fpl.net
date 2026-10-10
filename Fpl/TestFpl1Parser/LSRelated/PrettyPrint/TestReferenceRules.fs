@@ -22,3 +22,10 @@ type TestReferenceRules () =
     member _.TestRuleOfInferenceSyntaxErrorFreeInput (no: string, fplCode: string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments ruleOfInference fplCode
 
+    [<DataRow("01", """inf ModusPonens { dec p,q: pred; premise: and (p, impl (p,q) ) conclusion: q }""", "pre", "con")>]
+    [<DataRow("07", """inf ExistsByExample { dec p:pred(c:obj); premise: p(c) conclusion: ex x:obj {p(x)} }""", "pre", "con")>]
+    [<DataRow("08", """inf TestRuleOfInference { premise:true conclusion:true }""", "pre", "con")>]
+    [<DataRow("09", """inf ExistsByExample {dec c: obj; pre: true con: true}""", "pre", "con")>]
+    [<TestMethod>]
+    member _.TestRuleOfInferencePremiseAndConclusionEachOnOwnLine (no: string, fplCode: string, premiseAnchor: string, conclusionAnchor: string) =
+        assertEachOnOwnLine ruleOfInference [ premiseAnchor; conclusionAnchor ] fplCode

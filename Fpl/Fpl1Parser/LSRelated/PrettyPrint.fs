@@ -522,7 +522,10 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | RuleOfInferenceSignature(pos, a) ->
         withTrivia map pos (concat [ keyword opts "inf" "inference"; text " "; p a ])
     | PremiseConclusionBlock(a1, (a2, a3)) ->
-        braces opts (concat [ p a1; p a2; p a3 ])
+        braces opts
+            (concat [ p a1; line
+                      p a2; line
+                      keyword opts "con" "conclusion"; text ": "; p a3 ])
     | PremiseList(pos, asts) ->
         withTrivia map pos (concat [ keyword opts "pre" "premise"; text ": "; commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p) ])
 
