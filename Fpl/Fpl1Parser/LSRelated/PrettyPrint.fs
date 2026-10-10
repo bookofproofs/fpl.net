@@ -302,7 +302,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     let list sep xs = xs |> List.map p |> join sep
     match ast with
     // Lexical / Leaf tokens
-    | Alias(pos, name) -> withTrivia map pos (concat [ text "as "; text name ])
+    | Alias(pos, name) -> withTrivia map pos (concat [ text "alias "; text name ])
     | Dot () -> text "."
     | Star(pos, _) -> withTrivia map pos (text "*")
     | Digits s -> text s
@@ -571,7 +571,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | StartArgument a ->
         p a
     | StartArgumentStictly(a, asts) ->
-        concat [ p a; commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p) ]
+        concat [ p a; text " "; commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p); text " |-" ]
     | Justification(pos, a) ->
         withTrivia map pos (p a)
     | JustificationItem(pos, a) ->

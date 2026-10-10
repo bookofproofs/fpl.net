@@ -13,6 +13,7 @@ type TestProofRelated() =
     [<DataRow("03", """1. 3, GreaterTransitive  |-""")>]
     [<DataRow("04", """1. 4, byinf ModusPonens |- """)>]
     [<DataRow("05", """1. 1,2,  3 |- """)>]
+    [<DataRow("06", """1: """)>]
     [<TestMethod>]
     member _.TestJustificationSyntaxErrorFreeInput (no: string, fplCode: string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments justification fplCode
@@ -65,3 +66,9 @@ type TestProofRelated() =
     [<TestMethod>]
     member _.TestJustificationItemByDefSyntaxErrorFreeInput (no: string, fplCode: string) =
         allAssertionsSyntaxErrorFreeInputWithoutComments justificationItem fplCode
+
+    [<DataRow("01", """1. GreaterAB |-""", "1. GreaterAB |-")>]
+    [<DataRow("02", """1. PrecedingResults, 1 |-""", "1. PrecedingResults, 1 |-")>]
+    [<TestMethod>]
+    member _.TestJustificationPreservesTurnstileAndSpacing (no: string, fplCode: string, expectedFragment: string) =
+        assertFragmentsPresent justification [ expectedFragment ] fplCode
