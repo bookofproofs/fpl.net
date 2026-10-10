@@ -239,3 +239,38 @@ module Commons =
         assertFullPipelineIdempotentWith opts fplCode
         // 2c test: comment preservation / placement under custom opts
         assertCommentPreservationPlacementWith opts fplCode
+
+
+    /// <summary>
+    /// Category 1c'' (syntax-error variant): asserts that each of <paramref name="expectedFragments"/>
+    /// appears <em>exactly once</em> in the <c>printAll</c> output for <paramref name="fplCode"/>, and
+    /// that <paramref name="fplCode"/> indeed contains a syntax error (so the assertion is meaningful).
+    /// </summary>
+    /// <remarks>
+    /// Regression guard for the chunked error-recovery logic in <c>Fpl1Parser.Main</c>: a
+    /// successfully-parsed prefix of a chunk is committed as its own <c>BuildingBlock</c> AST node,
+    /// while the rest of the chunk is captured verbatim on the resulting error node. Miscomputing the
+    /// boundary between the two can either duplicate the prefix (it appears both as a real
+    /// <c>BuildingBlock</c> and again inside the error node's verbatim text) or truncate the start of
+    /// the error node's verbatim text (dropping leading characters of the unconsumed suffix). Plain
+    /// idempotency assertions do not catch either defect, since a duplicated/truncated rendering can
+    /// still be stable under a second reformat. This helper instead checks each expected fragment's
+    /// occurrence count directly against the rendered output.
+    /// </remarks>
+    let assertFragmentsAppearExactlyOnceForSyntaxErrorInput (expectedFragments: string list) (fplCode: string) =
+        let rendered, success = formatViaFplParser fplCode
+        Assert.IsFalse(success, $"Expected '{fplCode}' to contain a syntax error for this assertion to be meaningful.")
+        for fragment in expectedFragments do
+            let occurrences =
+                if fragment = "" then 0
+                else
+                    let mutable count = 0
+                    let mutable idx = rendered.IndexOf(fragment: string)
+                    while idx >= 0 do
+                        count <- count + 1
+                        idx <- rendered.IndexOf(fragment, idx + 1)
+                    count
+            Assert.AreEqual(
+                1, occurrences,
+                $"Expected fragment '{fragment}' to appear exactly once in the reformatted output of syntax-error input, but it appeared {occurrences} time(s). Rendered:{Environment.NewLine}{rendered}")
+

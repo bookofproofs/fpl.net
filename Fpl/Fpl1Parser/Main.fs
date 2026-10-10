@@ -189,6 +189,24 @@ let private getParseableInputAndErrorNodes input (originalFplCode: string) origL
                 else
                     parseAbleInput.Append(maskedChunk) |> ignore
 
+                // The successfully-parsed prefix (trimedInput.[0 .. posSuccess)) is already committed
+                // above as its own, independent BuildingBlock AST node (it will be re-parsed from
+                // parseAbleInput by the caller). Stamping the *whole* chunk's span/verbatim on the
+                // error node derived from the leftover suffix would therefore duplicate that prefix
+                // text: it would be emitted once by the genuine BuildingBlock node and a second time
+                // verbatim inside the error node. Instead, compute a span/verbatim that covers only
+                // the unconsumed suffix of the chunk, so error reprinting never repeats already-parsed
+                // text.
+                // Note: use TrimStart's length delta (not Trim's), since chunk.Trim() also strips
+                // trailing whitespace, which would overshoot suffixStart by the trailing whitespace
+                // amount and truncate the start of the unconsumed suffix.
+                let leadingTrimLen = chunk.Length - (chunk.TrimStart()).Length
+                let suffixStart = chunkStart + leadingTrimLen + posSuccess
+                let suffixLen = chunkStart + chunkLen - suffixStart
+                let suffixSpan = blockSpanOf suffixStart suffixLen
+                let suffixVerbatim = verbatimSlice suffixStart suffixLen
+                collectErrorsIfAny remainder errorList origLines origLength suffixSpan suffixVerbatim
+
             | _ ->
                 // If there were no recovery matches at all, keep the whole chunk,
                 // otherwise mask it entirely
@@ -196,7 +214,7 @@ let private getParseableInputAndErrorNodes input (originalFplCode: string) origL
                     parseAbleInput.Append(chunk) |> ignore
                 else
                     parseAbleInput.Append(maskedChunk) |> ignore
-            collectErrorsIfAny remainder errorList origLines origLength chunkSpan chunkVerbatim
+                collectErrorsIfAny remainder errorList origLines origLength chunkSpan chunkVerbatim
         maskedPrefix.Append(maskedChunk) |> ignore
 
     parseAbleInput.ToString(), errorList |> Seq.toList |> List.concat

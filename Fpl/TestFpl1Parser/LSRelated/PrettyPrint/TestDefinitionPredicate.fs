@@ -54,3 +54,11 @@ type TestDefinitionPredicate () =
     [<TestMethod>]
     member this.TestDefinitionPredicateSyntaxErrorInput (no:string, fplCode:string) =
         allAssertionsForSyntaxErrorInput fplCode
+
+    [<DataRow("13", """def pred T() postfix "" {intr}""", "def pred T()", "postfix")>]
+    [<DataRow("14", """def pred T() infix "" 0 {intr}""", "def pred T()", "infix")>]
+    [<DataRow("15", """def pred T() prefix "" {intr}""", "def pred T()", "prefix")>]
+    [<TestMethod>]
+    member this.TestDefinitionPredicateFixPostfixSyntaxErrorNoDuplicationOrTruncation (no:string, fplCode:string, validPrefixFragment:string, brokenKeywordFragment:string) =
+        assertFragmentsAppearExactlyOnceForSyntaxErrorInput [ validPrefixFragment; brokenKeywordFragment ] fplCode
+
