@@ -106,15 +106,6 @@ let private compoundNotation (opts: FormattingOptions) (kw: string) (sym: string
     | Notation.Symbol -> text sym
 
 /// <summary>
-/// Renders one of two spellings for a user-defined operator, choosing per
-/// <paramref name="opts"/>.<c>OperatorStyle</c>.
-/// </summary>
-let private operatorNotation (opts: FormattingOptions) (kw: string) (sym: string) : Doc =
-    match opts.OperatorStyle with
-    | Notation.Keyword -> text kw
-    | Notation.Symbol -> text sym
-
-/// <summary>
 /// Renders an opening delimiter pair (<paramref name="openD"/>/<paramref name="closeD"/>, e.g.
 /// <c>"{"</c>/<c>"}"</c>) around <paramref name="bodyDoc"/>, honoring <paramref name="style"/>:
 /// <see cref="OpeningStyle.OneLiner"/> keeps everything inline, <see cref="OpeningStyle.Egyptian"/>

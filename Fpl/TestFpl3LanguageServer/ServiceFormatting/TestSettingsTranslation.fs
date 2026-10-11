@@ -29,7 +29,6 @@ type TestSettingsTranslation () =
             JProperty("compoundPredicateStyle", "keyword"),
             JProperty("emptyLinesAfterBlocks", 2),
             JProperty("maxConsecutiveBlankLines", 3),
-            JProperty("operatorStyle", "keyword"),
             JProperty("isOperator", "polish"),
             JProperty("declSemicolon", "enclosing")
         )
@@ -54,7 +53,6 @@ type TestSettingsTranslation () =
         Assert.AreEqual<Notation>(Notation.Keyword, actual.CompoundPredicateStyle)
         Assert.AreEqual<int>(2, actual.EmptyLinesAfterBlocks)
         Assert.AreEqual<int>(3, actual.MaxConsecutiveBlankLines)
-        Assert.AreEqual<Notation>(Notation.Keyword, actual.OperatorStyle)
         Assert.AreEqual<IsOpStyle>(IsOpStyle.Polish, actual.IsOperator)
         Assert.AreEqual<BlockStyle>(BlockStyle.Enclosing, actual.DeclSemicolon)
 
@@ -73,7 +71,6 @@ type TestSettingsTranslation () =
     [<DataRow("compoundPredicateStyle")>]
     [<DataRow("emptyLinesAfterBlocks")>]
     [<DataRow("maxConsecutiveBlankLines")>]
-    [<DataRow("operatorStyle")>]
     [<DataRow("isOperator")>]
     [<DataRow("declSemicolon")>]
     [<TestMethod>]
@@ -101,7 +98,6 @@ type TestSettingsTranslation () =
         | "compoundPredicateStyle" -> Assert.AreEqual<Notation>(fplFormatDefaults.CompoundPredicateStyle, actual.CompoundPredicateStyle)
         | "emptyLinesAfterBlocks" -> Assert.AreEqual<int>(fplFormatDefaults.EmptyLinesAfterBlocks, actual.EmptyLinesAfterBlocks)
         | "maxConsecutiveBlankLines" -> Assert.AreEqual<int>(fplFormatDefaults.MaxConsecutiveBlankLines, actual.MaxConsecutiveBlankLines)
-        | "operatorStyle" -> Assert.AreEqual<Notation>(fplFormatDefaults.OperatorStyle, actual.OperatorStyle)
         | "isOperator" -> Assert.AreEqual<IsOpStyle>(fplFormatDefaults.IsOperator, actual.IsOperator)
         | "declSemicolon" -> Assert.AreEqual<BlockStyle>(fplFormatDefaults.DeclSemicolon, actual.DeclSemicolon)
         | _ -> Assert.Fail($"Unhandled key: {missingKey}")

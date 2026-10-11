@@ -123,6 +123,5 @@ let translate (defaults: FormattingOptions) (json: JToken) : FormattingOptions =
       CompoundPredicateStyle = parseNotation defaults.CompoundPredicateStyle json "compoundPredicateStyle"
       EmptyLinesAfterBlocks = parseInt defaults.EmptyLinesAfterBlocks json "emptyLinesAfterBlocks"
       MaxConsecutiveBlankLines = parseInt defaults.MaxConsecutiveBlankLines json "maxConsecutiveBlankLines"
-      OperatorStyle = parseNotation defaults.OperatorStyle json "operatorStyle"
       IsOperator = parseIsOpStyle defaults.IsOperator json "isOperator"
       DeclSemicolon = parseBlockStyle defaults.DeclSemicolon json "declSemicolon" }

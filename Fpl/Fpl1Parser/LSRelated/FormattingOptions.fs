@@ -91,7 +91,6 @@ type FormattingOptions =
       CompoundPredicateStyle: Notation
       EmptyLinesAfterBlocks: int
       MaxConsecutiveBlankLines: int
-      OperatorStyle: Notation
       IsOperator: IsOpStyle
       DeclSemicolon: BlockStyle }
 
@@ -112,6 +111,5 @@ let fplFormatDefaults : FormattingOptions =
       CompoundPredicateStyle = Notation.Symbol
       EmptyLinesAfterBlocks = 1
       MaxConsecutiveBlankLines = 1
-      OperatorStyle = Notation.Symbol
       IsOperator = IsOpStyle.Infix
       DeclSemicolon = BlockStyle.Compact }

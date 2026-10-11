@@ -189,15 +189,6 @@
                     "default": "symbol",
                     "description": "Whether compound predicates should use their keyword or symbolic spelling."
                 },
-                "fplExtension.format.operatorStyle": {
-                    "type": "string",
-                    "enum": [
-                        "keyword",
-                        "symbol"
-                    ],
-                    "default": "symbol",
-                    "description": "Whether a construct with both a keyword and symbolic spelling for an operator should use the keyword or symbolic form."
-                },
                 "fplExtension.format.emptyLinesAfterBlocks": {
                     "type": "integer",
                     "default": 1,
