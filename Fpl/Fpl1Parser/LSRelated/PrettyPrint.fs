@@ -4,6 +4,7 @@
 /// user-configurable <see cref="FormattingOptions.FormattingOptions"/>.
 /// </summary>
 module Fpl1Parser.LSRelated.PrettyPrint
+open Fpl0Base.Primitives
 open Fpl1Parser.Types
 open Fpl1Parser.LSRelated.CommentLexer
 open Fpl1Parser.LSRelated.TriviaMap
@@ -95,15 +96,6 @@ let private keyword (opts: FormattingOptions) (short: string) (long: string) : D
     | KeywordLength.Short -> text short
     | KeywordLength.Long -> text long
 
-/// <summary>
-/// Renders one of two spellings for a construct that has both a keyword form and a symbolic
-/// form, choosing per <paramref name="opts"/>.<c>CompoundPredicateStyle</c> (used for
-/// and/or/impl/iif/xor/not/all/exists).
-/// </summary>
-let private compoundNotation (opts: FormattingOptions) (kw: string) (sym: string) : Doc =
-    match opts.CompoundPredicateStyle with
-    | Notation.Keyword -> text kw
-    | Notation.Symbol -> text sym
 
 /// <summary>
 /// Renders an opening delimiter pair (<paramref name="openD"/>/<paramref name="closeD"/>, e.g.
@@ -346,23 +338,23 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | True(pos, _) -> withTrivia map pos (text "true")
     | False(pos, _) -> withTrivia map pos (text "false")
     | And(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ compoundNotation opts "and" "∧"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
+        withTrivia map pos (concat [ keyword opts LiteralAndSymbol LiteralAnd; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Or(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ compoundNotation opts "or" "∨"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
+        withTrivia map pos (concat [ keyword opts "∨" "or"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Xor(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ compoundNotation opts "xor" "⩡"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
+        withTrivia map pos (concat [ keyword opts "⩡" "xor"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Impl(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ compoundNotation opts "impl" "⇒"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
+        withTrivia map pos (concat [ keyword opts "⇒" "impl"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Iif(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ compoundNotation opts "iif" "⇔"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
+        withTrivia map pos (concat [ keyword opts "⇔" "iif"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Not(pos, a) ->
-        withTrivia map pos (concat [ compoundNotation opts "not " "¬"; p a ])
+        withTrivia map pos (concat [ keyword opts "¬" "not " ; p a ])
     | All(pos, (asts, a)) ->
         withTrivia map pos
-            (concat [ compoundNotation opts "all " "∀"; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
+            (concat [ keyword opts "∀" "all " ; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
     | Exists(pos, (asts, a)) ->
         withTrivia map pos
-            (concat [ compoundNotation opts "ex " "∃"; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
+            (concat [ keyword opts "∃" "ex "; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
     | Exists1 () -> text "∃!"
     | ExistsN(pos, ((a1, asts), a2)) ->
         withTrivia map pos
@@ -622,6 +614,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | ErrorSyntax(_, _, _, verbatim) -> verbatimBlock verbatim
     | ErrorSyntaxBacktracking(_, _, _, verbatim) -> verbatimBlock verbatim
     | ErrorSyntaxChain(_, _, _, verbatim) -> verbatimBlock verbatim
+
 /// <summary>
 /// The entry point for the formatting service: pretty-prints a list of top-level building-block
 /// ASTs (as returned by <c>Fpl1Parser.Main.fplParser</c>), honoring trivia recorded in

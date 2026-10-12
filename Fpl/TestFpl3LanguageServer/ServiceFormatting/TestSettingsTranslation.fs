@@ -26,7 +26,6 @@ type TestSettingsTranslation () =
             JProperty("spacingBeforeBrackets", true),
             JProperty("spacingBeforeParentheses", true),
             JProperty("keywordStyle", "long"),
-            JProperty("compoundPredicateStyle", "keyword"),
             JProperty("emptyLinesAfterBlocks", 2),
             JProperty("maxConsecutiveBlankLines", 3),
             JProperty("isOperator", "polish"),
@@ -50,7 +49,6 @@ type TestSettingsTranslation () =
         Assert.AreEqual<OptionYesNo>(OptionYesNo.Yes, actual.SpacingBeforeBrackets)
         Assert.AreEqual<OptionYesNo>(OptionYesNo.Yes, actual.SpacingBeforeParentheses)
         Assert.AreEqual<KeywordLength>(KeywordLength.Long, actual.KeywordStyle)
-        Assert.AreEqual<Notation>(Notation.Keyword, actual.CompoundPredicateStyle)
         Assert.AreEqual<int>(2, actual.EmptyLinesAfterBlocks)
         Assert.AreEqual<int>(3, actual.MaxConsecutiveBlankLines)
         Assert.AreEqual<IsOpStyle>(IsOpStyle.Polish, actual.IsOperator)
@@ -68,7 +66,6 @@ type TestSettingsTranslation () =
     [<DataRow("spacingBeforeBrackets")>]
     [<DataRow("spacingBeforeParentheses")>]
     [<DataRow("keywordStyle")>]
-    [<DataRow("compoundPredicateStyle")>]
     [<DataRow("emptyLinesAfterBlocks")>]
     [<DataRow("maxConsecutiveBlankLines")>]
     [<DataRow("isOperator")>]
@@ -95,7 +92,6 @@ type TestSettingsTranslation () =
         | "spacingBeforeBrackets" -> Assert.AreEqual<OptionYesNo>(fplFormatDefaults.SpacingBeforeBrackets, actual.SpacingBeforeBrackets)
         | "spacingBeforeParentheses" -> Assert.AreEqual<OptionYesNo>(fplFormatDefaults.SpacingBeforeParentheses, actual.SpacingBeforeParentheses)
         | "keywordStyle" -> Assert.AreEqual<KeywordLength>(fplFormatDefaults.KeywordStyle, actual.KeywordStyle)
-        | "compoundPredicateStyle" -> Assert.AreEqual<Notation>(fplFormatDefaults.CompoundPredicateStyle, actual.CompoundPredicateStyle)
         | "emptyLinesAfterBlocks" -> Assert.AreEqual<int>(fplFormatDefaults.EmptyLinesAfterBlocks, actual.EmptyLinesAfterBlocks)
         | "maxConsecutiveBlankLines" -> Assert.AreEqual<int>(fplFormatDefaults.MaxConsecutiveBlankLines, actual.MaxConsecutiveBlankLines)
         | "isOperator" -> Assert.AreEqual<IsOpStyle>(fplFormatDefaults.IsOperator, actual.IsOperator)

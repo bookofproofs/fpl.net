@@ -50,11 +50,6 @@ type KeywordLength =
     | Long
     | Short
 
-/// <summary>Whether a construct with both a keyword and symbolic spelling should use which form.</summary>
-type Notation =
-    | Keyword
-    | Symbol
-
 /// <summary>Layout style for the <c>is</c>-operator.</summary>
 type IsOpStyle =
     /// Function-call-like form, e.g. <c>is(x, y)</c>.
@@ -88,7 +83,6 @@ type FormattingOptions =
       SpacingBeforeBrackets: OptionYesNo
       SpacingBeforeParentheses: OptionYesNo
       KeywordStyle: KeywordLength
-      CompoundPredicateStyle: Notation
       EmptyLinesAfterBlocks: int
       MaxConsecutiveBlankLines: int
       IsOperator: IsOpStyle
@@ -108,7 +102,6 @@ let fplFormatDefaults : FormattingOptions =
       SpacingBeforeBrackets = OptionYesNo.No
       SpacingBeforeParentheses = OptionYesNo.No
       KeywordStyle = KeywordLength.Short
-      CompoundPredicateStyle = Notation.Symbol
       EmptyLinesAfterBlocks = 1
       MaxConsecutiveBlankLines = 1
       IsOperator = IsOpStyle.Infix

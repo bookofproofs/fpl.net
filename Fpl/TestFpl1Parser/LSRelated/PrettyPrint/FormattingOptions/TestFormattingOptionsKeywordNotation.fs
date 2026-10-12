@@ -23,24 +23,6 @@ type TestFormattingOptionsKeywordStyle () =
         allAssertionsForFormattingOptions opts fplCode
 
 [<TestClass>]
-type TestFormattingOptionsCompoundPredicateStyle () =
-
-    [<DataRow("Keyword")>]
-    [<DataRow("Symbol")>]
-    [<TestMethod>]
-    member _.TestCompoundPredicateStyleNoSyntaxErrorsIdempotentCommentsPreserved (notationName: string) =
-        let value =
-            match notationName with
-            | "Keyword" -> Notation.Keyword
-            | "Symbol" -> Notation.Symbol
-            | other -> failwith $"Unexpected Notation name: {other}"
-
-        let opts = { fplFormatDefaults with CompoundPredicateStyle = value }
-        let fplCode = """def pred T1() { and(x,b) }"""
-
-        allAssertionsForFormattingOptions opts fplCode
-
-[<TestClass>]
 type TestFormattingOptionsIsOperator () =
 
     [<DataRow("Infix")>]

@@ -79,12 +79,6 @@ let private parseKeywordLength (defaultValue: KeywordLength) (json: JToken) (key
     | Some "short" -> KeywordLength.Short
     | _ -> defaultValue
 
-let private parseNotation (defaultValue: Notation) (json: JToken) (key: string) : Notation =
-    match tryGetString json key with
-    | Some "keyword" -> Notation.Keyword
-    | Some "symbol" -> Notation.Symbol
-    | _ -> defaultValue
-
 let private parseIsOpStyle (defaultValue: IsOpStyle) (json: JToken) (key: string) : IsOpStyle =
     match tryGetString json key with
     | Some "polish" -> IsOpStyle.Polish
@@ -120,7 +114,6 @@ let translate (defaults: FormattingOptions) (json: JToken) : FormattingOptions =
       SpacingBeforeBrackets = parseOptionYesNo defaults.SpacingBeforeBrackets json "spacingBeforeBrackets"
       SpacingBeforeParentheses = parseOptionYesNo defaults.SpacingBeforeParentheses json "spacingBeforeParentheses"
       KeywordStyle = parseKeywordLength defaults.KeywordStyle json "keywordStyle"
-      CompoundPredicateStyle = parseNotation defaults.CompoundPredicateStyle json "compoundPredicateStyle"
       EmptyLinesAfterBlocks = parseInt defaults.EmptyLinesAfterBlocks json "emptyLinesAfterBlocks"
       MaxConsecutiveBlankLines = parseInt defaults.MaxConsecutiveBlankLines json "maxConsecutiveBlankLines"
       IsOperator = parseIsOpStyle defaults.IsOperator json "isOperator"

@@ -180,15 +180,6 @@
                     "default": "short",
                     "description": "Whether a keyword with both a short and long spelling should use the short or long form."
                 },
-                "fplExtension.format.compoundPredicateStyle": {
-                    "type": "string",
-                    "enum": [
-                        "keyword",
-                        "symbol"
-                    ],
-                    "default": "symbol",
-                    "description": "Whether compound predicates should use their keyword or symbolic spelling."
-                },
                 "fplExtension.format.emptyLinesAfterBlocks": {
                     "type": "integer",
                     "default": 1,
