@@ -22,20 +22,3 @@ type TestFormattingOptionsKeywordStyle () =
 
         allAssertionsForFormattingOptions opts fplCode
 
-[<TestClass>]
-type TestFormattingOptionsIsOperator () =
-
-    [<DataRow("Infix")>]
-    [<DataRow("Polish")>]
-    [<TestMethod>]
-    member _.TestIsOperatorNoSyntaxErrorsIdempotentCommentsPreserved (styleName: string) =
-        let value =
-            match styleName with
-            | "Infix" -> IsOpStyle.Infix
-            | "Polish" -> IsOpStyle.Polish
-            | other -> failwith $"Unexpected IsOpStyle name: {other}"
-
-        let opts = { fplFormatDefaults with IsOperator = value }
-        let fplCode = """def pred T1() { dec x: obj ; is(x, Nat) }"""
-
-        allAssertionsForFormattingOptions opts fplCode

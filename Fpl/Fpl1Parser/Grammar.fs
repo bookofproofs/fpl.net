@@ -879,17 +879,33 @@ let existsTimeNQuantifier = choice [
 let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN <!> "ExistsN"
 
 /// <summary>
-/// Parser for the 'is' operator forms; returns pair (predicate, type) representation.
+/// Parser for the infix form of the 'is' operator (e.g. <c>x is Set</c>); returns pair (predicate, type).
 /// </summary>
-let isOp = choice [
+let isOpInfix = choice [
         attempt ((referencingIdentifier .>> SW .>> keywordIs) .>>. (SW >>. variableType))
         attempt ((choice [predicateWithQualification; primePredicate ] .>> SW .>> keywordIs) .>>. (SW >>. variableType))
-        (keywordIs >>. attemptSW >>. leftParen >>. predicate) .>>. (comma >>. variableType) .>> rightParen
     ]
+
 /// <summary>
-/// Parser that wraps isOp into positioned <c>Ast.IsOperator</c>.
+/// Parser for the Polish/prefix form of the 'is' operator (e.g. <c>is(x, Set)</c>); returns pair (predicate, type).
 /// </summary>
-let isOperator = positions isOp |>> Ast.IsOperator <!> "IsOperator"
+let isOpPolish = (keywordIs >>. attemptSW >>. leftParen >>. predicate) .>>. (comma >>. variableType) .>> rightParen
+
+/// <summary>
+/// Parser that wraps the infix 'is' form into positioned <c>Ast.IsOperatorInfix</c>.
+/// </summary>
+let isOperatorInfix = positions isOpInfix |>> Ast.IsOperatorInfix <!> "IsOperatorInfix"
+
+/// <summary>
+/// Parser that wraps the Polish 'is' form into positioned <c>Ast.IsOperatorPolish</c>.
+/// </summary>
+let isOperatorPolish = positions isOpPolish |>> Ast.IsOperatorPolish <!> "IsOperatorPolish"
+
+/// <summary>
+/// Parser for either syntactic flavor of the 'is' operator, preferring the infix attempt first
+/// (it is already wrapped in <c>attempt</c> internally) before falling back to the Polish form.
+/// </summary>
+let isOperator = choice [isOperatorInfix; isOperatorPolish] <!> "IsOperator"
 
 /// <summary>
 /// Parser for infix symbol tokens producing <c>Ast.InfixSymbolWithPos</c>.

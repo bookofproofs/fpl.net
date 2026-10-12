@@ -83,7 +83,8 @@ type Ast =
     | Exists of Positions * (Ast list * Ast) 
     | Exists1 of unit
     | ExistsN of Positions * ((Ast * Ast list) * Ast)
-    | IsOperator of Positions * (Ast * Ast)
+    | IsOperatorInfix of Positions * (Ast * Ast)
+    | IsOperatorPolish of Positions * (Ast * Ast)
 
     // Expressions
     | PredicateWithQualification of (Ast * Ast)

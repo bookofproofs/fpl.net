@@ -117,7 +117,8 @@ let rec eval ast =
     | Ast.Exists _
     | Ast.Exists1 _
     | Ast.ExistsN _
-    | Ast.IsOperator _
+    | Ast.IsOperatorInfix _
+    | Ast.IsOperatorPolish _
         ->
         evalPredicates ast
 

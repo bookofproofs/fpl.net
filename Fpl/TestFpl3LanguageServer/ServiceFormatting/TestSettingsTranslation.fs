@@ -51,7 +51,6 @@ type TestSettingsTranslation () =
         Assert.AreEqual<KeywordLength>(KeywordLength.Long, actual.KeywordStyle)
         Assert.AreEqual<int>(2, actual.EmptyLinesAfterBlocks)
         Assert.AreEqual<int>(3, actual.MaxConsecutiveBlankLines)
-        Assert.AreEqual<IsOpStyle>(IsOpStyle.Polish, actual.IsOperator)
         Assert.AreEqual<BlockStyle>(BlockStyle.Enclosing, actual.DeclSemicolon)
 
     [<DataRow("indentSize")>]
@@ -94,7 +93,6 @@ type TestSettingsTranslation () =
         | "keywordStyle" -> Assert.AreEqual<KeywordLength>(fplFormatDefaults.KeywordStyle, actual.KeywordStyle)
         | "emptyLinesAfterBlocks" -> Assert.AreEqual<int>(fplFormatDefaults.EmptyLinesAfterBlocks, actual.EmptyLinesAfterBlocks)
         | "maxConsecutiveBlankLines" -> Assert.AreEqual<int>(fplFormatDefaults.MaxConsecutiveBlankLines, actual.MaxConsecutiveBlankLines)
-        | "isOperator" -> Assert.AreEqual<IsOpStyle>(fplFormatDefaults.IsOperator, actual.IsOperator)
         | "declSemicolon" -> Assert.AreEqual<BlockStyle>(fplFormatDefaults.DeclSemicolon, actual.DeclSemicolon)
         | _ -> Assert.Fail($"Unhandled key: {missingKey}")
 

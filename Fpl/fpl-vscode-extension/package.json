@@ -190,15 +190,6 @@
                     "default": 1,
                     "description": "The maximum number of consecutive blank lines allowed between constructs."
                 },
-                "fplExtension.format.isOperator": {
-                    "type": "string",
-                    "enum": [
-                        "polish",
-                        "infix"
-                    ],
-                    "default": "infix",
-                    "description": "Layout style for the 'is'-operator. 'polish' uses a function-call-like form, e.g. is(x, y). 'infix' uses an infix form, e.g. x is y."
-                },
                 "fplExtension.format.declSemicolon": {
                     "type": "string",
                     "enum": [

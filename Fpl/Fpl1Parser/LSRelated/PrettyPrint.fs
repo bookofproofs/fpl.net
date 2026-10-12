@@ -214,12 +214,6 @@ let private declBlock (opts: FormattingOptions) (declDocs: Doc list) : Doc =
                  indent (concat (declDocs |> List.map (fun d -> concat [ d; line ])))
                  text ";" ]
 
-/// <summary>Renders the <c>is</c>-operator honoring <paramref name="opts"/>.<c>IsOperator</c>.</summary>
-let private isOperator (opts: FormattingOptions) (subjectDoc: Doc) (typeDoc: Doc) : Doc =
-    match opts.IsOperator with
-    | IsOpStyle.Infix -> concat [ subjectDoc; text $" {LiteralIs} "; typeDoc ]
-    | IsOpStyle.Polish -> concat [ text $"{LiteralIs}("; subjectDoc; text ", "; typeDoc; text ")" ]
-
 /// <summary>Joins a list of already-rendered <see cref="Doc"/>s with a separator in between each pair.</summary>
 let private join (sep: Doc) (docs: Doc list) : Doc =
     match docs with
@@ -359,8 +353,10 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | ExistsN(pos, ((a1, asts), a2)) ->
         withTrivia map pos
             (concat [ text LiteralExN; p a1; text " "; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a2) ])
-    | IsOperator(pos, (a1, a2)) ->
-        withTrivia map pos (isOperator opts (p a1) (p a2))
+    | IsOperatorInfix(pos, (a1, a2)) ->
+        withTrivia map pos (concat [ p a1; text $" {LiteralIs} "; p a2 ])
+    | IsOperatorPolish(pos, (a1, a2)) ->
+        withTrivia map pos (concat [ text $"{LiteralIs}("; p a1; text ", "; p a2; text ")" ])
 
     // Expressions
     | PredicateWithQualification(a1, a2) ->

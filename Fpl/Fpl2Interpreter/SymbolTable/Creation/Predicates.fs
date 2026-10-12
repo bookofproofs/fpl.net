@@ -136,7 +136,8 @@ let evalPredicates ast =
         |> ignore
         evalRef.Value predicateAst
         heap.Eval.PopEvalStack() // remove exists n quantifier
-    | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
+    | Ast.IsOperatorInfix((pos1, pos2), (isOpArgAst, variableTypeAst))
+    | Ast.IsOperatorPolish((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
         let fv = heap.Eval.PeekEvalStack()
         let fvNew = new FplIsOperator((pos1, pos2), fv)
         heap.Eval.PushEvalStack(fvNew)

@@ -146,7 +146,8 @@ let rec collectPositions (acc: List<Positions>) (ast: Ast) =
         collectPositions acc a1
         list (collectPositions acc) asts
         collectPositions acc a2
-    | IsOperator(p, (a1, a2)) ->
+    | IsOperatorInfix(p, (a1, a2))
+    | IsOperatorPolish(p, (a1, a2)) ->
         add p
         collectPositions acc a1
         collectPositions acc a2

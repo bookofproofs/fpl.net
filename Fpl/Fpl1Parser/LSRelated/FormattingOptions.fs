@@ -50,13 +50,6 @@ type KeywordLength =
     | Long
     | Short
 
-/// <summary>Layout style for the <c>is</c>-operator.</summary>
-type IsOpStyle =
-    /// Function-call-like form, e.g. <c>is(x, y)</c>.
-    | Polish
-    /// Infix form, e.g. <c>x is y</c>.
-    | Infix
-
 /// <summary>
 /// Layout style for a declaration block's trailing semicolon and its variable declarations.
 /// </summary>
@@ -85,7 +78,6 @@ type FormattingOptions =
       KeywordStyle: KeywordLength
       EmptyLinesAfterBlocks: int
       MaxConsecutiveBlankLines: int
-      IsOperator: IsOpStyle
       DeclSemicolon: BlockStyle }
 
 /// <summary>The default FPL formatting preferences.</summary>
@@ -104,5 +96,4 @@ let fplFormatDefaults : FormattingOptions =
       KeywordStyle = KeywordLength.Short
       EmptyLinesAfterBlocks = 1
       MaxConsecutiveBlankLines = 1
-      IsOperator = IsOpStyle.Infix
       DeclSemicolon = BlockStyle.Compact }
