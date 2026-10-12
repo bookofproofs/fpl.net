@@ -693,7 +693,7 @@ type NameEndPos() =
         | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
         | "base6" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
         | "base7" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-        | "base8" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base8" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
         | "base9" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
         | "base10" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
         | "base11" -> Assert.AreEqual<int64>((int64)17, base1.EndPos.Column)

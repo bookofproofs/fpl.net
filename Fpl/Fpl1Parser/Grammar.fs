@@ -882,9 +882,8 @@ let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarati
 /// Parser for the 'is' operator forms; returns pair (predicate, type) representation.
 /// </summary>
 let isOp = choice [
-        attempt ((refArgumentIdentifier .>> SW .>> keywordIs) .>>. (SW >>. variableType))
-        attempt ((predicateWithQualification .>> SW .>> keywordIs) .>>. (SW >>. variableType))
-        attempt ((primePredicate .>> SW .>> keywordIs) .>>. (SW >>. variableType))
+        attempt ((referencingIdentifier .>> SW .>> keywordIs) .>>. (SW >>. variableType))
+        attempt ((choice [predicateWithQualification; primePredicate ] .>> SW .>> keywordIs) .>>. (SW >>. variableType))
         (keywordIs >>. attemptSW >>. leftParen >>. predicate) .>>. (comma >>. variableType) .>> rightParen
     ]
 /// <summary>
