@@ -1133,9 +1133,22 @@ let conjectureSignature = positions (keywordConjecture >>. pascalCaseId) .>> IW 
 let conjecture = positions (conjectureSignature .>>. theoremLikeBlock) |>> Ast.Conjecture <!> "Conjecture"
 
 /// <summary>
+/// Parser for a PascalCase signature identifier optionally extended with dollar-digit suffixes,
+/// used by proof and corollary signatures to build compound block identifiers (e.g. <c>Thm1$1</c>).
+/// </summary>
+/// <remarks>
+/// This is intentionally distinct from <see cref="referencingIdentifier"/>: the latter produces
+/// <c>Ast.ReferencingIdentifier</c>, which is evaluated as a *reference* to an existing proof or
+/// corollary (triggering symbol-table lookup and <c>RefersTo</c> resolution). The signature here
+/// instead *declares* a new block whose compound name is composed directly by the evaluator
+/// (<c>Ast.DollarDigits</c> appending to the currently pushed frame's <c>FplId</c>/<c>TypeId</c>).
+/// </remarks>
+let signatureIdWithDollarDigits = simpleSignature .>>. dollarDigitList
+
+/// <summary>
 /// The signature for theorems producing <c>Ast.CorollarySignature</c>.
 /// </summary>
-let corollarySignature = positions (keywordCorollary >>. simpleSignature .>>. dollarDigitList) .>> IW |>> Ast.CorollarySignature <!> "CorollarySignature"
+let corollarySignature = positions (keywordCorollary >>. signatureIdWithDollarDigits) .>> IW |>> Ast.CorollarySignature <!> "CorollarySignature"
 
 /// <summary>
 /// The full parser for theorems producing <c>Ast.Corollary</c>.
@@ -1387,7 +1400,7 @@ let proofBlock = leftBrace >>. proofContent .>> rightBrace |>> Ast.ProofBlock <!
 /// <summary>
 /// Parser for a proof signature (name + dollar digits) producing <c>Ast.ProofSignature</c>.
 /// </summary>
-let proofSignature = positions (keywordProof >>. simpleSignature .>>. dollarDigitList) .>> IW |>> Ast.ProofSignature <!> "ProofSignature"
+let proofSignature = positions (keywordProof >>. signatureIdWithDollarDigits) .>> IW |>> Ast.ProofSignature <!> "ProofSignature"
 
 /// <summary>
 /// Parser for a complete proof producing <c>Ast.Proof</c>.
