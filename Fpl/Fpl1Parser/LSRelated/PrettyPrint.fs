@@ -208,17 +208,17 @@ let private tuple (opts: FormattingOptions) (style: CommaStyle) (items: Doc list
 let private declBlock (opts: FormattingOptions) (declDocs: Doc list) : Doc =
     match opts.DeclSemicolon with
     | BlockStyle.Compact ->
-        concat [ text "dec "; concat (declDocs |> List.collect (fun d -> [ d; text " " ])); text ";" ]
+        concat [ keyword opts $"{LiteralDec} " $"{LiteralDecL} "; concat (declDocs |> List.collect (fun d -> [ d; text " " ])); text ";" ]
     | BlockStyle.Enclosing ->
-        concat [ text "dec"; line
+        concat [ keyword opts LiteralDec LiteralDecL; line
                  indent (concat (declDocs |> List.map (fun d -> concat [ d; line ])))
                  text ";" ]
 
 /// <summary>Renders the <c>is</c>-operator honoring <paramref name="opts"/>.<c>IsOperator</c>.</summary>
 let private isOperator (opts: FormattingOptions) (subjectDoc: Doc) (typeDoc: Doc) : Doc =
     match opts.IsOperator with
-    | IsOpStyle.Infix -> concat [ subjectDoc; text " is "; typeDoc ]
-    | IsOpStyle.Polish -> concat [ text "is("; subjectDoc; text ", "; typeDoc; text ")" ]
+    | IsOpStyle.Infix -> concat [ subjectDoc; text $" {LiteralIs} "; typeDoc ]
+    | IsOpStyle.Polish -> concat [ text $"{LiteralIs}("; subjectDoc; text ", "; typeDoc; text ")" ]
 
 /// <summary>Joins a list of already-rendered <see cref="Doc"/>s with a separator in between each pair.</summary>
 let private join (sep: Doc) (docs: Doc list) : Doc =
@@ -285,7 +285,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     let list sep xs = xs |> List.map p |> join sep
     match ast with
     // Lexical / Leaf tokens
-    | Alias(pos, name) -> withTrivia map pos (concat [ text "alias "; text name ])
+    | Alias(pos, name) -> withTrivia map pos (concat [ text $"{LiteralAlias} "; text name ])
     | Dot () -> text "."
     | Star(pos, _) -> withTrivia map pos (text "*")
     | Digits s -> text s
@@ -311,10 +311,10 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos (concat [ p a; concat (asts |> List.map p) ])
 
     // Types & type related constructs
-    | IndexType(pos, _) -> withTrivia map pos (keyword opts "ind" "index")
-    | FunctionalTermType(pos, _) -> withTrivia map pos (keyword opts "func" "function")
-    | ObjectType(pos, _) -> withTrivia map pos (keyword opts "obj" "object")
-    | PredicateType(pos, _) -> withTrivia map pos (keyword opts "pred" "predicate")
+    | IndexType(pos, _) -> withTrivia map pos (keyword opts LiteralInd LiteralIndL)
+    | FunctionalTermType(pos, _) -> withTrivia map pos (keyword opts LiteralFunc LiteralFuncL)
+    | ObjectType(pos, _) -> withTrivia map pos (keyword opts LiteralObj LiteralObjL)
+    | PredicateType(pos, _) -> withTrivia map pos (keyword opts LiteralPred LiteralPredL)
     | TemplateType(pos, s) -> withTrivia map pos (text s)
     | ArrayType(pos, (a, asts)) ->
         withTrivia map pos (concat [ text "*"; p a; brackets opts (commaList (if opts.ArgumentStyle = CommaStyle.Auto then CommaStyle.Auto else opts.ArgumentStyle) opts.SpacingAfterCommas (asts |> List.map p)) ])
@@ -335,30 +335,30 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | Var(pos, name) -> withTrivia map pos (text name)
 
     // Predicates
-    | True(pos, _) -> withTrivia map pos (text "true")
-    | False(pos, _) -> withTrivia map pos (text "false")
+    | True(pos, _) -> withTrivia map pos (text LiteralTrue)
+    | False(pos, _) -> withTrivia map pos (text LiteralFalse)
     | And(pos, (a1, a2)) ->
         withTrivia map pos (concat [ keyword opts LiteralAndSymbol LiteralAnd; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Or(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ keyword opts "∨" "or"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
+        withTrivia map pos (concat [ keyword opts LiteralOrSymbol LiteralOr; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Xor(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ keyword opts "⩡" "xor"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
+        withTrivia map pos (concat [ keyword opts LiteralXorSymbol LiteralXor; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Impl(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ keyword opts "⇒" "impl"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
+        withTrivia map pos (concat [ keyword opts LiteralImplSymbol LiteralImpl; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Iif(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ keyword opts "⇔" "iif"; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
+        withTrivia map pos (concat [ keyword opts LiteralIifSymbol LiteralIif; tuple opts opts.ArgumentStyle [ p a1; p a2 ] ])
     | Not(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "¬" "not " ; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralNotSymbol $"{LiteralNot} " ; p a ])
     | All(pos, (asts, a)) ->
         withTrivia map pos
-            (concat [ keyword opts "∀" "all " ; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
+            (concat [ keyword opts LiteralAllSymbol $"{LiteralAll} " ; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
     | Exists(pos, (asts, a)) ->
         withTrivia map pos
-            (concat [ keyword opts "∃" "ex "; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
-    | Exists1 () -> text "∃!"
+            (concat [ keyword opts LiteralExSymbol $"{LiteralEx} "; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
+    | Exists1 () -> text LiteralExNSymbol
     | ExistsN(pos, ((a1, asts), a2)) ->
         withTrivia map pos
-            (concat [ text "exn"; p a1; text " "; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a2) ])
+            (concat [ text LiteralExN; p a1; text " "; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a2) ])
     | IsOperator(pos, (a1, a2)) ->
         withTrivia map pos (isOperator opts (p a1) (p a2))
 
@@ -392,19 +392,19 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
 
     // Commands
     | Delegate(a1, a2) ->
-        concat [ text "del."; p a1; p a2 ]
+        concat [ keyword opts $"{LiteralDel}." $"{LiteralDelL}."; p a1; p a2 ]
     | Assertion(pos, a) ->
-        withTrivia map pos (concat [ text "assert "; p a ])
+        withTrivia map pos (concat [ text $"{LiteralAssert} "; p a ])
     | Cases(pos, (asts, a)) ->
         withTrivia map pos
-            (concat [ text "cases"; parens opts (concat [ line; concat (asts |> List.map p); p a ]) ])
+            (concat [ text LiteralCases; parens opts (concat [ line; concat (asts |> List.map p); p a ]) ])
     | CaseSingle(pos, (a, asts)) ->
         withTrivia map pos (concat [ text "| "; p a; text ": "; concat (asts |> List.map p); line ])
     | CaseElse(pos, asts) ->
         withTrivia map pos (concat [ text "? "; concat (asts |> List.map p) ])
     | MapCases(pos, (asts, a)) ->
         withTrivia map pos
-            (concat [ text "mcases"; parens opts (concat [ line; concat (asts |> List.map p); p a ]) ])
+            (concat [ text LiteralMapCases; parens opts (concat [ line; concat (asts |> List.map p); p a ]) ])
     | MapCaseSingle(pos, (a1, a2)) ->
         withTrivia map pos (concat [ text "| "; p a1; text ": "; p a2; line ])
     | MapCaseElse(pos, a) ->
@@ -413,21 +413,21 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos (concat [ p a1; text " := "; p a2 ])
     | ForIn(pos, ((a1, a2), asts)) ->
         withTrivia map pos
-            (concat [ text "for "; p a1; text " "; p a2; braces opts (concat (asts |> List.map p)) ])
+            (concat [ text $"{LiteralFor} "; p a1; text " "; p a2; braces opts (concat (asts |> List.map p)) ])
     | InEntity(pos, a) ->
-        withTrivia map pos (concat [ text "in "; p a ])
+        withTrivia map pos (concat [ text $"{LiteralIn} "; p a ])
     | Return(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "ret" "return"; text " "; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralRet LiteralRetL; text " "; p a ])
 
     // Symbol extensions
-    | SymbolDecl(pos, s) -> withTrivia map pos (concat [ text "symbol \""; text s; text "\"" ])
-    | PrefixDecl(pos, s) -> withTrivia map pos (concat [ text "prefix \""; text s; text "\"" ])
-    | PostfixDecl(pos, s) -> withTrivia map pos (concat [ text "postfix \""; text s; text "\"" ])
+    | SymbolDecl(pos, s) -> withTrivia map pos (concat [ text $"{LiteralSymbol} \""; text s; text "\"" ])
+    | PrefixDecl(pos, s) -> withTrivia map pos (concat [ text $"{LiteralPrefix} \""; text s; text "\"" ])
+    | PostfixDecl(pos, s) -> withTrivia map pos (concat [ text $"{LiteralPostFix} \""; text s; text "\"" ])
     | InfixDeclWithPrecedence(pos, (s, a)) ->
-        withTrivia map pos (concat [ text "infix \""; text s; text "\" "; p a ])
+        withTrivia map pos (concat [ text $"{LiteralInfix} \""; text s; text "\" "; p a ])
     | Precedence(pos, n) -> withTrivia map pos (text (string n))
     | DefinitionExtension(pos, ((a1, a2), a3)) ->
-        withTrivia map pos (concat [ keyword opts "ext" "extension"; text " "; p a1; text " "; p a2; braces opts (p a3) ])
+        withTrivia map pos (concat [ keyword opts LiteralExt LiteralExtL; text " "; p a1; text " "; p a2; braces opts (p a3) ])
     | ExtensionSignature(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; p a2 ])
     | ExtensionAssignment(pos, (a1, a2)) ->
@@ -438,12 +438,12 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     // Definitions
     | DefinitionClass(pos, (((a1, a1Opt), a2Opt), a3)) ->
         withTrivia map pos
-            (concat [ keyword opts "def" "definition"; text " "; p a1
+            (concat [ keyword opts LiteralDef LiteralDefL; text " "; p a1
                       opt (fun a -> concat [ text ": "; p a ]) a1Opt
                       opt (fun a -> concat [ text " "; p a ]) a2Opt
                       p a3 ])
     | ClassSignature(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "cl" "class"; text " "; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralCl LiteralClL; text " "; p a ])
     | ClassDefinitionBlock(pos, tupOpt) ->
         withTrivia map pos
             (opt (fun (a, astsOpt) ->
@@ -453,20 +453,20 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | Constructor(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text " "; p a2 ])
     | ConstructorSignature(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ keyword opts "ctor" "constructor"; text " "; p a1; p a2 ])
+        withTrivia map pos (concat [ keyword opts LiteralCtor LiteralCtorL; text " "; p a1; p a2 ])
     | ConstructorBlock a ->
         braces opts (p a)
     | BaseConstructorCall(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ text "base."; p a1; p a2 ])
+        withTrivia map pos (concat [ text $"{LiteralBase}."; p a1; p a2 ])
 
     | DefinitionPredicate(pos, (a, tupOpt)) ->
         withTrivia map pos
-            (concat [ keyword opts "def" "definition"; text " "; p a
+            (concat [ keyword opts LiteralDef LiteralDefL; text " "; p a
                       opt (fun (a1, astsOpt) ->
                           braces opts (concat [ p a1; opt (fun asts -> concat (asts |> List.map (fun a -> concat [ line; p a ]))) astsOpt ])) tupOpt ])
     | PredicateSignature((pos, ((a1, a1Opt), a2)), a3Opt) ->
         withTrivia map pos
-            (concat [ keyword opts "pred" "predicate"; text " "; p a1
+            (concat [ keyword opts LiteralPred LiteralPredL; text " "; p a1
                       opt (fun a -> concat [ text ": "; p a ]) a1Opt
                       p a2
                       opt (fun a -> concat [ text " "; p a ]) a3Opt ])
@@ -474,10 +474,10 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
         concat [ p a1; p a2 ]
 
     | DefinitionFunctionalTerm(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ keyword opts "def" "definition"; text " "; p a1; text " "; p a2 ])
+        withTrivia map pos (concat [ keyword opts LiteralDef LiteralDefL; text " "; p a1; text " "; p a2 ])
     | FunctionalTermSignature((pos, (((a1, a1Opt), a2), a3)), a4Opt) ->
         withTrivia map pos
-            (concat [ keyword opts "func" "function"; text " "; p a1
+            (concat [ keyword opts LiteralFunc LiteralFuncL; text " "; p a1
                       opt (fun a -> concat [ text ": "; p a ]) a1Opt
                       p a2; p a3
                       opt (fun a -> concat [ text " "; p a ]) a4Opt ])
@@ -491,58 +491,58 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
         concat [ p a1; p a2 ]
 
     | PredicateInstance(pos, (a, aOpt)) ->
-        withTrivia map pos (concat [ keyword opts "prty" "property"; text " "; p a; opt (fun a2 -> braces opts (p a2)) aOpt ])
+        withTrivia map pos (concat [ keyword opts LiteralPrty LiteralPrtyL; text " "; p a; opt (fun a2 -> braces opts (p a2)) aOpt ])
     | PredicateInstanceSignature(pos, (a1, a2)) ->
-        withTrivia map pos (concat [ keyword opts "pred" "predicate"; text " "; p a1; p a2 ])
+        withTrivia map pos (concat [ keyword opts LiteralPred LiteralPredL; text " "; p a1; p a2 ])
     | FunctionalTermInstance(pos, (a, aOpt)) ->
-        withTrivia map pos (concat [ keyword opts "prty" "property"; text " "; p a; opt (fun a2 -> braces opts (p a2)) aOpt ])
+        withTrivia map pos (concat [ keyword opts LiteralPrty LiteralPrtyL; text " "; p a; opt (fun a2 -> braces opts (p a2)) aOpt ])
     | FunctionalTermInstanceSignature(pos, ((a1, a2), a3)) ->
-        withTrivia map pos (concat [ keyword opts "func" "function"; text " "; p a1; p a2; p a3 ])
+        withTrivia map pos (concat [ keyword opts LiteralFunc LiteralFuncL; text " "; p a1; p a2; p a3 ])
 
     // Rules of inference
     | RuleOfInference(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text " "; p a2 ])
     | RuleOfInferenceSignature(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "inf" "inference"; text " "; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralInf LiteralInfL; text " "; p a ])
     | PremiseConclusionBlock(a1, (a2, a3)) ->
         braces opts
             (concat [ p a1; line
                       p a2; line
-                      keyword opts "con" "conclusion"; text ": "; p a3 ])
+                      keyword opts LiteralCon LiteralConL; text ": "; p a3 ])
     | PremiseList(pos, asts) ->
-        withTrivia map pos (concat [ keyword opts "pre" "premise"; text ": "; commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p) ])
+        withTrivia map pos (concat [ keyword opts LiteralPre LiteralPreL; text ": "; commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p) ])
 
     // Statements
     | Axiom(pos, (a1, (a2, a3))) ->
         withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | AxiomSignature(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "ax" "axiom"; text " "; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralAx LiteralAxL; text " "; p a ])
     | Conjecture(pos, (a1, (a2, a3))) ->
         withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | ConjectureSignature(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "conj" "conjecture"; text " "; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralConj LiteralConjL; text " "; p a ])
     | Theorem(pos, (a1, (a2, a3))) ->
         withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | TheoremSignature(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "thm" "theorem"; text " "; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralThm LiteralThmL; text " "; p a ])
     | Lemma(pos, (a1, (a2, a3))) ->
         withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | LemmaSignature(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "lem" "lemma"; text " "; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralLem LiteralLemL; text " "; p a ])
     | Proposition(pos, (a1, (a2, a3))) ->
         withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | PropositionSignature(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "prop" "proposition"; text " "; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralProp LiteralPropL; text " "; p a ])
     | Corollary(pos, (a1, (a2, a3))) ->
         withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | CorollarySignature(pos, (a, asts)) ->
-        withTrivia map pos (concat [ keyword opts "cor" "corollary"; text " "; p a; concat (asts |> List.map p) ])
+        withTrivia map pos (concat [ keyword opts LiteralCor LiteralCorL; text " "; p a; concat (asts |> List.map p) ])
 
     // Proofs
     | Proof(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text " "; p a2 ])
     | ProofSignature(pos, (a, asts)) ->
-        withTrivia map pos (concat [ keyword opts "prf" "proof"; text " "; p a; concat (asts |> List.map p) ])
+        withTrivia map pos (concat [ keyword opts LiteralPrf LiteralPrfL; text " "; p a; concat (asts |> List.map p) ])
     | ProofBlock a ->
         braces opts (p a)
     | ProofContent((a1, asts), a2Opt) ->
@@ -562,33 +562,33 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | ReferenceToProofOrCorollary(pos, a) ->
         withTrivia map pos (p a)
     | ByDef(pos, a) ->
-        withTrivia map pos (concat [ text "bydef "; p a ])
+        withTrivia map pos (concat [ text $"{LiteralByDef} "; p a ])
     | JustificationIdentifier(pos, (((modOpt, a1), astsOpt), a2Opt)) ->
         withTrivia map pos
             (concat [ (match modOpt with Some m -> concat [ text m; text " " ] | None -> concat [])
                       p a1
                       opt (fun asts -> concat (asts |> List.map p)) astsOpt
                       opt (fun a -> concat [ text ": "; p a ]) a2Opt ])
-    | TrivialArgument(pos, _) -> withTrivia map pos (text "trivial")
+    | TrivialArgument(pos, _) -> withTrivia map pos (text LiteralTrivial)
     | DeriveArgument(pos, a) ->
         withTrivia map pos (p a)
     | AssumeArgument(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "ass" "assume"; text " "; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralAss LiteralAssL; text " "; p a ])
     | RevokeArgument(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "rev" "revoke"; text " "; p a ])
-    | Qed(pos, _) -> withTrivia map pos (text "qed")
+        withTrivia map pos (concat [ keyword opts LiteralRev LiteralRevL; text " "; p a ])
+    | Qed(pos, _) -> withTrivia map pos (text LiteralQed)
 
     // Special references
-    | Intrinsic(pos, _) -> withTrivia map pos (keyword opts "intr" "intrinsic")
-    | Undefined(pos, _) -> withTrivia map pos (keyword opts "undef" "undefined")
+    | Intrinsic(pos, _) -> withTrivia map pos (keyword opts LiteralIntr LiteralIntrL)
+    | Undefined(pos, _) -> withTrivia map pos (keyword opts LiteralUndef LiteralUndefL)
     | SelfOrParent(pos, a) -> withTrivia map pos (p a)
-    | Self(pos, _) -> withTrivia map pos (text "self")
-    | Parent(pos, _) -> withTrivia map pos (text "parent")
+    | Self(pos, _) -> withTrivia map pos (text LiteralSelf)
+    | Parent(pos, _) -> withTrivia map pos (text LiteralParent)
     | Extension(pos, s) -> withTrivia map pos (concat [ text "@"; text s ])
 
     // Localizations
     | Localization((pos, a), asts) ->
-        withTrivia map pos (concat [ keyword opts "loc" "localization"; text " "; p a; text " := "; join (text " ") (asts |> List.map p); text ";" ])
+        withTrivia map pos (concat [ keyword opts LiteralLoc LiteralLocL; text " "; p a; text " := "; join (text " ") (asts |> List.map p); text ";" ])
     | TranslationTermList(pos, asts) ->
         withTrivia map pos (join (text " | ") (asts |> List.map p))
     | TranslationTerm(pos, asts) ->
@@ -602,7 +602,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | AST(pos, a) -> withTrivia map pos (p a)
     | Namespace asts -> concat (asts |> List.map (fun a -> concat [ p a; line ]))
     | UsesClause(pos, a) ->
-        withTrivia map pos (concat [ keyword opts "uses" "uses"; text " "; p a ])
+        withTrivia map pos (concat [ keyword opts LiteralUses LiteralUses; text " "; p a ])
     | BuildingBlock(pos, a) -> withTrivia map pos (p a)
     // Verbatim reprint: unlike every other case above, these three carry raw, already-formatted
     // source text captured from the faulty building block by Fpl1Parser.Main's error recovery, so
