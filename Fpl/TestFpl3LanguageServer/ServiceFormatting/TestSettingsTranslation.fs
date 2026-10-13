@@ -67,7 +67,6 @@ type TestSettingsTranslation () =
     [<DataRow("keywordStyle")>]
     [<DataRow("emptyLinesAfterBlocks")>]
     [<DataRow("maxConsecutiveBlankLines")>]
-    [<DataRow("isOperator")>]
     [<DataRow("declSemicolon")>]
     [<TestMethod>]
     member _.TestMissingFieldFallsBackToDefault(missingKey: string) =

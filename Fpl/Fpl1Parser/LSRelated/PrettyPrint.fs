@@ -222,6 +222,17 @@ let private join (sep: Doc) (docs: Doc list) : Doc =
     | d :: rest -> concat (d :: (rest |> List.collect (fun d -> [ sep; d ])))
 
 /// <summary>
+/// Joins a list of already-rendered command/statement <see cref="Doc"/>s (e.g. the bodies of
+/// <c>Ast.ForIn</c>, <c>Ast.CaseSingle</c>, <c>Ast.CaseElse</c>) with a hard <see cref="line"/>
+/// break between each pair, so that each statement occupies its own source line instead of being
+/// concatenated directly against its neighbor (which, for statements that don't self-terminate
+/// with a trailing separator — e.g. <c>Ast.Assertion</c>, <c>Ast.Assignment</c> — would otherwise
+/// merge two statements into one unparsable token run, e.g. <c>assert xa := 1</c>).
+/// </summary>
+let private statements (docs: Doc list) : Doc =
+    join line docs
+
+/// <summary>
 /// Renders a block of raw, already-formatted source text verbatim, splitting on line breaks so
 /// each physical line becomes its own <see cref="Doc.Text"/> node joined by <see cref="line"/>.
 /// </summary>
@@ -349,10 +360,22 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | Exists(pos, (asts, a)) ->
         withTrivia map pos
             (concat [ keyword opts LiteralExSymbol $"{LiteralEx} "; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a) ])
-    | Exists1 () -> text LiteralExNSymbol
+    | Exists1 () -> text ""
     | ExistsN(pos, ((a1, asts), a2)) ->
-        withTrivia map pos
-            (concat [ text LiteralExN; p a1; text " "; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a2) ])
+        let usedStyleDoc = keyword opts LiteralExNSymbol LiteralExN
+        let usedNumberDoc = p a1
+        let bodyDoc = concat [ text " "; commaList opts.ParameterStyle opts.SpacingAfterCommas (asts |> List.map p); braces opts (p a2) ]
+        match usedStyleDoc, usedNumberDoc with
+        | Text LiteralExNSymbol, Text "" 
+        | Text LiteralExNSymbol, Text "$1" ->
+            // abbreviate exn$1 with ∃!
+            withTrivia map pos (concat [usedStyleDoc; bodyDoc]) 
+        | Text LiteralExNSymbol, Text s ->
+            // abbreviate exn$x with ∃!x
+            withTrivia map pos (concat [usedStyleDoc; text (s.Substring(1)); bodyDoc])
+        | _, _ ->
+            // rewrite exn$x with exn$x
+            withTrivia map pos (concat [ usedStyleDoc; usedNumberDoc; bodyDoc ])
     | IsOperatorInfix(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text $" {LiteralIs} "; p a2 ])
     | IsOperatorPolish(pos, (a1, a2)) ->
@@ -386,18 +409,18 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | ParamTuple asts ->
         tuple opts opts.ParameterStyle (asts |> List.map p)
 
-    // Commands
+    // Commands 
     | Delegate(a1, a2) ->
         concat [ keyword opts $"{LiteralDel}." $"{LiteralDelL}."; p a1; p a2 ]
     | Assertion(pos, a) ->
         withTrivia map pos (concat [ text $"{LiteralAssert} "; p a ])
     | Cases(pos, (asts, a)) ->
         withTrivia map pos
-            (concat [ text LiteralCases; parens opts (concat [ line; concat (asts |> List.map p); p a ]) ])
+            (concat [ text LiteralCases; parens opts (concat [ line; statements (asts |> List.map p); line; p a ]) ])
     | CaseSingle(pos, (a, asts)) ->
-        withTrivia map pos (concat [ text "| "; p a; text ": "; concat (asts |> List.map p); line ])
+        withTrivia map pos (concat [ text "| "; p a; text ": "; indent (statements (asts |> List.map p)); line ])
     | CaseElse(pos, asts) ->
-        withTrivia map pos (concat [ text "? "; concat (asts |> List.map p) ])
+        withTrivia map pos (concat [ text "? "; indent (statements (asts |> List.map p)) ])
     | MapCases(pos, (asts, a)) ->
         withTrivia map pos
             (concat [ text LiteralMapCases; parens opts (concat [ line; concat (asts |> List.map p); p a ]) ])
@@ -409,7 +432,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos (concat [ p a1; text " := "; p a2 ])
     | ForIn(pos, ((a1, a2), asts)) ->
         withTrivia map pos
-            (concat [ text $"{LiteralFor} "; p a1; text " "; p a2; braces opts (concat (asts |> List.map p)) ])
+            (concat [ text $"{LiteralFor} "; p a1; text " "; p a2; braces opts (statements (asts |> List.map p)) ])
     | InEntity(pos, a) ->
         withTrivia map pos (concat [ text $"{LiteralIn} "; p a ])
     | Return(pos, a) ->
@@ -429,7 +452,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | ExtensionAssignment(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text " @ /"; p a2; text "/" ])
     | ExtensionRegex s -> text s
-    | ExtensionName(pos, s) -> withTrivia map pos (text s)
+    | ExtensionName(pos, s) -> withTrivia map pos (concat [text s; text " "])
 
     // Definitions
     | DefinitionClass(pos, (((a1, a1Opt), a2Opt), a3)) ->
@@ -445,7 +468,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
             (opt (fun (a, astsOpt) ->
                 braces opts (concat [ p a; opt (fun asts -> concat (asts |> List.map (fun a -> concat [ line; p a ]))) astsOpt ])) tupOpt)
     | DefClassCompleteContent(a, asts) ->
-        concat [ p a; concat (asts |> List.map p) ]
+        concat [ p a; (if List.isEmpty asts then concat [] else concat [ line; statements (asts |> List.map p) ]) ]
     | Constructor(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text " "; p a2 ])
     | ConstructorSignature(pos, (a1, a2)) ->
@@ -508,7 +531,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | PremiseList(pos, asts) ->
         withTrivia map pos (concat [ keyword opts LiteralPre LiteralPreL; text ": "; commaList opts.ArgumentStyle opts.SpacingAfterCommas (asts |> List.map p) ])
 
-    // Statements
+    // Theorem-like Statements and axioms
     | Axiom(pos, (a1, (a2, a3))) ->
         withTrivia map pos (concat [ p a1; braces opts (concat [ p a2; p a3 ]) ])
     | AxiomSignature(pos, a) ->
@@ -542,7 +565,9 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | ProofBlock a ->
         braces opts (p a)
     | ProofContent((a1, asts), a2Opt) ->
-        concat [ p a1; concat (asts |> List.map p); opt p a2Opt ]
+        concat [ p a1
+                 (if List.isEmpty asts then concat [] else concat [ line; statements (asts |> List.map p) ])
+                 opt (fun a2 -> concat [ line; p a2 ]) a2Opt ]
     | Argument(pos, a) ->
         withTrivia map pos (p a)
     | JustArgInf(pos, (a1, a2)) ->
