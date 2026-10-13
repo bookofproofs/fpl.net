@@ -18,6 +18,6 @@ type TestFormattingOptionsDeclSemicolon () =
             | other -> failwith $"Unexpected BlockStyle name: {other}"
 
         let opts = { fplFormatDefaults with DeclSemicolon = style }
-        let fplCode = """def class FieldPowerN: Set { dec x, y: obj a: pred ; intr }"""
+        let fplCode = """def class FieldPowerN: Set { dec x, y: obj a: pred ; ctor FieldPowerN() {dec x:=y;} }"""
 
         allAssertionsForFormattingOptions opts fplCode

@@ -1,4 +1,3 @@
-/// <summary>
 /// Provides a matching algorithm building the TriviaMap comparing each comment's position
 /// against all collected node positions to find the nearest one — fundamentally a "merge two sorted sequences" operation.
 /// </summary>
@@ -6,7 +5,8 @@
 /// This module exists to support comment-trivia attachment for a formatting service: after parsing,
 /// a single post-pass walks the entire tree in source order and attaches each comment either as:
 /// leading trivia of the next node whose start position follows the comment, or
-/// trailing trivia of the previous node, if the comment starts on the same source line as that node's end.
+/// trailing trivia of the widest (outermost) preceding node whose end lands on the same source
+/// line as the comment, if any such node exists.
 /// </remarks>
 module Fpl1Parser.LSRelated.TriviaMap
 open FParsec
@@ -49,8 +49,13 @@ let private key ((startPos, _): Positions) = startPos.Index
 /// <summary>
 /// Builds a <c>TriviaMap</c> by associating each comment discovered in the source with the
 /// nearest AST node: a comment is attached as leading trivia of the next node that starts after
-/// it, unless it begins on the same source line as the end of the previous node, in which case it
-/// is attached as that previous node's trailing comment instead.
+/// it, unless at least one preceding node's end position lands on the same source line as the
+/// comment, in which case the comment is attached as the trailing trivia of the WIDEST such node
+/// — i.e. the one with the smallest start index among all candidates — so that e.g. a comment
+/// following a class definition's closing brace stays attached to the whole class definition
+/// rather than drifting to whatever innermost statement/expression happens to end on that same
+/// line (which would otherwise "win" merely because it is the node whose start index is closest
+/// to the comment).
 /// </summary>
 /// <param name="nodePositions">
 /// All node positions in source order, as produced by <c>Fpl1Parser.Trivia.getAllPositions</c>.
@@ -66,7 +71,11 @@ let private key ((startPos, _): Positions) = startPos.Index
 /// <remarks>
 /// This is fundamentally a merge of two already-sorted sequences (node positions and comment
 /// positions), advancing a single cursor over <paramref name="nodePositions"/> as it scans
-/// <paramref name="comments"/> in source order.
+/// <paramref name="comments"/> in source order. Because AST nodes nest, several ancestors can
+/// share (or nearly share) an end position with their last-closing descendant (e.g. the last
+/// statement of a block ends right where the block itself ends); among all nodes satisfying
+/// "already closed, same line as the comment", the ancestor always has the smallest start index
+/// (it was opened first), so picking the minimum start index reliably selects the outermost one.
 /// </remarks>
 let buildTriviaMap (nodePositions: Positions list) (comments: Comment list) : TriviaMap =
     let map = TriviaMap()
@@ -79,8 +88,18 @@ let buildTriviaMap (nodePositions: Positions list) (comments: Comment list) : Tr
         while nodeIdx < nodes.Length - 1 && (fst nodes.[nodeIdx]).Index < cStart.Index do
             nodeIdx <- nodeIdx + 1
 
-        if nodeIdx > 0 && isSameLine (snd nodes.[nodeIdx - 1]) cStart then
-            let k = key nodes.[nodeIdx - 1]
+        // Among all nodes that start before the comment, find candidates whose END lands on the
+        // same source line as the comment and precedes it; among those, the one with the
+        // smallest start index is the outermost (widest) enclosing node.
+        let mutable bestIdx = -1
+        for i in 0 .. nodeIdx - 1 do
+            let (nStart, nEnd) = nodes.[i]
+            if nEnd.Index <= cStart.Index && isSameLine nEnd cStart then
+                if bestIdx = -1 || nStart.Index < (fst nodes.[bestIdx]).Index then
+                    bestIdx <- i
+
+        if bestIdx >= 0 then
+            let k = key nodes.[bestIdx]
             let existing = match map.TryGetValue k with true, t -> t | false, _ -> { Leading = []; Trailing = None }
             map.[k] <- { existing with Trailing = Some c }
         elif nodeIdx < nodes.Length then
