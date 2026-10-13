@@ -53,7 +53,7 @@ let private renderLeadingComment (c: Comment) : Doc =
 /// <see cref="renderComment"/>, preceded by a single space).
 /// </returns>
 let private withTrivia (map: TriviaMap) (pos: Positions) (body: Doc) : Doc =
-    match tryGetTrivia map pos with
+    match tryTakeTrivia map pos with
     | None -> body
     | Some trivia ->
         let leading =

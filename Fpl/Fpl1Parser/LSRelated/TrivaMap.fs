@@ -103,3 +103,29 @@ let tryGetTrivia (map: TriviaMap) (p: Positions) : Trivia option =
     match map.TryGetValue(key p) with
     | true, t -> Some t
     | false, _ -> None
+
+/// <summary>
+/// Looks up and removes the <c>Trivia</c> attached to the node whose start position is
+/// <paramref name="p"/>, so that a comment is rendered at most once even when several AST nodes
+/// (e.g. pass-through wrapper nodes) share the same start position.
+/// </summary>
+/// <param name="map">The <c>TriviaMap</c> to query, as produced by <c>buildTriviaMap</c>.</param>
+/// <param name="p">The <c>Positions</c> of the node whose trivia should be retrieved.</param>
+/// <returns>
+/// <c>Some</c> trivia if any comments were attached to this node's start position (the entry is
+/// then removed from <paramref name="map"/>); otherwise <c>None</c>.
+/// </returns>
+/// <remarks>
+/// Prefer this over <c>tryGetTrivia</c> when rendering: several AST node kinds can legitimately
+/// share the exact same start <c>Position</c> as a nested child (e.g. single-child pass-through
+/// wrappers), and without removing the entry on first use both the wrapper and its child would
+/// independently retrieve and re-emit the same leading/trailing comment, duplicating it in the
+/// pretty-printed output.
+/// </remarks>
+let tryTakeTrivia (map: TriviaMap) (p: Positions) : Trivia option =
+    let k = key p
+    match map.TryGetValue k with
+    | true, t ->
+        map.Remove k |> ignore
+        Some t
+    | false, _ -> None
