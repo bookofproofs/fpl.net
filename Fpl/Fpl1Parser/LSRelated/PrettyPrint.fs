@@ -260,10 +260,10 @@ let private subBlocks (opts: FormattingOptions) (precededByContent: bool) (items
     | [] -> concat []
     | first :: rest ->
         let blankLines = concat (List.replicate opts.EmptyLinesAfterBlocks line)
-        let sep = concat [ line; blankLines ]
+        let sep = concat [ line; blankLines; line ]
         concat (
-            concat [ (if precededByContent then sep else line); first ]
-            :: (rest |> List.map (fun d -> concat [ sep; line; d ]))
+            concat [ (if precededByContent then sep else concat []); first ]
+            :: (rest |> List.map (fun d -> concat [ sep; d ]))
         )
 
 /// <summary>
