@@ -60,12 +60,14 @@ let private withTrivia (map: TriviaMap) (pos: Positions) (body: Doc) : Doc =
             trivia.Leading
             |> List.map renderLeadingComment
             |> concat
-        // a trailing LineComment gets its mandatory line break via renderComment's LineComment branch,
-        // while a trailing BlockComment stays inline exactly as before
+        // Each trailing comment (there may be several, e.g. a block comment immediately
+        // followed by a line comment) gets its own leading space; a trailing LineComment gets
+        // its mandatory line break via renderComment's LineComment branch, while a trailing
+        // BlockComment stays inline exactly as before.
         let trailing =
-            match trivia.Trailing with
-            | Some c -> concat [ text " "; renderComment c ]
-            | None -> concat []
+            trivia.Trailing
+            |> List.map (fun c -> concat [ text " "; renderComment c ])
+            |> concat
         concat [ leading; body; trailing ]
 
 // ============================================================================

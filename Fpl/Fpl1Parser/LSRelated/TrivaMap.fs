@@ -15,8 +15,8 @@ open Fpl1Parser.Types
 open Fpl1Parser.LSRelated.CommentLexer
 
 /// <summary>
-/// Comment trivia attached to a single AST node: any comments that precede it (leading) and,
-/// at most, one comment that follows it on the same source line (trailing).
+/// Comment trivia attached to a single AST node: any comments that precede it (leading) and
+/// any comments that follow it on the same source line (trailing), in source order.
 /// </summary>
 type Trivia = {
     /// <summary>
@@ -26,11 +26,14 @@ type Trivia = {
     /// </summary>
     Leading: Comment list
     /// <summary>
-    /// The comment, if any, that starts on the same source line as this node's end position.
-    /// Used for end-of-line comments (e.g. <c>x := 1; // explains x</c>) so they stay attached
-    /// to the statement they annotate rather than drifting to the next node during reformatting.
+    /// Comments, if any, that start on the same source line as this node's end position, in
+    /// source order. Used for end-of-line comments (e.g. <c>x := 1; // explains x</c>) so they
+    /// stay attached to the statement they annotate rather than drifting to the next node during
+    /// reformatting. A list rather than a single <c>Comment option</c>, since several distinct
+    /// comments (e.g. a block comment immediately followed by a line comment) can legitimately
+    /// all trail the same node on the same source line.
     /// </summary>
-    Trailing: Comment option
+    Trailing: Comment list
 }
 
 /// <summary>
@@ -100,13 +103,12 @@ let buildTriviaMap (nodePositions: Positions list) (comments: Comment list) : Tr
 
         if bestIdx >= 0 then
             let k = key nodes.[bestIdx]
-            let existing = match map.TryGetValue k with true, t -> t | false, _ -> { Leading = []; Trailing = None }
-            map.[k] <- { existing with Trailing = Some c }
+            let existing = match map.TryGetValue k with true, t -> t | false, _ -> { Leading = []; Trailing = [] }
+            map.[k] <- { existing with Trailing = existing.Trailing @ [c] }
         elif nodeIdx < nodes.Length then
             let k = key nodes.[nodeIdx]
-            let existing = match map.TryGetValue k with true, t -> t | false, _ -> { Leading = []; Trailing = None }
+            let existing = match map.TryGetValue k with true, t -> t | false, _ -> { Leading = []; Trailing = [] }
             map.[k] <- { existing with Leading = existing.Leading @ [c] }
-
     map
 
 /// <summary>
