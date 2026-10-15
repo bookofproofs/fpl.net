@@ -58,6 +58,34 @@ let softline = SoftLine
 /// <returns>A <see cref="Doc.Concat"/> node wrapping <paramref name="docs"/>.</returns>
 let concat docs = Concat docs
 
+/// <summary>
+/// Determines whether <paramref name="d"/> would render no visible content at all (no text and
+/// no forced line breaks) — i.e. whether it is, recursively, an empty <see cref="Text"/>, an empty
+/// <see cref="Concat"/>, or a <see cref="Concat"/>/<see cref="Indent"/>/<see cref="Group"/>
+/// composed entirely of such "nothing" nodes.
+/// </summary>
+/// <param name="d">The document to inspect.</param>
+/// <returns>
+/// <c>true</c> if <paramref name="d"/> is structurally empty (so callers can decide, e.g., whether
+/// a blank-line separator is needed before content that would otherwise follow it); <c>false</c>
+/// otherwise, including when <paramref name="d"/> contains only whitespace <see cref="Text"/>, since
+/// that still represents rendered content.
+/// </returns>
+/// <remarks>
+/// Used by <c>Fpl1Parser.LSRelated.PrettyPrint</c> to avoid inserting a separating blank line (or
+/// an extra leading line break) before the first member of a sub-block list when whatever would
+/// otherwise precede it (e.g. an empty <c>dec</c> section) rendered nothing at all.
+/// <c>Doc.isEmpty</c> is a reusable primitive for any future case needing the same "was anything actually rendered before this point" check.
+/// </remarks>
+let rec isEmpty (d: Doc) : bool =
+    match d with
+    | Text s -> s.Length = 0
+    | Line -> false
+    | SoftLine -> false
+    | Concat ds -> ds |> List.forall isEmpty
+    | Indent d -> isEmpty d
+    | Group d -> isEmpty d
+
 /// <summary>Increases the indentation level by one for the wrapped document.</summary>
 /// <param name="d">The document to render at one additional indentation level.</param>
 /// <returns>A <see cref="Doc.Indent"/> node wrapping <paramref name="d"/>.</returns>

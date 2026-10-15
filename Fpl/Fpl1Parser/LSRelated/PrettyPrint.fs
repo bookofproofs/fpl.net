@@ -235,6 +235,38 @@ let private statements (docs: Doc list) : Doc =
     join line docs
 
 /// <summary>
+/// Renders a block's list of sub-block members (e.g. a class's constructors/properties, a
+/// predicate/functional-term's inner definitions), honoring <paramref name="opts"/>.
+/// <c>EmptyLinesAfterBlocks</c> between consecutive members, and optionally before the first one.
+/// </summary>
+/// <param name="opts">The active <see cref="FormattingOptions"/>, consulted for <c>EmptyLinesAfterBlocks</c>.</param>
+/// <param name="precededByContent">
+/// Whether <paramref name="items"/> follows some other already-rendered, non-empty content inside
+/// the same enclosing block (e.g. a class's <c>dec</c> section or constructor list preceding its
+/// property list) that this list's first member should also be separated from by a blank line.
+/// Pass <c>false</c> when the preceding content renders nothing (see <see cref="Doc.isEmpty"/>) so
+/// the first member instead starts right after the block's opening content/brace, without an
+/// extraneous leading blank line.
+/// </param>
+/// <param name="items">The already-rendered sub-block <see cref="Doc"/>s, in source order.</param>
+/// <returns>
+/// <c>concat []</c> if <paramref name="items"/> is empty; otherwise each item preceded by a single
+/// hard <see cref="line"/> break plus <paramref name="opts"/>.<c>EmptyLinesAfterBlocks</c>
+/// additional blank lines — applied between every consecutive pair of items, and also before the
+/// first item when <paramref name="precededByContent"/> is <c>true</c>.
+/// </returns>
+let private subBlocks (opts: FormattingOptions) (precededByContent: bool) (items: Doc list) : Doc =
+    match items with
+    | [] -> concat []
+    | first :: rest ->
+        let blankLines = concat (List.replicate opts.EmptyLinesAfterBlocks line)
+        let sep = concat [ line; blankLines ]
+        concat (
+            concat [ (if precededByContent then sep else line); first ]
+            :: (rest |> List.map (fun d -> concat [ sep; line; d ]))
+        )
+
+/// <summary>
 /// Renders a block of raw, already-formatted source text verbatim, splitting on line breaks so
 /// each physical line becomes its own <see cref="Doc.Text"/> node joined by <see cref="line"/>.
 /// </summary>
@@ -468,9 +500,11 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | ClassDefinitionBlock(pos, tupOpt) ->
         withTrivia map pos
             (opt (fun (a, astsOpt) ->
-                braces opts (concat [ p a; opt (fun asts -> concat (asts |> List.map (fun a -> concat [ line; p a ]))) astsOpt ])) tupOpt)
+                let contentDoc = p a
+                braces opts (concat [ contentDoc; opt (fun asts -> subBlocks opts (not (isEmpty contentDoc)) (asts |> List.map p)) astsOpt ])) tupOpt)
     | DefClassCompleteContent(a, asts) ->
-        concat [ p a; (if List.isEmpty asts then concat [] else concat [ line; statements (asts |> List.map p) ]) ]
+        let declDoc = p a
+        concat [ declDoc; subBlocks opts (not (isEmpty declDoc)) (asts |> List.map p) ]
     | Constructor(pos, (a1, a2)) ->
         withTrivia map pos (concat [ p a1; text " "; p a2 ])
     | ConstructorSignature(pos, (a1, a2)) ->
@@ -484,7 +518,8 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos
             (concat [ keyword opts LiteralDef LiteralDefL; text " "; p a
                       opt (fun (a1, astsOpt) ->
-                          braces opts (concat [ p a1; opt (fun asts -> concat (asts |> List.map (fun a -> concat [ line; p a ]))) astsOpt ])) tupOpt ])
+                          let contentDoc = p a1
+                          braces opts (concat [ contentDoc; opt (fun asts -> subBlocks opts (not (isEmpty contentDoc)) (asts |> List.map p)) astsOpt ])) tupOpt ])
     | PredicateSignature((pos, ((a1, a1Opt), a2)), a3Opt) ->
         withTrivia map pos
             (concat [ keyword opts LiteralPred LiteralPredL; text " "; p a1
@@ -507,7 +542,8 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     | FunctionalTermDefinitionBlock(pos, tupOpt) ->
         withTrivia map pos
             (opt (fun (a, astsOpt) ->
-                braces opts (concat [ p a; opt (fun asts -> concat (asts |> List.map (fun a -> concat [ line; p a ]))) astsOpt ])) tupOpt)
+                let contentDoc = p a
+                braces opts (concat [ contentDoc; opt (fun asts -> subBlocks opts (not (isEmpty contentDoc)) (asts |> List.map p)) astsOpt ])) tupOpt)
     | DefFunctionContent(a1, a2) ->
         concat [ p a1; p a2 ]
 
