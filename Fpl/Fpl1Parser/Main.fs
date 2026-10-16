@@ -373,25 +373,3 @@ let testParser (parserType:string) (input:string) =
         sprintf "%O" result
     | _ -> $"testParser {parserType} not implemented"
 
-/// <summary>
-/// Parses <paramref name="fplCode"/> for the formatting service: returns the same building-block
-/// ASTs and success flag as <c>fplParser</c>, together with the full, independently-discovered list
-/// of comments (with kind and positions), ready to be merged into a <c>TriviaMap</c>.
-/// </summary>
-/// <param name="fplCode">Raw FPL source code to parse.</param>
-/// <returns>
-/// A tuple of: the result of <c>fplParser</c> (building blocks, full-success flag), and the list
-/// of <c>CommentLexer.Comment</c> found by an independent full-text scan of the raw source. Comment
-/// discovery does not depend on <c>fplParser</c>'s outcome and is always complete, even when the
-/// FPL code has syntax errors.
-/// </returns>
-let fplParserWithTrivia fplCode =
-    let asts, wasFullyParsed = fplParser fplCode
-    let comments = findComments fplCode
-    let nodePositions =
-        asts
-        |> List.collect (fun a ->
-            let acc = List<Positions>()
-            collectPositions acc a                      // <-- still used here
-            List.ofSeq acc)
-    (asts, wasFullyParsed), nodePositions, comments

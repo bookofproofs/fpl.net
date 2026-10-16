@@ -146,7 +146,7 @@ module Commons =
     /// from the *original* (un-stripped) <paramref name="fplCode"/>, and renders via <c>printAll</c>.
     /// </summary>
     /// <returns>The rendered text, plus the clean-parse success flag returned by <c>fplParser</c>.</returns>
-    let private formatViaFplParserWith (opts: FormattingOptions) (fplCode: string) : string * bool =
+    let formatViaFplParserWith (opts: FormattingOptions) (fplCode: string) : string * bool =
         let asts, success = Fpl1Parser.Main.fplParser fplCode
         let comments = findComments fplCode
         let positions = asts |> List.collect Fpl1Parser.LSRelated.Trivia.getAllPositions
@@ -154,14 +154,8 @@ module Commons =
         printAll opts map asts, success
 
     /// <summary>Full pipeline using <c>fplFormatDefaults</c>.</summary>
-    let private formatViaFplParser (fplCode: string) : string * bool =
+    let formatViaFplParser (fplCode: string) : string * bool =
         formatViaFplParserWith fplFormatDefaults fplCode
-
-    /// <summary>True if any top-level ast produced by <c>fplParser</c> is a syntax-error placeholder.</summary>
-    let private isErrorAst (ast: Ast) =
-        match ast with
-        | ErrorSyntax _ | ErrorSyntaxBacktracking _ | ErrorSyntaxChain _ -> true
-        | _ -> false
 
     /// <summary>Category 1b/2b (full-pipeline variant): format → format-again; the two outputs must match.</summary>
     let private assertFullPipelineIdempotent (fplCode: string) =

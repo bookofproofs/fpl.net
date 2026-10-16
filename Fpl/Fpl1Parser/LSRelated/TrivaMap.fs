@@ -5,8 +5,8 @@
 /// This module exists to support comment-trivia attachment for a formatting service: after parsing,
 /// a single post-pass walks the entire tree in source order and attaches each comment either as:
 /// leading trivia of the next node whose start position follows the comment, or
-/// trailing trivia of the widest (outermost) preceding node whose end lands on the same source
-/// line as the comment, if any such node exists.
+/// trailing trivia of the widest (outermost) node among those that end nearest to (and on the same
+/// source line as) the comment, if any such node exists.
 /// </remarks>
 module Fpl1Parser.LSRelated.TriviaMap
 open FParsec
@@ -37,28 +37,36 @@ type Trivia = {
 }
 
 /// <summary>
-/// Maps an AST node to its attached <c>Trivia</c>, keyed by the <c>Index</c> of the node's start
-/// <c>Position</c> (see <c>Positions</c>).
+/// Maps an AST node to its attached <c>Trivia</c>, keyed by the FULL <c>(start.Index, end.Index)</c>
+/// pair of the node's <c>Positions</c>.
 /// </summary>
 /// <remarks>
-/// Keying on the start position's <c>Index</c> (an <c>int64</c>) rather than on the full
-/// <c>Positions</c> tuple avoids relying on <see cref="FParsec.Position"/>'s structural equality
-/// and hashing as an implicit dependency, and is cheaper to hash for trees with many nodes.
+/// Keying by start index ALONE (as an earlier version of this module did) is unsound: many
+/// grammar productions wrap an outer composite node around an inner child node that starts at the
+/// exact same token — e.g. <c>Ast.RuleOfInference</c> and its own <c>Ast.RuleOfInferenceSignature</c>
+/// child both start at the <c>inf</c> keyword; <c>Ast.Proof</c>/<c>Ast.ProofSignature</c> both start
+/// at <c>prf</c>; <c>Ast.DefinitionClass</c>/<c>Ast.ClassSignature</c> both start at the class
+/// keyword. Keying by start index alone makes these distinct nodes alias to the same dictionary
+/// slot, so whichever one happens to be rendered (and call <see cref="tryTakeTrivia"/>) FIRST —
+/// typically the inner child, since <c>PrettyPrint.print</c> renders child sub-expressions before
+/// the enclosing <c>withTrivia</c> call wraps the result — incorrectly steals trivia that was
+/// actually attached to the outer node. Including the end index in the key disambiguates these
+/// cases, since an outer node's span always strictly contains (and so has a different end index
+/// from) its inner child's span whenever the two aren't literally the same AST node.
 /// </remarks>
-type TriviaMap = Dictionary<int64, Trivia>
+type TriviaMap = Dictionary<int64 * int64, Trivia>
 
-let private key ((startPos, _): Positions) = startPos.Index
+let private key ((startPos, endPos): Positions) = (startPos.Index, endPos.Index)
 
 /// <summary>
 /// Builds a <c>TriviaMap</c> by associating each comment discovered in the source with the
 /// nearest AST node: a comment is attached as leading trivia of the next node that starts after
 /// it, unless at least one preceding node's end position lands on the same source line as the
-/// comment, in which case the comment is attached as the trailing trivia of the WIDEST such node
-/// — i.e. the one with the smallest start index among all candidates — so that e.g. a comment
-/// following a class definition's closing brace stays attached to the whole class definition
-/// rather than drifting to whatever innermost statement/expression happens to end on that same
-/// line (which would otherwise "win" merely because it is the node whose start index is closest
-/// to the comment).
+/// comment, in which case the comment is attached as trailing trivia of a node chosen in two steps:
+/// first, find the node(s) whose end is CLOSEST to (i.e. has the maximum end index not exceeding)
+/// the comment's start and on the same source line; then, among any such nodes tied at that same
+/// end index (which happens exactly when an outer node's span ends at the same point as its
+/// last-closing descendant's), pick the one with the smallest start index — the outermost ancestor.
 /// </summary>
 /// <param name="nodePositions">
 /// All node positions in source order, as produced by <c>Fpl1Parser.Trivia.getAllPositions</c>.
@@ -68,17 +76,23 @@ let private key ((startPos, _): Positions) = startPos.Index
 /// in source order.
 /// </param>
 /// <returns>
-/// A <c>TriviaMap</c> keyed by node start position (see <c>TriviaMap</c>) that the pretty-printer
+/// A <c>TriviaMap</c> keyed by node <c>Positions</c> (see <c>TriviaMap</c>) that the pretty-printer
 /// can consult while emitting each node, in order to re-insert its leading and trailing comments.
 /// </returns>
 /// <remarks>
 /// This is fundamentally a merge of two already-sorted sequences (node positions and comment
 /// positions), advancing a single cursor over <paramref name="nodePositions"/> as it scans
-/// <paramref name="comments"/> in source order. Because AST nodes nest, several ancestors can
-/// share (or nearly share) an end position with their last-closing descendant (e.g. the last
-/// statement of a block ends right where the block itself ends); among all nodes satisfying
-/// "already closed, same line as the comment", the ancestor always has the smallest start index
-/// (it was opened first), so picking the minimum start index reliably selects the outermost one.
+/// <paramref name="comments"/> in source order.
+/// <para>
+/// Picking by "maximum end index, tie-broken by minimum start index" (rather than simply "minimum
+/// start index among any node ending on the comment's line", as an earlier version of this function
+/// did) matters once several unrelated nodes happen to share a source line with the comment — which
+/// is the common case for single-physical-line FPL snippets. Without first narrowing to the node(s)
+/// closing NEAREST the comment, an earlier, unrelated, but textually "wider" node (e.g. a class's
+/// signature, which starts earliest but ends long before the comment) could incorrectly win over the
+/// node that is actually immediately adjacent to the comment (e.g. the class's last constructor
+/// block).
+/// </para>
 /// </remarks>
 let buildTriviaMap (nodePositions: Positions list) (comments: Comment list) : TriviaMap =
     let map = TriviaMap()
@@ -91,15 +105,24 @@ let buildTriviaMap (nodePositions: Positions list) (comments: Comment list) : Tr
         while nodeIdx < nodes.Length - 1 && (fst nodes.[nodeIdx]).Index < cStart.Index do
             nodeIdx <- nodeIdx + 1
 
-        // Among all nodes that start before the comment, find candidates whose END lands on the
-        // same source line as the comment and precedes it; among those, the one with the
-        // smallest start index is the outermost (widest) enclosing node.
-        let mutable bestIdx = -1
+        // Step 1: among all nodes that start before the comment and whose END lands on the same
+        // source line as the comment and at or before it, find the maximum end index — i.e. the
+        // node(s) closing NEAREST the comment.
+        let mutable maxEnd = -1L
         for i in 0 .. nodeIdx - 1 do
-            let (nStart, nEnd) = nodes.[i]
-            if nEnd.Index <= cStart.Index && isSameLine nEnd cStart then
-                if bestIdx = -1 || nStart.Index < (fst nodes.[bestIdx]).Index then
-                    bestIdx <- i
+            let (_, nEnd) = nodes.[i]
+            if nEnd.Index <= cStart.Index && isSameLine nEnd cStart && nEnd.Index > maxEnd then
+                maxEnd <- nEnd.Index
+
+        // Step 2: among nodes tied at that maximum end index, pick the one with the smallest
+        // start index — the outermost ancestor among any nodes that close at exactly that point.
+        let mutable bestIdx = -1
+        if maxEnd >= 0L then
+            for i in 0 .. nodeIdx - 1 do
+                let (nStart, nEnd) = nodes.[i]
+                if nEnd.Index = maxEnd then
+                    if bestIdx = -1 || nStart.Index < (fst nodes.[bestIdx]).Index then
+                        bestIdx <- i
 
         if bestIdx >= 0 then
             let k = key nodes.[bestIdx]
@@ -112,13 +135,12 @@ let buildTriviaMap (nodePositions: Positions list) (comments: Comment list) : Tr
     map
 
 /// <summary>
-/// Looks up the <c>Trivia</c> attached to the node whose start position is <paramref name="p"/>.
+/// Looks up the <c>Trivia</c> attached to the node whose <c>Positions</c> is <paramref name="p"/>.
 /// </summary>
 /// <param name="map">The <c>TriviaMap</c> to query, as produced by <c>buildTriviaMap</c>.</param>
 /// <param name="p">The <c>Positions</c> of the node whose trivia should be retrieved.</param>
 /// <returns>
-/// <c>Some</c> trivia if any comments were attached to this node's start position; otherwise
-/// <c>None</c>.
+/// <c>Some</c> trivia if any comments were attached to this exact node; otherwise <c>None</c>.
 /// </returns>
 let tryGetTrivia (map: TriviaMap) (p: Positions) : Trivia option =
     match map.TryGetValue(key p) with
@@ -126,22 +148,23 @@ let tryGetTrivia (map: TriviaMap) (p: Positions) : Trivia option =
     | false, _ -> None
 
 /// <summary>
-/// Looks up and removes the <c>Trivia</c> attached to the node whose start position is
+/// Looks up and removes the <c>Trivia</c> attached to the node whose <c>Positions</c> is
 /// <paramref name="p"/>, so that a comment is rendered at most once even when several AST nodes
-/// (e.g. pass-through wrapper nodes) share the same start position.
+/// (e.g. pass-through wrapper nodes) share the exact same <c>Positions</c>.
 /// </summary>
 /// <param name="map">The <c>TriviaMap</c> to query, as produced by <c>buildTriviaMap</c>.</param>
 /// <param name="p">The <c>Positions</c> of the node whose trivia should be retrieved.</param>
 /// <returns>
-/// <c>Some</c> trivia if any comments were attached to this node's start position (the entry is
-/// then removed from <paramref name="map"/>); otherwise <c>None</c>.
+/// <c>Some</c> trivia if any comments were attached to this exact node (the entry is then removed
+/// from <paramref name="map"/>); otherwise <c>None</c>.
 /// </returns>
 /// <remarks>
-/// Prefer this over <c>tryGetTrivia</c> when rendering: several AST node kinds can legitimately
-/// share the exact same start <c>Position</c> as a nested child (e.g. single-child pass-through
-/// wrappers), and without removing the entry on first use both the wrapper and its child would
-/// independently retrieve and re-emit the same leading/trailing comment, duplicating it in the
-/// pretty-printed output.
+/// Prefer this over <c>tryGetTrivia</c> when rendering: a handful of AST node kinds can still
+/// legitimately share the exact same full <c>Positions</c> (start AND end) as a nested child (true
+/// single-child pass-through wrappers, as opposed to the merely-same-start aliasing this module's
+/// keying scheme now disambiguates), and without removing the entry on first use both the wrapper
+/// and its child would independently retrieve and re-emit the same leading/trailing comment,
+/// duplicating it in the pretty-printed output.
 /// </remarks>
 let tryTakeTrivia (map: TriviaMap) (p: Positions) : Trivia option =
     let k = key p
