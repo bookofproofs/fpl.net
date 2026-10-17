@@ -16,6 +16,25 @@ type TestSignatures () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+
+    [<DataRow("01", """pred T(f: pred) prefix "!" """)>] // false prefix character
+    [<DataRow("02", """pred T(f: pred) postfix "~" """)>] // false postfix character
+    [<DataRow("03", """pred T(f,g: pred) infix "∠" 0 """)>] // false infix character
+    [<TestMethod>]
+    member this.TestPredicateSignatureFailure (no:string, fplCode:string) =
+        let result = run (predicateSignature .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<DataRow("03", """cl T symbol "+" """)>] // false symbol character
+    [<TestMethod>]
+    member this.TestClassSignatureFailure (no:string, fplCode:string) =
+        let result = run (classSignatureExtended .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
     [<DataRow("01", """inf ExistsByExample""")>]
     [<DataRow("02", """inference PrecedingResults""")>]
     [<TestMethod>]

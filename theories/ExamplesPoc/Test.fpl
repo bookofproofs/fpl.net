@@ -4,3 +4,13 @@ inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } /*a*/
 proof T$1 {dec f,x:pred; 1: x 2: x ⇒ (f ⇒ f) 3. 2,1, byinf/*a*/ MP |- (f ⇒ f) }
 
 def class FieldPowerN: Set { ctor FieldPowerN(x:obj, y:pred) { dec base.Obj() ; } /*a*/ property pred T() { true } }
+
+
+def pred Impl1(f, g: pred) /*a*/ infix "=>" 4 {impl(f,g)}
+def pred Not1(f: pred) /*a*/ prefix "!" {not f}
+def pred Not(x:obj) /*a*/ prefix "-"  {true}
+def pred NotD(f: pred) /*a*/ postfix "'" {not f}
+def func Add(f, g: obj)->obj /*a*/ infix "+" 1 {intr}
+def func Succ(f: obj)->obj /*a*/ prefix "!" {intr}
+def func SuccD(f: obj)->obj /*a*/ postfix "'" {intr}
+def cl Bla /*a*/ symbol "∠" {intr}

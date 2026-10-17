@@ -534,5 +534,6 @@ let errExprMismatchVarNumbDifferent numA varsA numP pName =
 /// <summary>OK sentinel for expression mismatch diagnostics.</summary>
 let (errExprMismatchOK: string option) = None
 
-
+/// <summary>Message used to produce errors related to invalid symbols used in prefix/postfix/infix FPL notation.</summary>
+let errFalseSymbol ch validSymbols symbolType = $"`{ch}` is not a valid {symbolType} symbol, try one of ```{validSymbols}```."
 

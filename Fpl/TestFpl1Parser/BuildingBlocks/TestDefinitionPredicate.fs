@@ -54,6 +54,8 @@ type TestDefinitionPredicate () =
     [<DataRow("13", """def pred T() postfix "" {intr}""")>]
     [<DataRow("14", """def pred T() infix "" 0 {intr}""")>]
     [<DataRow("15", """def pred T() prefix "" {intr}""")>]
+    [<DataRow("16", """def pred Not1(f: pred) prefix "!" {not f}""")>] // false prefix character
+    
     [<TestMethod>]
     member this.TestDefinitionPredicateFailure (no:string, fplCode:string) =
         let result = run (definition .>> eof) fplCode

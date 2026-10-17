@@ -22,7 +22,7 @@ type TestNSP02() =
         // ensure no diagnostics from previous tests remain
         diagnosticsContainer.Clear()
     
-    [<DataRow("01", "https://google.com", 0)>]
+    [<DataRow("01", "https://www.google.com", 0)>]
     [<DataRow("02", "https://nonexistent.invalid", 1)>]
     [<TestMethod>]
     member this.TestNSP02(no:string, url:string, expected:int) =

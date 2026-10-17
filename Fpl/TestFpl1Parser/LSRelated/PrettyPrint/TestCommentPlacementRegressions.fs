@@ -81,16 +81,21 @@ type TestCommentPlacementRegressions () =
         this.AssertCommentNextToCorrectAnchor fplCode "/*a*/" "}" [ "FieldPowerN" ]
 
     /// <summary>
-    /// Input A: a comment between a predicate's parameter list and its <c>infix</c> symbol
-    /// declaration should stay there. KNOWN LIMITATION: <c>Ast.PredicateSignature</c>'s recorded
+    /// Input A: a comment between the starting of a definition (e.g, a predicate's parameter list) and its symbolic clause (e.g., a <c>infix</c> symbol)
+    /// should stay there. KNOWN LIMITATION: <c>Ast.PredicateSignature</c>'s recorded
     /// <c>Positions</c> do not currently span the trailing <c>infix "..." n</c> clause at all (a
     /// grammar/AST-shape gap, not a <c>TriviaMap</c> attachment bug), so this case is expected to
     /// still fail until that AST shape is revisited; it is included here, marked
     /// <c>[&lt;Ignore&gt;]</c>, purely so the limitation is tracked and the test starts passing
     /// automatically once fixed.
     /// </summary>
+    [<DataRow("01", """def pred Impl(f, g: pred) /*a*/ infix "=>" 0 {impl(f,g)}""")>]
+    [<DataRow("01a", """def pred Not(f: pred) /*a*/ prefix "!" {not f}""")>]
+    [<DataRow("01b", """def pred NotD(f: pred) /*a*/ postfix "'" 0 {not f}""")>]
+    [<DataRow("02", """def func Add(f, g: obj)->obj /*a*/ infix "+" 0 {intr}""")>]
+    [<DataRow("02a", """def func Succ(f: obj)->obj /*a*/ prefix "!" {intr}""")>]
+    [<DataRow("02b", """def func SuccD(f: obj)->obj /*a*/ postfix "'" {intr}""")>]
+    [<DataRow("03", """def cl Bla /*a*/ symbol "∠" {intr}""")>]
     [<TestMethod>]
-    [<Ignore("Known limitation: PredicateSignature's Positions do not span its trailing infix clause; requires an AST-shape change, not a TriviaMap fix.")>]
-    member this.TestCommentStaysBeforeInfixClause () =
-        let fplCode = """def pred Impl(f, g: pred) /*a*/ infix "=>" 0 {impl(f,g)}"""
+    member this.TestCommentStaysSymbolicClause (no:string, fplCode:string) =
         this.AssertCommentNextToCorrectAnchor fplCode "/*a*/" "pred)" [ "infix" ]
