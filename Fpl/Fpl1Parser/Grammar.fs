@@ -1535,9 +1535,18 @@ let classSignature = positions (keywordClass >>. SW >>. pascalCaseId) .>> IW |>>
 
 /// <summary>
 /// Parser for the extended signature of class definition involving optional inheritance list and optional user-defined symbol for the defined class.
+/// The <c>Ast.ClassSignature</c> node's recorded positions span the header, the inheritance list, and the trailing symbol clause.
+/// The result shape is unchanged, so consumers do not need to be refactored.
 /// </summary>
-let classSignatureExtended = classSignature .>>. opt (colon >>. inheritedTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)) .>> IW
-
+let classSignatureExtended =
+    positions (classSignature .>>. opt (colon >>. inheritedTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)))
+    .>> IW
+    |>> (fun (span, ((classSig, inheritance), symbol)) ->
+            let widenedClassSig =
+                match classSig with
+                | Ast.ClassSignature(_, id) -> Ast.ClassSignature(span, id)
+                | other -> other
+            ((widenedClassSig, inheritance), symbol))
 /// <summary>
 /// Parser for full class definition producing <c>Ast.DefinitionClass</c>.
 /// </summary>

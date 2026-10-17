@@ -23,8 +23,8 @@ type TestFplValue() =
     [<DataRow("proof TestId$1$2$3 {1: trivial}", "TestId$1$2$3", "pred")>]
 
     
-    [<DataRow("def class Test:Obj proof Test$1 {1: trivial}", "Test", "Test")>]
-    [<DataRow("def class TestId:Obj", "TestId", "TestId")>]
+    [<DataRow("def class Test:Obj {intr} proof Test$1 {1: trivial}", "Test", "Test")>]
+    [<DataRow("def class TestId:Obj {intr}", "TestId", "TestId")>]
     [<DataRow("def class TestId:Nat1, Nat2, Nat3, Nat4 {intrinsic} ", "TestId", "TestId")>]
     [<DataRow("def class TestId:Nat3 {intrinsic} ", "TestId", "TestId")>]
 
@@ -140,7 +140,7 @@ type TestFplValue() =
             Assert.AreEqual<int64>(expectedStart, withSignature.SignStartPos.Index)
             let expectedEnd = 
                 if fplCode.Contains("def cl") then
-                    (int64)(fplCode.IndexOf(":", System.StringComparison.OrdinalIgnoreCase))
+                    (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
                 else
                     (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
             Assert.AreEqual<int64>(expectedEnd, withSignature.SignEndPos.Index)
