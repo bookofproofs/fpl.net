@@ -1534,19 +1534,25 @@ let classDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntrinsic <|>
 let classSignature = positions (keywordClass >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature <!> "ClassSignature"
 
 /// <summary>
+/// Parser for the symbol declaration of a class (<c>symbol "..."</c>) without consuming trailing whitespace,
+/// producing <c>Ast.SymbolDecl</c>.
+/// </summary>
+let classSymbolDecl = positions (keywordSymbol >>. objectSymbolString) |>> Ast.SymbolDecl <!> "Symbol"
+
+/// <summary>
 /// Parser for the extended signature of class definition involving optional inheritance list and optional user-defined symbol for the defined class.
-/// The <c>Ast.ClassSignature</c> node's recorded positions span the header, the inheritance list, and the trailing symbol clause.
+/// The recorded positions span exactly from the 'cl' keyword to the end of the last consumed token
+/// (the class name, the inheritance list, or the symbol string). Trailing whitespace is consumed outside the span.
 /// The result shape is unchanged, so consumers do not need to be refactored.
 /// </summary>
 let classSignatureExtended =
-    positions (classSignature .>>. opt (colon >>. inheritedTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)))
+    positions (
+        keywordClass >>. SW >>. pascalCaseId
+        .>>. opt (attempt (IW >>. colon >>. inheritedTypeList))
+        .>>. opt (attempt (IW >>. classSymbolDecl)))
     .>> IW
-    |>> (fun (span, ((classSig, inheritance), symbol)) ->
-            let widenedClassSig =
-                match classSig with
-                | Ast.ClassSignature(_, id) -> Ast.ClassSignature(span, id)
-                | other -> other
-            ((widenedClassSig, inheritance), symbol))
+    |>> (fun (span, ((id, inheritance), symbol)) -> ((Ast.ClassSignature(span, id), inheritance), symbol))
+
 /// <summary>
 /// Parser for full class definition producing <c>Ast.DefinitionClass</c>.
 /// </summary>
