@@ -462,7 +462,7 @@ let namedVariableDeclaration = positions ((variableList .>> colon) .>>. variable
 
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
 
-paramTupleRef.Value <- (leftParen >>. namedVariableDeclarationList) .>> rightParen |>> Ast.ParamTuple <!> "ParamTuple"
+paramTupleRef.Value <- positions ((leftParen >>. namedVariableDeclarationList) .>> rightParen) |>> Ast.ParamTuple <!> "ParamTuple"
 
 /// <summary>
 /// Parser for a simple signature (PascalCase identifier) consumed with trailing whitespace.

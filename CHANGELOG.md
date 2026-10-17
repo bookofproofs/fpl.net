@@ -25,10 +25,14 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[language-server]** Wire user-configured `FormattingOptions` through to the formatting service: new `SettingsStore` singleton, `SettingsTranslation` module translating client JSON payloads into `FormattingOptions`, and a `SettingsPull` module issuing a live `workspace/configuration` request on every `textDocument/formatting` request, replacing the previously hardcoded `fplFormatDefaults`
 ### Changed
 - **[parser]** consolidate unit test namespaces and convert single-case test methods to datarow-driven test methods (if not already the case)
+- **[parser]** `Ast.PredicateSignature` and `Ast.FunctionalTermSignature` now record positions that also span their trailing `infix`, `prefix`, `postfix`, or `symbol` clause, so the formatting service can attach comments to the correct node
+- **[parser]** `Ast.ClassSignature` (via `classSignatureExtended`) now records positions that end at the class name, inheritance list, or `symbol` clause, excluding trailing whitespace before the class block
+- **[parser]** `ParamTuple` now carries its own `Positions`, so its span covers the parameter list's parentheses; consumers were updated accordingly
 ### Fixed
 - **[parser]** Fixed the formatting service corrupting FPL building blocks containing syntax errors: `PrettyPrint` previously rendered the internal diagnostic message text of `ErrorSyntax`/`ErrorSyntaxBacktracking`/`ErrorSyntaxChain` AST nodes verbatim as if it were FPL source; it now reprints the original, unmodified source text of the faulty building block instead
 - **[parser]** Fixed `PrettyPrint` emitting duplicated parentheses around constructor, predicate-instance, and functional-term-instance parameter lists (e.g. `ctor Magma((x: tplSet, op: BinOp))`), caused by `ConstructorSignature`/`PredicateInstanceSignature`/`FunctionalTermInstanceSignature` wrapping an already self-parenthesizing `ParamTuple` node in an extra set of parentheses
-  
+- **[parser]** Fixed the formatting service emitting a comment after the wrong anchor when a trailing comment followed a signature with a symbolic clause, e.g. `def pred Impl(f, g: pred) /*a*/ infix "=>" 0`, which previously moved the comment inside the parameter list
+-   
 ## [v5.1.1] - 2026-09-27
 ### Added
 - **[vscode]** New release 5.1.1, automate syncing and checking vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files

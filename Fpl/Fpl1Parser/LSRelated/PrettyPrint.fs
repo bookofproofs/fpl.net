@@ -440,8 +440,8 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
         withTrivia map pos (concat [ text "."; p a ])
     | QualificationList(pos, asts) ->
         withTrivia map pos (concat (asts |> List.map p))
-    | ParamTuple asts ->
-        tuple opts opts.ParameterStyle (asts |> List.map p)
+    | ParamTuple (pos, asts) ->
+        withTrivia map pos (tuple opts opts.ParameterStyle (asts |> List.map p))
 
     // Commands 
     | Delegate(a1, a2) ->

@@ -99,7 +99,7 @@ type Ast =
     | ArgumentTuple of Positions * Ast list 
     | DottedPredicate of Positions * Ast 
     | QualificationList of Positions * Ast list
-    | ParamTuple of Ast list 
+    | ParamTuple of Positions * Ast list 
 
     // Commands 
     | Delegate of Ast * Ast

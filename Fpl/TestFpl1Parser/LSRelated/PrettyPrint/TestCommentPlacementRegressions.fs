@@ -89,13 +89,27 @@ type TestCommentPlacementRegressions () =
     /// <c>[&lt;Ignore&gt;]</c>, purely so the limitation is tracked and the test starts passing
     /// automatically once fixed.
     /// </summary>
-    [<DataRow("01", """def pred Impl(f, g: pred) /*a*/ infix "=>" 0 {impl(f,g)}""")>]
-    [<DataRow("01a", """def pred Not(f: pred) /*a*/ prefix "-" {not f}""")>]
-    [<DataRow("01b", """def pred NotD(f: pred) /*a*/ postfix "'" {not f}""")>]
-    [<DataRow("02", """def func Add(f, g: obj)->obj /*a*/ infix "+" 0 {intr}""")>]
-    [<DataRow("02a", """def func Succ(f: obj)->obj /*a*/ prefix "-" {intr}""")>]
-    [<DataRow("02b", """def func SuccD(f: obj)->obj /*a*/ postfix "'" {intr}""")>]
-    [<DataRow("03", """def cl Bla /*a*/ symbol "∠" {intr}""")>]
+    [<DataRow("01", """def pred Impl(f, g: pred) /*a*/ infix "=>" 0 {impl(f,g)}""", "pred)", "infix")>]
+    [<DataRow("01a", """def pred Not(f: pred) /*a*/ prefix "-" {not f}""", "pred)", "prefix")>]
+    [<DataRow("01b", """def pred NotD(f: pred) /*a*/ postfix "'" {not f}""", "pred)", "postfix")>]
+    [<DataRow("02", """def func Add(f, g: obj)->obj /*a*/ infix "+" 0 {intr}""", "obj)", "infix")>]
+    [<DataRow("02a", """def func Succ(f: obj)->obj /*a*/ prefix "-" {intr}""", "obj)", "prefix")>]
+    [<DataRow("02b", """def func SuccD(f: obj)->obj /*a*/ postfix "'" {intr}""", "obj)", "postfix")>]
+    [<DataRow("03", """def cl Bla /*a*/ symbol "∠" {intr}""", "Bla", "symbol")>]
+    [<DataRow("03", """def cl Bla /*a*/ symbol "∠" {intr}""", "Bla", "symbol")>]
+    [<DataRow("03", """def cl Bla /*a*/ symbol "∠" {intr}""", "Bla", "symbol")>]
+    [<DataRow("03", """def cl Bla /*a*/ symbol "∠" {intr}""", "Bla", "symbol")>]
+    [<DataRow("04a", """def class Empty: Bla /*a*/ symbol "∅" { intr }""", "Bla", "symbol")>]
+    [<DataRow("04b", """def class Empty: Bla /*a*/ symbol "∅" """, "Bla", "symbol")>]
+    [<DataRow("04c", """def class Empty:Bla /*a*/ symbol "∅" { intr }""", "Bla", "symbol")>]
+    [<DataRow("04d", """def class Empty:Bla /*a*/ symbol "∅" """, "Bla", "symbol")>]
+    [<DataRow("04e", """def class Empty /*a*/ symbol "∅" { intr }""", "Empty", "symbol")>]
+    [<DataRow("04f", """def class Empty /*a*/ symbol "∅" """, "Empty", "symbol")>]
+    [<DataRow("04g", """def class Empty: Typ1, Bla /*a*/ symbol "∅" { intr }""", "Bla", "symbol")>]
+    [<DataRow("04h", """def class Empty: Typ1,Bla /*a*/ symbol "∅" """, "Bla", "symbol")>]
+    [<DataRow("04i", """def class Empty:Typ1,Bla /*a*/ symbol "∅" { intr }""", "Bla", "symbol")>]
+    [<DataRow("04j", """def class Empty:Typ1 , Bla /*a*/ symbol "∅" """, "Bla", "symbol")>]
+
     [<TestMethod>]
-    member this.TestCommentStaysSymbolicClause (no:string, fplCode:string) =
-        this.AssertCommentNextToCorrectAnchor fplCode "/*a*/" "pred)" [ "infix" ]
+    member this.TestCommentStaysSymbolicClause (no:string, fplCode:string, correctAnchor:string, wrongAnchor:string) =
+        this.AssertCommentNextToCorrectAnchor fplCode "/*a*/" correctAnchor [ wrongAnchor ]

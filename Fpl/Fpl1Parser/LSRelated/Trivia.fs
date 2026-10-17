@@ -188,7 +188,8 @@ let rec collectPositions (acc: List<Positions>) (ast: Ast) =
     | QualificationList(p, asts) ->
         add p
         list (collectPositions acc) asts
-    | ParamTuple asts ->
+    | ParamTuple(p, asts) ->
+        add p
         list (collectPositions acc) asts
 
     // Commands
