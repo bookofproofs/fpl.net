@@ -90,10 +90,10 @@ type TestCommentPlacementRegressions () =
     /// automatically once fixed.
     /// </summary>
     [<DataRow("01", """def pred Impl(f, g: pred) /*a*/ infix "=>" 0 {impl(f,g)}""")>]
-    [<DataRow("01a", """def pred Not(f: pred) /*a*/ prefix "!" {not f}""")>]
-    [<DataRow("01b", """def pred NotD(f: pred) /*a*/ postfix "'" 0 {not f}""")>]
+    [<DataRow("01a", """def pred Not(f: pred) /*a*/ prefix "-" {not f}""")>]
+    [<DataRow("01b", """def pred NotD(f: pred) /*a*/ postfix "'" {not f}""")>]
     [<DataRow("02", """def func Add(f, g: obj)->obj /*a*/ infix "+" 0 {intr}""")>]
-    [<DataRow("02a", """def func Succ(f: obj)->obj /*a*/ prefix "!" {intr}""")>]
+    [<DataRow("02a", """def func Succ(f: obj)->obj /*a*/ prefix "-" {intr}""")>]
     [<DataRow("02b", """def func SuccD(f: obj)->obj /*a*/ postfix "'" {intr}""")>]
     [<DataRow("03", """def cl Bla /*a*/ symbol "∠" {intr}""")>]
     [<TestMethod>]

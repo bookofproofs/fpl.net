@@ -1444,8 +1444,13 @@ let inheritedTypeList = sepBy1 inheritedType comma |>> Ast.InheritedTypeList <!>
 
 /// <summary>
 /// Parser for the signature of predicate definitions producing <c>Ast.PredicateSignature</c>.
+/// The recorded positions span the header, the parameter list, and the trailing symbolic clause.
 /// </summary>
-let predicateSignature = positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature <!> "PredicateSignature"
+let predicateSignature =
+    positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple .>>. userDefinedSymbol)
+    .>> IW
+    |>> (fun (pos, ((header, paramTuple), symbol)) -> ((pos, (header, paramTuple)), symbol))
+    |>> Ast.PredicateSignature <!> "PredicateSignature"
 
 /// <summary>
 /// Parser for full predicate definition producing <c>Ast.DefinitionPredicate</c>.
@@ -1460,8 +1465,13 @@ let functionalTermDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntr
 
 /// <summary>
 /// Parser for the signature of functional-term definitions producing <c>Ast.FunctionalTermSignature</c>.
+/// The recorded positions span the header, the parameter list, the mapping, and the trailing symbolic clause.
 /// </summary>
-let functionalTermSignature = positions (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature <!> "FunctionalTermSignature"
+let functionalTermSignature =
+    positions (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping) .>>. userDefinedSymbol)
+    .>> IW
+    |>> (fun (pos, (((header, paramTuple), mapping), symbol)) -> ((pos, ((header, paramTuple), mapping)), symbol))
+    |>> Ast.FunctionalTermSignature <!> "FunctionalTermSignature"
 
 /// <summary>
 /// Parser for full functional-term definition producing <c>Ast.DefinitionFunctionalTerm</c>.
