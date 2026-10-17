@@ -7,6 +7,7 @@ module Fpl1Parser.Grammar
 
 open FParsec
 open Fpl0Base.Primitives
+open Fpl0Base.Errors.Messages
 open Fpl1Parser.Basic
 open Fpl1Parser.Types
 open Fpl1Parser.Debug
@@ -479,14 +480,23 @@ let localizationString = positions (regex "[^\"\n]*") <?> "<language-specific st
 let keywordSymbol = pstring LiteralSymbol .>> IW
 
 /// <summary>
-/// Parser for a quoted object-symbol string.
+/// Parser for quoted object-symbol string. An invalid symbol is reported as a fatal error
+/// at its own position, so that <c>opt</c> and <c>attempt</c> cannot hide it.
 /// </summary>
-let objectSymbolString = pchar '"' >>. objectMathSymbols .>> pchar '"'
+let objectSymbolString =
+    pchar '"' 
+    >>. (objectMathSymbols <|> (lookAhead (noneOf "\"\r\n") >>= fun c -> failFatally (errFalseSymbol c LiteralValidObjectSymbols LiteralObjL)))
+    .>> pchar '"'
 
 /// <summary>
-/// Parser for quoted infix-symbol text.
+/// Parser for quoted infix-symbol string. An invalid symbol is reported as a fatal error
+/// at its own position, so that <c>opt</c> and <c>attempt</c> cannot hide it.
 /// </summary>
-let infixString = pchar '"' >>. infixMathSymbols .>> pchar '"'
+let infixString =
+    pchar '"' 
+    >>. (infixMathSymbols <|> (lookAhead (noneOf "\"\r\n") >>= fun c -> failFatally (errFalseSymbol c LiteralValidInfixSymbols LiteralInfix)))
+    .>> pchar '"'
+
 
 /// <summary>
 /// Parser for the 'infix' keyword followed by precedence information.
@@ -494,19 +504,27 @@ let infixString = pchar '"' >>. infixMathSymbols .>> pchar '"'
 let keywordInfix = pstring LiteralInfix >>. IW
 
 /// <summary>
-/// Parser for quoted postfix-symbol text.
+/// Parser for quoted postfix-symbol string. An invalid symbol is reported as a fatal error
+/// at its own position, so that <c>opt</c> and <c>attempt</c> cannot hide it.
 /// </summary>
-let postfixString = pchar '"' >>. postfixMathSymbols .>> pchar '"' 
+let postfixString =
+    pchar '"' 
+    >>. (postfixMathSymbols <|> (lookAhead (noneOf "\"\r\n") >>= fun c -> failFatally (errFalseSymbol c LiteralValidPostfixSymbols LiteralPostfix)))
+    .>> pchar '"'
 
 /// <summary>
 /// Parser for the 'postfix' keyword.
 /// </summary>
-let keywordPostfix = pstring LiteralPostFix >>. IW
+let keywordPostfix = pstring LiteralPostfix >>. IW
 
 /// <summary>
-/// Parser for quoted prefix-symbol text.
+/// Parser for quoted prefix-symbol string. An invalid symbol is reported as a fatal error
+/// at its own position, so that <c>opt</c> and <c>attempt</c> cannot hide it.
 /// </summary>
-let prefixString = pchar '"' >>. prefixMathSymbols .>> pchar '"' 
+let prefixString =
+    pchar '"' 
+    >>. (prefixMathSymbols <|> (lookAhead (noneOf "\"\r\n") >>= fun c -> failFatally (errFalseSymbol c LiteralValidPrefixSymbols LiteralPrefix)))
+    .>> pchar '"'
 
 /// <summary>
 /// Parser for the 'prefix' keyword.
@@ -539,9 +557,20 @@ let userDefinedPostfix = positions (keywordPostfix >>. postfixString) .>> IW |>>
 let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> Ast.PrefixDecl <!> "Prefix"
 
 /// <summary>
+/// Parser that recognizes the fixity keyword (prefix, infix or postfix) that starts a fixity declaration.
+/// </summary>
+/// <remarks>
+/// Only this lookahead is wrapped in <c>attempt</c>. Once a fixity keyword has matched, the
+/// subsequent parsers run without <c>attempt</c>, so their errors (such as an invalid symbol)
+/// are reported instead of being silently backtracked by <c>opt</c>.
+/// </remarks>
+let fixityKeywordLookAhead = lookAhead (choice [pstring LiteralPrefix; pstring LiteralInfix; pstring LiteralPostfix])
+
+/// <summary>
 /// Optional parser that accepts a user-defined symbol declaration if present.
 /// </summary>
-let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]))
+let userDefinedSymbol =
+    opt (attempt (IW >>. fixityKeywordLookAhead) >>. IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix])
 
 // -----------------------------------------------------
 (* Statements *)

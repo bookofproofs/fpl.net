@@ -659,6 +659,10 @@ type TestExpression () =
     [<DataRow("quant02", """all x in T[x] {true}""")>]
     [<DataRow("quant03", """exn$0 x,y,z(true)""")>]
     [<DataRow("quant04", """exn$2 x in Nat,y {not (iif ( iif( true, false), true))}""")>]
+    [<DataRow("wrongSymb01", """!x""")>]
+    [<DataRow("wrongSymb02", """x~""")>]
+    [<DataRow("wrongSymb03", """x ∠ y""")>]
+    [<DataRow("wrongSymb04", """not +""")>]
     [<TestMethod>]
     member this.TestExpressionFailure (no:string, expr:string) =
         let result = run (expression .>> eof) expr

@@ -475,7 +475,7 @@ let rec print (opts: FormattingOptions) (map: TriviaMap) (ast: Ast) : Doc =
     // Symbol extensions
     | SymbolDecl(pos, s) -> withTrivia map pos (concat [ text $"{LiteralSymbol} \""; text s; text "\"" ])
     | PrefixDecl(pos, s) -> withTrivia map pos (concat [ text $"{LiteralPrefix} \""; text s; text "\"" ])
-    | PostfixDecl(pos, s) -> withTrivia map pos (concat [ text $"{LiteralPostFix} \""; text s; text "\"" ])
+    | PostfixDecl(pos, s) -> withTrivia map pos (concat [ text $"{LiteralPostfix} \""; text s; text "\"" ])
     | InfixDeclWithPrecedence(pos, (s, a)) ->
         withTrivia map pos (concat [ text $"{LiteralInfix} \""; text s; text "\" "; p a ])
     | Precedence(pos, n) -> withTrivia map pos (text (string n))

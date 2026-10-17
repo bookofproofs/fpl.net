@@ -162,7 +162,7 @@ let LiteralParent = "parent"
 [<Literal>]
 let LiteralPost = "post"
 [<Literal>]
-let LiteralPostFix = "postfix"
+let LiteralPostfix = "postfix"
 [<Literal>]
 let LiteralPostL = "postulate"
 [<Literal>]
@@ -297,7 +297,7 @@ let keyWordSet =
            LiteralOr
            LiteralParent
            LiteralPost
-           LiteralPostFix
+           LiteralPostfix
            LiteralPostL
            LiteralPred
            LiteralPredL

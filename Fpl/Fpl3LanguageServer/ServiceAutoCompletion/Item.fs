@@ -333,9 +333,9 @@ type FplCompletionItem(word: string, ?insertText: string) as this =
             this.SortText <- LiteralPrefix
             this.Kind <- CompletionItemKind.Operator
             this.IsShort <- false
-        | LiteralPostFix ->
+        | LiteralPostfix ->
             this.Detail <- "postfix operator"
-            this.SortText <- LiteralPostFix
+            this.SortText <- LiteralPostfix
             this.Kind <- CompletionItemKind.Operator
             this.IsShort <- false
         | LiteralPreL ->

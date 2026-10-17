@@ -503,7 +503,7 @@ type TestWhitespaceControl() =
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
 
     [<DataRow(LiteralPrefix)>]
-    [<DataRow(LiteralPostFix)>]
+    [<DataRow(LiteralPostfix)>]
     [<TestMethod>]
     member this.TestSpacesSomeFixNotation (word:string) =
         let result = run (definition .>> eof) ($"def pred T(){word}\"-\"" + "{true}")
