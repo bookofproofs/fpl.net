@@ -83,7 +83,7 @@ let evalTuples ast =
         heap.Eval.PushEvalStack(refBlock)
         evalRef.Value predicateWithOptSpecificationAst
         heap.Eval.PopEvalStack()
-    | Ast.ParamTuple namedVariableDeclarationListAsts ->
+    | Ast.ParamTuple ((pos1, pos2), namedVariableDeclarationListAsts) ->
         let fv = heap.Eval.PeekEvalStack()
         fv.ArgType <- ArgType.Parentheses
         namedVariableDeclarationListAsts |> List.map (fun child ->

@@ -693,11 +693,11 @@ type NameEndPos() =
         | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
         | "base6" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
         | "base7" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-        | "base8" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base8" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
         | "base9" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
         | "base10" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
         | "base11" -> Assert.AreEqual<int64>((int64)17, base1.EndPos.Column)
-        | "base12" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base12" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
         | "base13" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
         | "base11a" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
         | "base12a" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
@@ -860,16 +860,16 @@ type NameEndPos() =
             Assert.AreEqual<int64>((int64)13, hasSignature.SignEndPos.Column)
         | "base2" -> 
             let hasSignature = base1 :?> FplPredicate
-            Assert.AreEqual<int64>((int64)14, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)28, hasSignature.SignEndPos.Column)
         | "base3" -> 
             let hasSignature = base1 :?> FplPredicate
-            Assert.AreEqual<int64>((int64)14, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)27, hasSignature.SignEndPos.Column)
         | "base4" -> 
             let hasSignature = base1 :?> FplPredicate
-            Assert.AreEqual<int64>((int64)14, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)26, hasSignature.SignEndPos.Column)
         | "base5" -> 
             let hasSignature = base1 :?> FplClass
-            Assert.AreEqual<int64>((int64)9, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)20, hasSignature.SignEndPos.Column)
         | "base5a" -> 
             let hasSignature = base1 :?> FplClass
             Assert.AreEqual<int64>((int64)9, hasSignature.SignEndPos.Column)
@@ -878,13 +878,13 @@ type NameEndPos() =
             Assert.AreEqual<int64>((int64)18, hasSignature.SignEndPos.Column)
         | "base7" -> 
             let hasSignature = base1 :?> FplFunctionalTerm
-            Assert.AreEqual<int64>((int64)19, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)33, hasSignature.SignEndPos.Column)
         | "base8" -> 
             let hasSignature = base1 :?> FplFunctionalTerm
-            Assert.AreEqual<int64>((int64)20, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)32, hasSignature.SignEndPos.Column)
         | "base9" -> 
             let hasSignature = base1 :?> FplFunctionalTerm
-            Assert.AreEqual<int64>((int64)19, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)31, hasSignature.SignEndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 

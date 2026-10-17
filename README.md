@@ -6,7 +6,7 @@ It comes with a VS Code extension that enables you to make use of advantages of 
 
 <img src="https://github.com/bookofproofs/fpl.net/blob/main/Fpl/fpl-vscode-extension/images/FplExtension.gif?raw=true" width="550">
 
-## Main Features
+## Key Features
 
 * A custom **Formal Proving Language (FPL)** for writing and structuring mathematical proofs independently of natural language, with rich mathematical notation and a continuously simplified, readable syntax
 * A real **interpreter** with an execution engine capable of evaluating logical expressions and verifying proof correctness, not just parsing structure

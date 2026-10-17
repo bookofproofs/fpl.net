@@ -7,6 +7,7 @@ module Fpl1Parser.Grammar
 
 open FParsec
 open Fpl0Base.Primitives
+open Fpl0Base.Errors.Messages
 open Fpl1Parser.Basic
 open Fpl1Parser.Types
 open Fpl1Parser.Debug
@@ -90,12 +91,12 @@ let variableList = (sepBy1 variable comma) .>> IW
 /// <summary>
 /// Parser for the positional token 'self', producing <c>Ast.Self</c>.
 /// </summary>
-let keywordSelf = positions (skipString LiteralSelf) .>> IW |>> Ast.Self <!> "Self"
+let keywordSelf = positions (skipString LiteralSelf) |>> Ast.Self <!> "Self"
 
 /// <summary>
 /// Parser for the positional token 'parent', producing <c>Ast.Parent</c>.
 /// </summary>
-let keywordParent = positions (skipString LiteralParent) .>> IW |>> Ast.Parent <!> "Parent"
+let keywordParent = positions (skipString LiteralParent) |>> Ast.Parent <!> "Parent"
 
 /// <summary>
 /// Parser for the 'base' class reference keyword (used in constructor calls).
@@ -461,7 +462,7 @@ let namedVariableDeclaration = positions ((variableList .>> colon) .>>. variable
 
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
 
-paramTupleRef.Value <- (leftParen >>. namedVariableDeclarationList) .>> rightParen |>> Ast.ParamTuple <!> "ParamTuple"
+paramTupleRef.Value <- positions ((leftParen >>. namedVariableDeclarationList) .>> rightParen) |>> Ast.ParamTuple <!> "ParamTuple"
 
 /// <summary>
 /// Parser for a simple signature (PascalCase identifier) consumed with trailing whitespace.
@@ -479,14 +480,23 @@ let localizationString = positions (regex "[^\"\n]*") <?> "<language-specific st
 let keywordSymbol = pstring LiteralSymbol .>> IW
 
 /// <summary>
-/// Parser for a quoted object-symbol string.
+/// Parser for quoted object-symbol string. An invalid symbol is reported as a fatal error
+/// at its own position, so that <c>opt</c> and <c>attempt</c> cannot hide it.
 /// </summary>
-let objectSymbolString = pchar '"' >>. objectMathSymbols .>> pchar '"'
+let objectSymbolString =
+    pchar '"' 
+    >>. (objectMathSymbols <|> (lookAhead (noneOf "\"\r\n") >>= fun c -> failFatally (errFalseSymbol c LiteralValidObjectSymbols LiteralObjL)))
+    .>> pchar '"'
 
 /// <summary>
-/// Parser for quoted infix-symbol text.
+/// Parser for quoted infix-symbol string. An invalid symbol is reported as a fatal error
+/// at its own position, so that <c>opt</c> and <c>attempt</c> cannot hide it.
 /// </summary>
-let infixString = pchar '"' >>. infixMathSymbols .>> pchar '"'
+let infixString =
+    pchar '"' 
+    >>. (infixMathSymbols <|> (lookAhead (noneOf "\"\r\n") >>= fun c -> failFatally (errFalseSymbol c LiteralValidInfixSymbols LiteralInfix)))
+    .>> pchar '"'
+
 
 /// <summary>
 /// Parser for the 'infix' keyword followed by precedence information.
@@ -494,19 +504,27 @@ let infixString = pchar '"' >>. infixMathSymbols .>> pchar '"'
 let keywordInfix = pstring LiteralInfix >>. IW
 
 /// <summary>
-/// Parser for quoted postfix-symbol text.
+/// Parser for quoted postfix-symbol string. An invalid symbol is reported as a fatal error
+/// at its own position, so that <c>opt</c> and <c>attempt</c> cannot hide it.
 /// </summary>
-let postfixString = pchar '"' >>. postfixMathSymbols .>> pchar '"' 
+let postfixString =
+    pchar '"' 
+    >>. (postfixMathSymbols <|> (lookAhead (noneOf "\"\r\n") >>= fun c -> failFatally (errFalseSymbol c LiteralValidPostfixSymbols LiteralPostfix)))
+    .>> pchar '"'
 
 /// <summary>
 /// Parser for the 'postfix' keyword.
 /// </summary>
-let keywordPostfix = pstring LiteralPostFix >>. IW
+let keywordPostfix = pstring LiteralPostfix >>. IW
 
 /// <summary>
-/// Parser for quoted prefix-symbol text.
+/// Parser for quoted prefix-symbol string. An invalid symbol is reported as a fatal error
+/// at its own position, so that <c>opt</c> and <c>attempt</c> cannot hide it.
 /// </summary>
-let prefixString = pchar '"' >>. prefixMathSymbols .>> pchar '"' 
+let prefixString =
+    pchar '"' 
+    >>. (prefixMathSymbols <|> (lookAhead (noneOf "\"\r\n") >>= fun c -> failFatally (errFalseSymbol c LiteralValidPrefixSymbols LiteralPrefix)))
+    .>> pchar '"'
 
 /// <summary>
 /// Parser for the 'prefix' keyword.
@@ -539,9 +557,20 @@ let userDefinedPostfix = positions (keywordPostfix >>. postfixString) .>> IW |>>
 let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> Ast.PrefixDecl <!> "Prefix"
 
 /// <summary>
+/// Parser that recognizes the fixity keyword (prefix, infix or postfix) that starts a fixity declaration.
+/// </summary>
+/// <remarks>
+/// Only this lookahead is wrapped in <c>attempt</c>. Once a fixity keyword has matched, the
+/// subsequent parsers run without <c>attempt</c>, so their errors (such as an invalid symbol)
+/// are reported instead of being silently backtracked by <c>opt</c>.
+/// </remarks>
+let fixityKeywordLookAhead = lookAhead (choice [pstring LiteralPrefix; pstring LiteralInfix; pstring LiteralPostfix])
+
+/// <summary>
 /// Optional parser that accepts a user-defined symbol declaration if present.
 /// </summary>
-let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]))
+let userDefinedSymbol =
+    opt (attempt (IW >>. fixityKeywordLookAhead) >>. IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix])
 
 // -----------------------------------------------------
 (* Statements *)
@@ -674,7 +703,14 @@ statementListRef.Value <- many statement
 /// <summary>
 /// Parser for optional specification (bracketed coords or argument tuple).
 /// </summary>
-let optionalSpecification = opt (choice [bracketedCoords; argumentTuple])
+/// <remarks>
+/// Whitespace preceding the bracket/paren is consumed only when a specification actually
+/// follows; wrapping in <c>attempt</c> ensures that if neither '(' nor '[' is found, the
+/// optional leading whitespace is backtracked too, leaving it available for other parsers
+/// that may require it afterward (e.g. <c>isOp</c>'s significant whitespace before 'is', or
+/// a following dotted-predicate's leading '.').
+/// </remarks>
+let optionalSpecification = opt (attempt (IW >>. (choice [bracketedCoords; argumentTuple])))
 
 /// <summary>
 /// Parser that pairs an identifier with an optional specification producing <c>Ast.PredicateWithOptSpecification</c>.
@@ -699,7 +735,7 @@ let dollarDigitList = many1 dollarDigits
 /// <summary>
 /// Parser for referencing identifiers with dollar digits producing <c>Ast.ReferencingIdentifier</c>.
 /// </summary>
-let referencingIdentifier = positions (predicateIdentifier .>>. dollarDigitList) .>> IW |>> Ast.ReferencingIdentifier <!> "ReferencingIdentifier"
+let referencingIdentifier = positions (predicateIdentifier .>>. dollarDigitList) |>> Ast.ReferencingIdentifier <!> "ReferencingIdentifier"
 
 /// <summary>
 /// Parser to reference proofs or corollaries producing <c>Ast.ReferenceToProofOrCorollary</c>.
@@ -872,17 +908,33 @@ let existsTimeNQuantifier = choice [
 let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN <!> "ExistsN"
 
 /// <summary>
-/// Parser for the 'is' operator forms; returns pair (predicate, type) representation.
+/// Parser for the infix form of the 'is' operator (e.g. <c>x is Set</c>); returns pair (predicate, type).
 /// </summary>
-let isOp = choice [
-        attempt ((predicateWithQualification .>> SW .>> keywordIs) .>>. (SW >>. variableType))
-        (keywordIs >>. attemptSW >>. leftParen >>. predicate) .>>. (comma >>. variableType) .>> rightParen
+let isOpInfix = choice [
+        attempt ((referencingIdentifier .>> SW .>> keywordIs) .>>. (SW >>. variableType))
+        attempt ((choice [predicateWithQualification; primePredicate ] .>> SW .>> keywordIs) .>>. (SW >>. variableType))
     ]
 
 /// <summary>
-/// Parser that wraps isOp into positioned <c>Ast.IsOperator</c>.
+/// Parser for the Polish/prefix form of the 'is' operator (e.g. <c>is(x, Set)</c>); returns pair (predicate, type).
 /// </summary>
-let isOperator = positions isOp |>> Ast.IsOperator <!> "IsOperator"
+let isOpPolish = (keywordIs >>. attemptSW >>. leftParen >>. predicate) .>>. (comma >>. variableType) .>> rightParen
+
+/// <summary>
+/// Parser that wraps the infix 'is' form into positioned <c>Ast.IsOperatorInfix</c>.
+/// </summary>
+let isOperatorInfix = positions isOpInfix |>> Ast.IsOperatorInfix <!> "IsOperatorInfix"
+
+/// <summary>
+/// Parser that wraps the Polish 'is' form into positioned <c>Ast.IsOperatorPolish</c>.
+/// </summary>
+let isOperatorPolish = positions isOpPolish |>> Ast.IsOperatorPolish <!> "IsOperatorPolish"
+
+/// <summary>
+/// Parser for either syntactic flavor of the 'is' operator, preferring the infix attempt first
+/// (it is already wrapped in <c>attempt</c> internally) before falling back to the Polish form.
+/// </summary>
+let isOperator = choice [isOperatorInfix; isOperatorPolish] <!> "IsOperator"
 
 /// <summary>
 /// Parser for infix symbol tokens producing <c>Ast.InfixSymbolWithPos</c>.
@@ -1126,9 +1178,22 @@ let conjectureSignature = positions (keywordConjecture >>. pascalCaseId) .>> IW 
 let conjecture = positions (conjectureSignature .>>. theoremLikeBlock) |>> Ast.Conjecture <!> "Conjecture"
 
 /// <summary>
+/// Parser for a PascalCase signature identifier optionally extended with dollar-digit suffixes,
+/// used by proof and corollary signatures to build compound block identifiers (e.g. <c>Thm1$1</c>).
+/// </summary>
+/// <remarks>
+/// This is intentionally distinct from <see cref="referencingIdentifier"/>: the latter produces
+/// <c>Ast.ReferencingIdentifier</c>, which is evaluated as a *reference* to an existing proof or
+/// corollary (triggering symbol-table lookup and <c>RefersTo</c> resolution). The signature here
+/// instead *declares* a new block whose compound name is composed directly by the evaluator
+/// (<c>Ast.DollarDigits</c> appending to the currently pushed frame's <c>FplId</c>/<c>TypeId</c>).
+/// </remarks>
+let signatureIdWithDollarDigits = simpleSignature .>>. dollarDigitList
+
+/// <summary>
 /// The signature for theorems producing <c>Ast.CorollarySignature</c>.
 /// </summary>
-let corollarySignature = positions (keywordCorollary >>. simpleSignature .>>. dollarDigitList) .>> IW |>> Ast.CorollarySignature <!> "CorollarySignature"
+let corollarySignature = positions (keywordCorollary >>. signatureIdWithDollarDigits) .>> IW |>> Ast.CorollarySignature <!> "CorollarySignature"
 
 /// <summary>
 /// The full parser for theorems producing <c>Ast.Corollary</c>.
@@ -1380,7 +1445,7 @@ let proofBlock = leftBrace >>. proofContent .>> rightBrace |>> Ast.ProofBlock <!
 /// <summary>
 /// Parser for a proof signature (name + dollar digits) producing <c>Ast.ProofSignature</c>.
 /// </summary>
-let proofSignature = positions (keywordProof >>. simpleSignature .>>. dollarDigitList) .>> IW |>> Ast.ProofSignature <!> "ProofSignature"
+let proofSignature = positions (keywordProof >>. signatureIdWithDollarDigits) .>> IW |>> Ast.ProofSignature <!> "ProofSignature"
 
 /// <summary>
 /// Parser for a complete proof producing <c>Ast.Proof</c>.
@@ -1408,8 +1473,13 @@ let inheritedTypeList = sepBy1 inheritedType comma |>> Ast.InheritedTypeList <!>
 
 /// <summary>
 /// Parser for the signature of predicate definitions producing <c>Ast.PredicateSignature</c>.
+/// The recorded positions span the header, the parameter list, and the trailing symbolic clause.
 /// </summary>
-let predicateSignature = positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature <!> "PredicateSignature"
+let predicateSignature =
+    positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple .>>. userDefinedSymbol)
+    .>> IW
+    |>> (fun (pos, ((header, paramTuple), symbol)) -> ((pos, (header, paramTuple)), symbol))
+    |>> Ast.PredicateSignature <!> "PredicateSignature"
 
 /// <summary>
 /// Parser for full predicate definition producing <c>Ast.DefinitionPredicate</c>.
@@ -1424,8 +1494,13 @@ let functionalTermDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntr
 
 /// <summary>
 /// Parser for the signature of functional-term definitions producing <c>Ast.FunctionalTermSignature</c>.
+/// The recorded positions span the header, the parameter list, the mapping, and the trailing symbolic clause.
 /// </summary>
-let functionalTermSignature = positions (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature <!> "FunctionalTermSignature"
+let functionalTermSignature =
+    positions (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping) .>>. userDefinedSymbol)
+    .>> IW
+    |>> (fun (pos, (((header, paramTuple), mapping), symbol)) -> ((pos, ((header, paramTuple), mapping)), symbol))
+    |>> Ast.FunctionalTermSignature <!> "FunctionalTermSignature"
 
 /// <summary>
 /// Parser for full functional-term definition producing <c>Ast.DefinitionFunctionalTerm</c>.
@@ -1459,9 +1534,24 @@ let classDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntrinsic <|>
 let classSignature = positions (keywordClass >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature <!> "ClassSignature"
 
 /// <summary>
-/// Parser for the extended signature of class definition involving optional inheritance list and optional user-defined symbol for the defined class.
+/// Parser for the symbol declaration of a class (<c>symbol "..."</c>) without consuming trailing whitespace,
+/// producing <c>Ast.SymbolDecl</c>.
 /// </summary>
-let classSignatureExtended = classSignature .>>. opt (colon >>. inheritedTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)) .>> IW
+let classSymbolDecl = positions (keywordSymbol >>. objectSymbolString) |>> Ast.SymbolDecl <!> "Symbol"
+
+/// <summary>
+/// Parser for the extended signature of class definition involving optional inheritance list and optional user-defined symbol for the defined class.
+/// The recorded positions span exactly from the 'cl' keyword to the end of the last consumed token
+/// (the class name, the inheritance list, or the symbol string). Trailing whitespace is consumed outside the span.
+/// The result shape is unchanged, so consumers do not need to be refactored.
+/// </summary>
+let classSignatureExtended =
+    positions (
+        keywordClass >>. SW >>. pascalCaseId
+        .>>. opt (attempt (IW >>. colon >>. inheritedTypeList))
+        .>>. opt (attempt (IW >>. classSymbolDecl)))
+    .>> IW
+    |>> (fun (span, ((id, inheritance), symbol)) -> ((Ast.ClassSignature(span, id), inheritance), symbol))
 
 /// <summary>
 /// Parser for full class definition producing <c>Ast.DefinitionClass</c>.

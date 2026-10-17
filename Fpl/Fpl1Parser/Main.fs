@@ -13,6 +13,10 @@ open Fpl1Parser.Types
 open FParsec
 open Fpl1Parser.Grammar
 open Fpl1Parser.Formatting
+open Fpl1Parser.LSRelated.CommentLexer
+open Fpl1Parser.LSRelated.Trivia
+
+
 
 /// <summary>
 /// Regex used for the error recovery of FPL blocks. Matches FPL block keywords as whole words
@@ -49,15 +53,19 @@ let private getMatches (pattern: string) (input: string) =
 /// <param name="errorList">Mutable list to which discovered error AST nodes will be appended.</param>
 /// <param name="origLines">Original input split into lines (used to compute positions).</param>
 /// <param name="origLength">Original input length (used for position computations).</param>
+/// <param name="blockSpan">The source span of the enclosing building block that failed to parse.</param>
+/// <param name="verbatim">The verbatim FPL source text of the enclosing building block.</param>
 /// <returns>Unit. Diagnostics are appended to <paramref name="errorList"/>.</returns>
 /// <remarks>
 /// This function executes the standard parser and converts parser failures into error AST nodes
-/// using the project's diagnostic helpers.
+/// using the project's diagnostic helpers. <paramref name="blockSpan"/> and <paramref name="verbatim"/>
+/// are stamped identically onto every error node produced for this chunk, per the design that a
+/// chunk's building-block span/verbatim text is shared across its whole error chain.
 /// </remarks>
-let private collectErrorsIfAny input (errorList:List<Ast list>) origLines origLength =
+let private collectErrorsIfAny input (errorList:List<Ast list>) origLines origLength (blockSpan: Positions) (verbatim: string) =
     match run (stdParser .>> eof) (input) with
     | Failure(errorMsg, _, _) ->
-        errorList.Add (getErrorNodes errorMsg origLines origLength)
+        errorList.Add (getErrorNodes errorMsg origLines origLength blockSpan verbatim)
     | _ -> ()
 
 /// <summary>
@@ -65,6 +73,12 @@ let private collectErrorsIfAny input (errorList:List<Ast list>) origLines origLe
 /// syntactically invalid regions. Also collect syntactic error AST nodes extracted from failed chunks.
 /// </summary>
 /// <param name="input">Original FPL source with comments removed.</param>
+/// <param name="originalFplCode">
+/// The original FPL source exactly as provided by the caller, before comment removal. Used only to
+/// capture verbatim building-block text so error-containing blocks can be reprinted unchanged by the
+/// formatting service; relies on <see cref="removeFplComments"/> preserving character offsets 1:1
+/// between <paramref name="originalFplCode"/> and <paramref name="input"/>.
+/// </param>
 /// <param name="origLines">Original input split into lines (used for computing diagnostics positions).</param>
 /// <param name="origLength">Length of the original input string.</param>
 /// <returns>
@@ -75,15 +89,27 @@ let private collectErrorsIfAny input (errorList:List<Ast list>) origLines origLe
 /// <remarks>
 /// The function performs a two-stage attempt per chunk: a strict parse that must consume the whole
 /// chunk, and a lenient parse (without EOF) to preserve any successfully parsed prefix. Masking
-/// preserves layout so other diagnostics remain correctly positioned.
+/// preserves layout so other diagnostics remain correctly positioned. Each chunk corresponds to one
+/// building block delimited by <see cref="errRecoveryBlocks"/> keywords (or the whole input, when no
+/// such keyword is found at all); its character span and verbatim source (sliced from
+/// <paramref name="originalFplCode"/> at the same offsets) are computed once per chunk and passed to
+/// <c>collectErrorsIfAny</c> so every error node derived from that chunk shares the same span/verbatim.
 /// </remarks>
-let private getParseableInputAndErrorNodes input origLines origLength =
+let private getParseableInputAndErrorNodes input (originalFplCode: string) origLines origLength =
     let matches = getMatches errRecoveryBlocks input
     let parseAbleInput = StringBuilder()
     let maskedPrefix = StringBuilder()
     let errorList = List<Ast list>()
 
+    // Slices originalFplCode at the same [start, start+len) offsets used to slice `input`,
+    // relying on removeFplComments being length/offset-preserving.
+    let verbatimSlice (start: int) (len: int) =
+        let clampedStart = min start originalFplCode.Length
+        let clampedLen = max 0 (min len (originalFplCode.Length - clampedStart))
+        originalFplCode.Substring(clampedStart, clampedLen)
 
+    let blockSpanOf (start: int) (len: int) : Positions =
+        indexToPosition input start, indexToPosition input (start + len)
 
     // Helper to produce chunk, maskedChunk and the 'remainder' used for diagnostics
     let getChunkMaskedAndRemainder i =
@@ -112,7 +138,9 @@ let private getParseableInputAndErrorNodes input origLines origLength =
         
     if matches.Length > 0 && matches[0].Index>0 then
         let prefix1 = input.Substring(0,matches[0].Index)
-        collectErrorsIfAny prefix1 errorList origLines origLength
+        let prefixSpan = blockSpanOf 0 matches[0].Index
+        let prefixVerbatim = verbatimSlice 0 matches[0].Index
+        collectErrorsIfAny prefix1 errorList origLines origLength prefixSpan prefixVerbatim
         let maskedPrefix1 = masked prefix1
         maskedPrefix.Append(maskedPrefix1) |> ignore
 
@@ -124,6 +152,17 @@ let private getParseableInputAndErrorNodes input origLines origLength =
 
 
         let chunk, maskedChunk, remainder = getChunkMaskedAndRemainder i
+        // This chunk's own [start, start+len) span within `input` (and, by offset-preservation,
+        // within `originalFplCode`), used for both the building-block span and verbatim capture.
+        let chunkStart, chunkLen =
+            if matches.Length = 0 then 0, input.Length
+            else
+                let s = matches[i].Index
+                let l = if i < matches.Length - 1 then matches[i + 1].Index - s else input.Length - s
+                s, l
+        let chunkSpan = blockSpanOf chunkStart chunkLen
+        let chunkVerbatim = verbatimSlice chunkStart chunkLen
+
         let trimedInput = chunk.Trim()
         // Try a strict parse of the building block (must consume all of the trimmed chunk)
         match run (buildingBlock .>> eof) trimedInput with
@@ -150,6 +189,24 @@ let private getParseableInputAndErrorNodes input origLines origLength =
                 else
                     parseAbleInput.Append(maskedChunk) |> ignore
 
+                // The successfully-parsed prefix (trimedInput.[0 .. posSuccess)) is already committed
+                // above as its own, independent BuildingBlock AST node (it will be re-parsed from
+                // parseAbleInput by the caller). Stamping the *whole* chunk's span/verbatim on the
+                // error node derived from the leftover suffix would therefore duplicate that prefix
+                // text: it would be emitted once by the genuine BuildingBlock node and a second time
+                // verbatim inside the error node. Instead, compute a span/verbatim that covers only
+                // the unconsumed suffix of the chunk, so error reprinting never repeats already-parsed
+                // text.
+                // Note: use TrimStart's length delta (not Trim's), since chunk.Trim() also strips
+                // trailing whitespace, which would overshoot suffixStart by the trailing whitespace
+                // amount and truncate the start of the unconsumed suffix.
+                let leadingTrimLen = chunk.Length - (chunk.TrimStart()).Length
+                let suffixStart = chunkStart + leadingTrimLen + posSuccess
+                let suffixLen = chunkStart + chunkLen - suffixStart
+                let suffixSpan = blockSpanOf suffixStart suffixLen
+                let suffixVerbatim = verbatimSlice suffixStart suffixLen
+                collectErrorsIfAny remainder errorList origLines origLength suffixSpan suffixVerbatim
+
             | _ ->
                 // If there were no recovery matches at all, keep the whole chunk,
                 // otherwise mask it entirely
@@ -157,7 +214,7 @@ let private getParseableInputAndErrorNodes input origLines origLength =
                     parseAbleInput.Append(chunk) |> ignore
                 else
                     parseAbleInput.Append(maskedChunk) |> ignore
-            collectErrorsIfAny remainder errorList origLines origLength
+                collectErrorsIfAny remainder errorList origLines origLength chunkSpan chunkVerbatim
         maskedPrefix.Append(maskedChunk) |> ignore
 
     parseAbleInput.ToString(), errorList |> Seq.toList |> List.concat
@@ -201,7 +258,7 @@ let fplParser fplCode =
     | _ ->
         let origLines = input.Split(Environment.NewLine)
         let origLength = input.Length
-        let parseAbleInput, errorList = getParseableInputAndErrorNodes input origLines origLength
+        let parseAbleInput, errorList = getParseableInputAndErrorNodes input fplCode origLines origLength
         match run stdParser parseAbleInput with 
         | Success(ast, _, _) ->
             let resultWithSyntaxErrors = errorList @ getBuildingBlockAsts ast
@@ -211,13 +268,17 @@ let fplParser fplCode =
             |> List.sortBy (fun buildingBlockAst ->
                 match buildingBlockAst with
                 | Ast.BuildingBlock((pos1,_),_) -> sortingComparer (indexFormat pos1) ""
-                | Ast.ErrorSyntax((pos1,_),_) -> sortingComparer (indexFormat pos1) ""
-                | Ast.ErrorSyntaxBacktracking((pos1,_),_) -> sortingComparer (indexFormat pos1) ""
-                | Ast.ErrorSyntaxChain(((pos1,_),maxPos),(_, chain)) -> sortingComparer (indexFormat maxPos) chain
+                | Ast.ErrorSyntax((pos1,_),_,_,_) -> sortingComparer (indexFormat pos1) ""
+                | Ast.ErrorSyntaxBacktracking((pos1,_),_,_,_) -> sortingComparer (indexFormat pos1) ""
+                | Ast.ErrorSyntaxChain(((pos1,_),maxPos),_,(_, chain),_) -> sortingComparer (indexFormat maxPos) chain
                 | _ -> sortingComparer "ZZZ" ""
             ), false
         | Failure(errorMsg, _, _) ->
-            getErrorNodes errorMsg origLines origLength, false
+            // Whole document is unparseable even after chunked recovery: there is no
+            // keyword-delimited building-block span to speak of, so the "block" is the entire
+            // (comment-stripped) input, and its verbatim text is the entire original source.
+            let wholeDocSpan : Positions = indexToPosition input 0, indexToPosition input input.Length
+            getErrorNodes errorMsg origLines origLength wholeDocSpan fplCode, false
 
 /// <summary>
 /// Return parser choice suggestions for a given input position.
@@ -311,3 +372,4 @@ let testParser (parserType:string) (input:string) =
         let result = run (buildingBlock .>> eof) trimmed 
         sprintf "%O" result
     | _ -> $"testParser {parserType} not implemented"
+

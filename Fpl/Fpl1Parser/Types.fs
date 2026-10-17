@@ -83,7 +83,8 @@ type Ast =
     | Exists of Positions * (Ast list * Ast) 
     | Exists1 of unit
     | ExistsN of Positions * ((Ast * Ast list) * Ast)
-    | IsOperator of Positions * (Ast * Ast)
+    | IsOperatorInfix of Positions * (Ast * Ast)
+    | IsOperatorPolish of Positions * (Ast * Ast)
 
     // Expressions
     | PredicateWithQualification of (Ast * Ast)
@@ -98,7 +99,7 @@ type Ast =
     | ArgumentTuple of Positions * Ast list 
     | DottedPredicate of Positions * Ast 
     | QualificationList of Positions * Ast list
-    | ParamTuple of Ast list 
+    | ParamTuple of Positions * Ast list 
 
     // Commands 
     | Delegate of Ast * Ast
@@ -206,24 +207,31 @@ type Ast =
     | TranslationTerm of Positions * Ast list
     | Language of Positions * (Ast * Ast)
     | LanguageCode of Positions * string
-    | LocalizationString of Positions * string
+        | LocalizationString of Positions * string
 
     // TopLevel
     | AST of Positions * Ast
     | Namespace of Ast list
     | UsesClause of Positions * Ast
     | BuildingBlock of Positions * Ast
-    | ErrorSyntax of Positions * string 
-    | ErrorSyntaxBacktracking of Positions * string 
-    | ErrorSyntaxChain of (Positions * Position) * (string * string)
-
-
-
-    
-
-
-
-
-
-
-
+    /// <summary>
+    /// A syntax error (non-backtracking) found inside a building block. Carries, in order:
+    /// the error position(s), the enclosing building block's source span, the human-readable
+    /// error message, and the verbatim FPL source text of the enclosing building block (as found
+    /// in the original, un-stripped source) so the formatting service can reprint it unchanged.
+    /// </summary>
+    | ErrorSyntax of Positions * Positions * string * string
+    /// <summary>
+    /// A backtracking syntax error found inside a building block. See <see cref="ErrorSyntax"/>
+    /// for the meaning of each field.
+    /// </summary>
+    | ErrorSyntaxBacktracking of Positions * Positions * string * string
+    /// <summary>
+    /// One link of a chained (mixed syntax/backtracking) error found inside a building block.
+    /// Carries, in order: the error position(s), the chain's maximum error position (used only
+    /// for building-block sort order), the enclosing building block's source span, the error
+    /// message paired with its chain id, and the verbatim FPL source text of the enclosing
+    /// building block. Only the first link of a chain carries non-empty verbatim text; subsequent
+    /// links carry <c>""</c> so the formatting service prints the faulty block exactly once.
+    /// </summary>
+    | ErrorSyntaxChain of (Positions * Position) * Positions * (string * string) * string

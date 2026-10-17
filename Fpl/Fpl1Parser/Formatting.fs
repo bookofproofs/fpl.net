@@ -249,6 +249,39 @@ let private computeIndex (pos: Position) (lines: string array) inputLength =
         int64 inputLength
 
 /// <summary>
+/// Computes a 1-based FParsec <see cref="Position"/> (Index/Line/Column) for a given zero-based
+/// character <paramref name="index"/> within <paramref name="text"/>.
+/// </summary>
+/// <param name="text">The text <paramref name="index"/> is relative to.</param>
+/// <param name="index">The zero-based character offset to convert. Clamped to <c>text.Length</c>.</param>
+/// <returns>
+/// A <see cref="Position"/> whose <c>Index</c> is the clamped <paramref name="index"/> and whose
+/// <c>Line</c>/<c>Column</c> are computed by counting <see cref="Environment.NewLine"/> occurrences
+/// up to that offset, consistent with how <see cref="computeIndex"/> (its inverse) and
+/// <c>Fpl1Parser.Main</c>'s <c>origLines = input.Split(Environment.NewLine)</c> already interpret
+/// line boundaries elsewhere in this error-recovery pipeline.
+/// </returns>
+/// <remarks>
+/// This is the single shared implementation for turning a plain character offset (as produced by,
+/// e.g., keyword-based chunking over <c>string.Substring</c> indices) into the <see cref="Position"/>
+/// values expected by AST nodes; avoid re-implementing this conversion at additional call sites.
+/// </remarks>
+let indexToPosition (text: string) (index: int) : Position =
+    let clampedIndex = max 0 (min index text.Length)
+    let prefix = text.Substring(0, clampedIndex)
+    let lineBreaks =
+        Regex.Matches(prefix, Regex.Escape(Environment.NewLine))
+        |> Seq.cast<Match>
+        |> Seq.toList
+    let line = lineBreaks.Length + 1
+    let lastBreakEnd =
+        match lineBreaks with
+        | [] -> 0
+        | _ -> let m = List.last lineBreaks in m.Index + m.Length
+    let column = clampedIndex - lastBreakEnd + 1
+    Position("", int64 clampedIndex, int64 line, int64 column)
+
+/// <summary>
 /// Removes from an FParsec error message line substrings in the process of preparing a line of an FPL diagnostic message.
 /// </summary>
 let private removeFParsecErrorStringsFromFplDiagnostics (line:string) =
@@ -309,7 +342,21 @@ let masked (input:String) =
 /// Transforms an FParsec syntax error message (including the complex ones with parser backtracking)
 /// into a list of BuildingBlockError ast nodes that are aggregated by error position they occur.
 /// </summary>
-let getErrorNodes (errorMsg:string) origLines origLength = 
+/// <param name="errorMsg">The raw FParsec error message produced for the faulty chunk.</param>
+/// <param name="origLines">The original (comment-stripped) input split into lines, used to compute indices.</param>
+/// <param name="origLength">The length of the original (comment-stripped) input.</param>
+/// <param name="blockSpan">
+/// The source span (start/end <see cref="Position"/>) of the enclosing building block in which
+/// this error occurred, as determined by the caller's chunking logic.
+/// </param>
+/// <param name="verbatim">
+/// The verbatim FPL source text of the enclosing building block, captured from the original
+/// (un-stripped) source so the formatting service can reprint it unchanged. Every returned node
+/// shares this exact same <paramref name="blockSpan"/>; only the first node in a chain carries
+/// non-empty verbatim text (see <see cref="Ast.ErrorSyntaxChain"/>) to avoid the formatting
+/// service reprinting the same faulty block once per chained diagnostic.
+/// </param>
+let getErrorNodes (errorMsg:string) origLines origLength (blockSpan: Positions) (verbatim: string) = 
     let firstResult = 
         errorMsg
         |> insertLightning
@@ -333,10 +380,14 @@ let getErrorNodes (errorMsg:string) origLines origLength =
 
     firstResult
     |> List.mapi (fun i (pos, errMsg) ->
+        // Only the first link of a chain carries the verbatim block text; every other link
+        // (including the non-chained SY000/SY001 single-node cases, which are always "first")
+        // gets "" so the formatting service never reprints the same faulty block twice.
+        let verbatimForThisNode = if i = 0 then verbatim else ""
         if errMsg.StartsWith("SY000:") then
-            Ast.ErrorSyntax((pos, pos), collapseExpectingBlock errMsg)
+            Ast.ErrorSyntax((pos, pos), blockSpan, collapseExpectingBlock errMsg, verbatimForThisNode)
         elif errMsg.StartsWith("SY001:") then
-            Ast.ErrorSyntaxBacktracking((pos, pos), collapseExpectingBlock errMsg)
+            Ast.ErrorSyntaxBacktracking((pos, pos), blockSpan, collapseExpectingBlock errMsg, verbatimForThisNode)
         else
-            Ast.ErrorSyntaxChain(((pos, pos), maxPos), (collapseExpectingBlock errMsg, $"{chainId}.{(i+1).ToString()}"))
+            Ast.ErrorSyntaxChain(((pos, pos), maxPos), blockSpan, (collapseExpectingBlock errMsg, $"{chainId}.{(i+1).ToString()}"), verbatimForThisNode)
     )

@@ -92,20 +92,112 @@
         "configuration": {
             "title": "FPL",
             "properties": {
-                "fplExtension.entryPoint": {
+                "fplExtension.format.indentSize": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "The number of spaces used for a single indentation level."
+                },
+                "fplExtension.format.braceStyle": {
                     "type": "string",
-                    "default": "MyFplTheory.fpl",
-                    "description": "The fpl file containing the top entry point of your mathematical theory."
+                    "enum": [
+                        "auto",
+                        "oneLiner",
+                        "egyptian",
+                        "allman"
+                    ],
+                    "default": "allman",
+                    "description": "Layout style for braces ({ }). 'auto' behaves as 'oneLiner' if the construct fits within the max line length, or as 'egyptian' otherwise. 'oneLiner' places the opening brace, closing brace and content all on one line. 'egyptian' keeps the opening brace on the same line as the preceding construct. 'allman' places the opening brace on its own line."
                 },
-                "fplExtension.textEditor.setting1": {
-                    "type": "number",
-                    "default": 1,
-                    "description": "Test number."
+                "fplExtension.format.parenthesesStyle": {
+                    "type": "string",
+                    "enum": [
+                        "auto",
+                        "oneLiner",
+                        "egyptian",
+                        "allman"
+                    ],
+                    "default": "auto",
+                    "description": "Layout style for parentheses. 'auto' behaves as 'oneLiner' if the construct fits within the max line length, or as 'egyptian' otherwise. 'oneLiner' places the opening and closing parenthesis and content all on one line. 'egyptian' keeps the opening parenthesis on the same line as the preceding construct. 'allman' places the opening parenthesis on its own line."
                 },
-                "fplExtension.textEditor.setting2": {
+                "fplExtension.format.maxLineLength": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "The maximum line length used to decide width-driven ('auto') layout choices."
+                },
+                "fplExtension.format.parameterStyle": {
+                    "type": "string",
+                    "enum": [
+                        "auto",
+                        "oneLiner",
+                        "trailing",
+                        "leading"
+                    ],
+                    "default": "auto",
+                    "description": "Layout style for comma-separated parameter lists. 'auto' behaves as 'oneLiner' if the list fits within the max line length, or as 'leading' otherwise. 'oneLiner' puts all items on a single line. 'trailing' puts one item per line with the comma placed after each item. 'leading' puts one item per line with the comma placed before each item."
+                },
+                "fplExtension.format.argumentStyle": {
+                    "type": "string",
+                    "enum": [
+                        "auto",
+                        "oneLiner",
+                        "trailing",
+                        "leading"
+                    ],
+                    "default": "auto",
+                    "description": "Layout style for comma-separated argument lists. 'auto' behaves as 'oneLiner' if the list fits within the max line length, or as 'leading' otherwise. 'oneLiner' puts all items on a single line. 'trailing' puts one item per line with the comma placed after each item. 'leading' puts one item per line with the comma placed before each item."
+                },
+                "fplExtension.format.spacingInsideBrackets": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to insert a space just inside square brackets ([ ])."
+                },
+                "fplExtension.format.spacingInsideParentheses": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to insert a space just inside parentheses (( ))."
+                },
+                "fplExtension.format.spacingAfterCommas": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Test boolean."
+                    "description": "Whether to insert a space after a comma."
+                },
+                "fplExtension.format.spacingBeforeBrackets": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to insert a space before an opening square bracket ([)."
+                },
+                "fplExtension.format.spacingBeforeParentheses": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to insert a space before an opening parenthesis (()."
+                },
+                "fplExtension.format.keywordStyle": {
+                    "type": "string",
+                    "enum": [
+                        "long",
+                        "short"
+                    ],
+                    "default": "short",
+                    "description": "Whether a keyword with both a short and long spelling should use the short or long form."
+                },
+                "fplExtension.format.emptyLinesAfterBlocks": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "The number of empty lines to insert after a block."
+                },
+                "fplExtension.format.maxConsecutiveBlankLines": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "The maximum number of consecutive blank lines allowed between constructs."
+                },
+                "fplExtension.format.declSemicolon": {
+                    "type": "string",
+                    "enum": [
+                        "compact",
+                        "enclosing"
+                    ],
+                    "default": "compact",
+                    "description": "Layout style for a declaration block's trailing semicolon and its variable declarations. 'compact' puts declarations and the closing semicolon all on one line. 'enclosing' puts each declaration on its own (indented) line, with the semicolon on its own line."
                 }
             }
         },

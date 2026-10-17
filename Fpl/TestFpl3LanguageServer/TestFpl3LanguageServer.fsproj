@@ -51,6 +51,7 @@
         <Compile Include="ServiceAutoCompletion\TestVariable.fs" />
         <Compile Include="ServiceAutoCompletion\TestWhitespace.fs" />
         <Compile Include="ServiceAutoCompletion\TestWord.fs" />
+        <Compile Include="ServiceFormatting\TestSettingsTranslation.fs" />
     </ItemGroup>
 
     <ItemGroup>

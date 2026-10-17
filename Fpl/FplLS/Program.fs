@@ -1,4 +1,3 @@
-module FplLS.Program
 
 open System
 open System.Threading.Tasks
@@ -10,13 +9,17 @@ open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.SymbolTable.Storage.Heap
 open Fpl3LanguageServer.Buffers.BuffMgr
 open Fpl3LanguageServer.Buffers.DocSync
+open Fpl3LanguageServer.Buffers.SettingsStore
 open Fpl3LanguageServer.ServicesDiagnostics.Diags
 open Fpl3LanguageServer.ServiceAutoCompletion.Handler
+open Fpl3LanguageServer.ServiceFormatting.Handler
 
 let private configureServices (services: IServiceCollection) =
     services.AddSingleton<BufferManager>() |> ignore
     services.AddSingleton<DiagnosticsHandler>() |> ignore
     services.AddSingleton<CompletionHandler>() |> ignore
+    services.AddSingleton<SettingsStore>() |> ignore
+    services.AddSingleton<FormattingHandler>() |> ignore
 
 [<EntryPoint>]
 let main _ =
@@ -32,6 +35,7 @@ let main _ =
                         .WithServices(Action<IServiceCollection>(configureServices))
                         .WithHandler<TextDocumentSyncHandler>()
                         .WithHandler<CompletionHandler>()
+                        .WithHandler<FormattingHandler>()
                         .OnRequest<JToken, string>("getTreeData", (fun _request _cancellationToken ->
                             while heap.IsEvaluating do ()
                             Task.FromResult(heap.SymbolTable.ToJson())))
