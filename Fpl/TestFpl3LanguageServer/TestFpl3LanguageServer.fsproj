@@ -52,11 +52,13 @@
         <Compile Include="ServiceAutoCompletion\TestWhitespace.fs" />
         <Compile Include="ServiceAutoCompletion\TestWord.fs" />
         <Compile Include="ServiceFormatting\TestSettingsTranslation.fs" />
+        <Compile Include="ServiceGoToDefinition\TestGoToDefinition.fs" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Fpl2Interpreter\Fpl2Interpreter.fsproj" />
         <ProjectReference Include="..\Fpl3LanguageServer\Fpl3LanguageServer.fsproj" />
+        <ProjectReference Include="..\TestFpl2Interpreter\TestFpl2Interpreter.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

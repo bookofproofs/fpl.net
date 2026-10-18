@@ -71,6 +71,9 @@ type DefinitionHandler(languageServer: ILanguageServer) =
                 let column = int64 request.Position.Character + 1L
                 let nodePaths = collectNodePaths heap.SymbolTable.Root
 
+                logMsg languageServer "Definition" $"file={filePath} line={line} col={column} nodes={nodePaths.Count}"
+                logMsg languageServer "Definition" $"paths=%A{nodePaths.Values |> Seq.distinct |> Seq.truncate 3 |> List.ofSeq}"
+
                 // Innermost node containing the cursor: greatest start, then smallest end
                 let cursorNode =
                     nodePaths
