@@ -16,7 +16,6 @@ open Fpl1Parser.Types
 open Fpl1Parser.LSRelated.CommentLexer
 open Fpl1Parser.LSRelated.Trivia
 open Fpl1Parser.LSRelated.TriviaMap
-open Fpl1Parser.LSRelated.FormattingOptions
 open Fpl1Parser.LSRelated.PrettyPrint
 open Fpl3LanguageServer.ServiceFormatting.SettingsPull
 

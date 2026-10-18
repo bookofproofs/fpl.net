@@ -13,6 +13,7 @@ open Fpl3LanguageServer.Buffers.SettingsStore
 open Fpl3LanguageServer.ServicesDiagnostics.Diags
 open Fpl3LanguageServer.ServiceAutoCompletion.Handler
 open Fpl3LanguageServer.ServiceFormatting.Handler
+open Fpl3LanguageServer.ServiceGoToDefinition.Handler
 
 let private configureServices (services: IServiceCollection) =
     services.AddSingleton<BufferManager>() |> ignore
@@ -20,6 +21,7 @@ let private configureServices (services: IServiceCollection) =
     services.AddSingleton<CompletionHandler>() |> ignore
     services.AddSingleton<SettingsStore>() |> ignore
     services.AddSingleton<FormattingHandler>() |> ignore
+    services.AddSingleton<DefinitionHandler>() |> ignore
 
 [<EntryPoint>]
 let main _ =
@@ -36,6 +38,7 @@ let main _ =
                         .WithHandler<TextDocumentSyncHandler>()
                         .WithHandler<CompletionHandler>()
                         .WithHandler<FormattingHandler>()
+                        .WithHandler<DefinitionHandler>()
                         .OnRequest<JToken, string>("getTreeData", (fun _request _cancellationToken ->
                             while heap.IsEvaluating do ()
                             Task.FromResult(heap.SymbolTable.ToJson())))
