@@ -9,7 +9,7 @@ def pred Impl(f, g: pred) infix "⇒" 0
 
  
 // weakening rule
-axiom A1
+      axiom A1
 {
     dec f, g: pred;
     f ⇒ (g ⇒ f)
