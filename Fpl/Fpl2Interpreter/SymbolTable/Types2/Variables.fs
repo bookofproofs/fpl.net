@@ -460,11 +460,14 @@ type IHasDimensions =
 /// Mapping nodes may be used as both main types and index-allowed types. They support
 /// array-style mappings when designated via <c>SetIsArray</c>.
 /// </remarks>
-type FplMapping(positions: Positions, parent: FplGenericNode) =
+type FplMapping(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericNode(positions, Some parent)
     let _dimensionTypes = new List<FplGenericNode>()
     let mutable _dimensionTypesBeingSet = false
     let mutable _isArrayMapping = false
+
+    do
+        this.FilePath <- parent.FilePath
 
     /// <summary>
     /// Mark this mapping as an array mapping (affects Type rendering).

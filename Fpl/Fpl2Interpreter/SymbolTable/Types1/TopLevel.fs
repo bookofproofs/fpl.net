@@ -29,9 +29,9 @@ type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) a
     let _runOrder = runOrder
 
     do
-        this.FilePath <- Some filePath
         this.FplId <- theoryName
         this.TypeId <- theoryName
+        this.FilePath <- filePath
 
     /// <summary>
     /// Human-readable long name for the node (used by the interpreter).
@@ -48,7 +48,7 @@ type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) a
     /// </summary>
     /// <returns>A cloned <see cref="FplGenericNode"/> representing the same theory.</returns>
     override this.Clone () =
-        let ret = new FplTheory(this.FplId, this.Parent.Value, this.FilePath.Value, _runOrder)
+        let ret = new FplTheory(this.FplId, this.Parent.Value, this.FilePath, _runOrder)
         this.AssignParts(ret)
         ret
 
@@ -217,9 +217,7 @@ type SymbolTable() =
         let mutable currentPath = ""
 
         let rec createJson (root: FplGenericNode) (sb: StringBuilder) level isLast preventInfinite =
-            match root.FilePath with
-            | Some path -> currentPath <- path
-            | _ -> ()
+            currentPath <- root.FilePath
 
             let indent, indentMinusOne =
                 if DebugModeInterpreter then

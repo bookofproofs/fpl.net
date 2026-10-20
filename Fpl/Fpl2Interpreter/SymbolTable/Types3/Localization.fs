@@ -32,10 +32,13 @@ open Fpl2Interpreter.SymbolTable.Storage.Util
 /// - At runtime the active language is read from <c>heap.Helper.CurrentLanguage</c>.
 /// - If the active language has no translation defined, an <c>ST004</c> diagnostic is emitted.
 /// </remarks>
-type FplLocalization(positions: Positions, parent: FplGenericNode, runOrder) =
+type FplLocalization(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericNode(positions, Some parent)
     let _runOrder = runOrder
     let mutable _currentLanguage = ""
+
+    do
+        this.FilePath <- parent.FilePath
 
     override this.Name = LiteralLocL
     override this.ShortName = LiteralLoc
@@ -128,8 +131,11 @@ type FplLocalization(positions: Positions, parent: FplGenericNode, runOrder) =
 /// <remarks>
 /// The node's representation is provided by its <c>FplId</c> and it does not execute at runtime.
 /// </remarks>
-type FplTranslation(positions: Positions, parent: FplGenericNode) =
+type FplTranslation(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericNode(positions, Some parent)
+
+    do
+        this.FilePath <- parent.FilePath
 
     override this.Name = PrimTranslationL
     override this.ShortName = PrimTranslation
@@ -171,7 +177,9 @@ type FplTranslation(positions: Positions, parent: FplGenericNode) =
     /// Attach the translation expression to its parent's argument list.
     /// </summary>
     /// <param name="_">Unused parameter (conventional signature).</param>
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
+    override this.EmbedInSymbolTable _ =
+        addExpressionToParentArgList this
+
 
     override this.RunOrder = None
 
@@ -186,8 +194,11 @@ type FplTranslation(positions: Positions, parent: FplGenericNode) =
 /// separated by spaces. When embedded, it registers itself in the parent scope and emits
 /// ID014 on duplicate language identifiers.
 /// </remarks>
-type FplLanguage(positions: Positions, parent: FplGenericNode) =
+type FplLanguage(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericNode(positions, Some parent)
+
+    do
+        this.FilePath <- parent.FilePath
 
     override this.Name = PrimLanguageL
     override this.ShortName = PrimLanguage

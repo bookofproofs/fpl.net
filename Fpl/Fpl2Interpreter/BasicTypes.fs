@@ -2,11 +2,11 @@
 /// This module contains all abstract types used by nodes that are listed in the symbol table of the FPL interpreter.
 /// </summary>
 module Fpl2Interpreter.BasicTypes
+open FParsec
 open System.Collections.Generic
 open Fpl0Base.Primitives
 open Fpl1Parser.Types
 
-open FParsec
 
 /// <summary>
 /// Discriminated union representing the fixity of an operator or literal in FPL.
@@ -137,7 +137,7 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
     let mutable _arity = 0
     let mutable _fplId = ""
     let mutable _typeId = ""
-    let mutable (_filePath: string option) = None
+    let mutable _filePath = ""
     let mutable _isIntrinsic = false
     let mutable (_errorOccurred: string option) = None
     let mutable _refersTo:FplGenericNode option = None
@@ -233,6 +233,7 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
     default this.AssignParts (ret:FplGenericNode) =
         ret.FplId <- this.FplId
         ret.TypeId <- this.TypeId
+        ret.FilePath <- this.FilePath
         ret.Arity <- this.Arity
         ret.AuxiliaryInfo <- this.AuxiliaryInfo
         ret.IsIntrinsic <- this.IsIntrinsic
@@ -476,8 +477,12 @@ and ScopeSearchResult =
 /// Abstract class for nodes that represent values.
 /// </summary>
 [<AbstractClass>]
-type FplGenericIsValue(positions: Positions, parent: FplGenericNode) =
+type FplGenericIsValue(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericNode(positions, Some parent)
+
+    do 
+        this.FilePath <- parent.FilePath
+
 
     /// <summary>Override providing a non-value representation.</summary>
     override this.Represent() = // done
@@ -490,8 +495,11 @@ type FplGenericIsValue(positions: Positions, parent: FplGenericNode) =
 /// Abstract class for nodes that represent actions.
 /// </summary>
 [<AbstractClass>]
-type FplGenericIsAction(positions: Positions, parent: FplGenericNode) =
+type FplGenericIsAction(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericNode(positions, Some parent)
+
+    do 
+        this.FilePath <- parent.FilePath
 
     override this.Represent() = // done
         PrimNone
@@ -505,9 +513,10 @@ type FplGenericIsAction(positions: Positions, parent: FplGenericNode) =
 /// <param name="parent">Parent node in the symbol table.</param>
 type FplUndetermined(typeId:string, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericIsValue(positions, parent)
-    do 
+    do
         this.FplId <- LiteralUndet
         this.TypeId <- typeId
+        this.FilePath <- parent.FilePath
 
     /// <summary>Formal name returned by this node.</summary>
     override this.Name = LiteralUndetL
@@ -550,9 +559,12 @@ type FplUndetermined(typeId:string, positions: Positions, parent: FplGenericNode
 /// Abstract base class for nodes that may hold a value.
 /// </summary>
 [<AbstractClass>]
-type FplGenericHasValue(positions: Positions, parent: FplGenericNode) =
+type FplGenericHasValue(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericNode(positions, Some parent)
     let mutable (_value:FplGenericNode option) = None
+
+    do
+        this.FilePath <- parent.FilePath
 
     /// <summary>Optional value currently held by the node.</summary>
     member this.Value

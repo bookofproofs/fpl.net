@@ -1,6 +1,5 @@
 module Fpl3LanguageServer.ServiceGoToDefinition.Handler
 open System
-open System.Collections.Generic
 open System.IO
 open System.Threading
 open System.Threading.Tasks
@@ -15,27 +14,6 @@ open Fpl2Interpreter.SymbolTable.Storage.Heap
 open Fpl3LanguageServer.Buffers.Logging
 
 /// <summary>
-/// Walks the whole symbol table once and maps every reachable node to the file path it belongs to.
-/// The path is inherited from the nearest ancestor that defines one (theories define it).
-/// </summary>
-/// <param name="root">Root node of the symbol table.</param>
-/// <returns>Dictionary from node (by reference) to file path.</returns>
-let private collectNodePaths (root: FplGenericNode) : Dictionary<FplGenericNode, string> =
-    let paths = Dictionary<FplGenericNode, string>(HashIdentity.Reference)
-
-    let rec walk (node: FplGenericNode) (inheritedPath: string) =
-        if not (paths.ContainsKey node) then
-            let path = defaultArg node.FilePath inheritedPath
-            paths.[node] <- path
-            for child in node.Scope.Values do
-                walk child path
-            for child in node.ArgList do
-                walk child path
-
-    walk root ""
-    paths
-
-/// <summary>
 /// Normalizes a file path so that paths from the editor (backslashes) and from the symbol table
 /// (forward slashes) can be compared. Empty paths stay empty.
 /// </summary>
@@ -46,18 +24,6 @@ let private normalizePath (path: string) =
         ""
     else
         Path.GetFullPath(path).Replace('\\', '/').TrimEnd('/')
-
-/// <summary>
-/// Checks whether a 1-based (line, column) position lies within the node's start and end positions.
-/// </summary>
-/// <param name="node">Node to test.</param>
-/// <param name="line">1-based line (FParsec int64).</param>
-/// <param name="column">1-based column (FParsec int64).</param>
-/// <returns>True when the position lies inside the node.</returns>
-let private containsCursor (node: FplGenericNode) (line: int64) (column: int64) =
-    let startPos = node.StartPos
-    let endPos = node.EndPos
-    (startPos.Line, startPos.Column) <= (line, column) && (line, column) <= (endPos.Line, endPos.Column)
 
 /// <summary>
 /// Handles textDocument/definition requests by resolving the declaration of the symbol under the cursor.
@@ -85,18 +51,15 @@ type DefinitionHandler(languageServer: ILanguageServer) =
                 // LSP positions are 0-based, FParsec positions are 1-based (int64)
                 let line = int64 request.Position.Line + 1L
                 let column = int64 request.Position.Character + 1L
-                let nodePaths = collectNodePaths heap.SymbolTable.Root
 
                 // Try to find the innermost symbol table node containing the cursor: greatest start, then smallest end
-                let cursorNode =
-                    nodePaths
-                    |> Seq.filter (fun kv ->
-                        containsCursor kv.Key line column
-                        && String.Equals(normalizePath kv.Value, cursorPath, StringComparison.OrdinalIgnoreCase))
-                    |> Seq.map (fun kv -> kv.Key)
-                    |> Seq.sortBy (fun n ->
-                        (n.StartPos.Line, n.StartPos.Column, -n.EndPos.Line, -n.EndPos.Column))
-                    |> Seq.tryLast
+                let cursorNode = heap.Eval.CursorNode cursorPath line column
+
+                if cursorNode.IsSome then 
+                    logMsg languageServer $"{cursorNode.Value.Name} {cursorNode.Value.Type SignatureType.Name}" "cursorNode" 
+                else
+                    logMsg languageServer "None" "cursorNode" 
+                logMsg languageServer $"{cursorPath} {line} {column}" "Coords" 
 
                 // Try to find the declaration / definition of the innermost symbol table node
                 let resolvedNodeOpt = 
@@ -107,28 +70,23 @@ type DefinitionHandler(languageServer: ILanguageServer) =
                 // Try to return the definition location to the F12 "go-to-definition" service
                 match resolvedNodeOpt with
                 | Some declaration ->
-                    match nodePaths.TryGetValue declaration with
-                    | true, declPath when declPath <> "" ->
-                        // FParsec int64 -> OmniSharp int. Node columns are not always 1-based
-                        // (block nodes such as "axiom" report column 0), so clamp at zero.
-                        let toLspLine (line: int64) = max 0 (int line - 1)
-                        let toLspCharacter (column: int64) = max 0 (int column)
-                        let start =
-                            Position(
-                                Line = toLspLine declaration.StartPos.Line,
-                                Character = toLspCharacter declaration.StartPos.Column)
-                        let finish =
-                            Position(
-                                Line = toLspLine declaration.EndPos.Line,
-                                Character = toLspCharacter declaration.EndPos.Column)
-                        let location =
-                            Location(
-                                Uri = DocumentUri.FromFileSystemPath(declPath),
-                                Range = Range(Start = start, End = finish))
-                        return LocationOrLocationLinks([| LocationOrLocationLink(location) |])
-                    | _ ->
-                        logMsg languageServer "F12" "no file of definition node found"
-                        return LocationOrLocationLinks()
+                    // FParsec int64 -> OmniSharp int. Node columns are not always 1-based
+                    // (block nodes such as "axiom" report column 0), so clamp at zero.
+                    let toLspLine (line: int64) = max 0 (int line - 1)
+                    let toLspCharacter (column: int64) = max 0 (int column)
+                    let start =
+                        Position(
+                            Line = toLspLine declaration.StartPos.Line,
+                            Character = toLspCharacter declaration.StartPos.Column)
+                    let finish =
+                        Position(
+                            Line = toLspLine declaration.EndPos.Line,
+                            Character = toLspCharacter declaration.EndPos.Column)
+                    let location =
+                        Location(
+                            Uri = DocumentUri.FromFileSystemPath(declaration.FilePath),
+                            Range = Range(Start = start, End = finish))
+                    return LocationOrLocationLinks([| LocationOrLocationLink(location) |])
                 | None ->
                     logMsg languageServer "F12" "no definition found"
                     return LocationOrLocationLinks()

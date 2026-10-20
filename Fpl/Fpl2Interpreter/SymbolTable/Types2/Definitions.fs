@@ -341,8 +341,11 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
 /// </summary>
 /// <param name="positions">Source positions for diagnostics.</param>
 /// <param name="parent">Parent node in the symbol table.</param>
-type FplBase(positions: Positions, parent: FplGenericNode) =
+type FplBase(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericNode(positions, Some parent)
+
+    do
+        this.FilePath <- parent.FilePath
 
     override this.Name = LiteralBase
     override this.ShortName = LiteralBase
