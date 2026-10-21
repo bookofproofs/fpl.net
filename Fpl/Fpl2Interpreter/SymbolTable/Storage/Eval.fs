@@ -14,7 +14,7 @@ open Fpl2Interpreter.BasicTypes
 /// </summary>
 type EvalStack() =
     let _valueStack = Stack<FplGenericNode>()
-    let _flattenedNodes = List<FplGenericNode>()
+    let _flattenedNodes = HashSet<FplGenericNode>(HashIdentity.Reference)
 
     /// <summary>
     /// Underlying low-level .NET stack containing candidate <see cref="FplGenericNode"/> values.
@@ -32,7 +32,9 @@ type EvalStack() =
     /// </summary>
     /// <returns>The popped <see cref="FplGenericNode"/>.</returns>
     member this.Pop() =
-        _valueStack.Pop()
+        let fv = _valueStack.Pop()
+        this.AddNode fv |> ignore
+        fv
 
     /// <summary>
     /// Pops an <see cref="FplGenericNode"/> and propagates its name and signature to the next node on the stack.
@@ -45,7 +47,7 @@ type EvalStack() =
         if _valueStack.Count > 0 then
             let next = _valueStack.Peek()
             fv.EmbedInSymbolTable (Some next) 
-        this.AddNode fv
+        this.AddNode fv |> ignore
 
     /// <summary>
     /// Pushes a new symbol table node onto the evaluation stack.
