@@ -3,6 +3,7 @@
 /// between the AST of the FPL parser and the symbol table of the FPL interpreter.
 /// </summary>
 module Fpl2Interpreter.SymbolTable.Storage.Eval
+open System
 open System.Collections.Generic
 open Fpl0Base.Primitives
 open Fpl2Interpreter.BasicTypes
@@ -13,6 +14,7 @@ open Fpl2Interpreter.BasicTypes
 /// </summary>
 type EvalStack() =
     let _valueStack = Stack<FplGenericNode>()
+    let _flattenedNodes = HashSet<FplGenericNode>(HashIdentity.Reference)
 
     /// <summary>
     /// Underlying low-level .NET stack containing candidate <see cref="FplGenericNode"/> values.
@@ -20,10 +22,19 @@ type EvalStack() =
     member this.EvalStack = _valueStack
 
     /// <summary>
+    /// Adds the specified symbol table node and returns true, if it was added, otherwise false if it was already present.
+    /// </summary>
+    member private this.AddNode (node:FplGenericNode) =
+        _flattenedNodes.Add node
+
+    /// <summary>
     /// Pops an <see cref="FplGenericNode"/> from the stack without propagating its name and signature to the next node.
     /// </summary>
     /// <returns>The popped <see cref="FplGenericNode"/>.</returns>
-    member this.Pop() = _valueStack.Pop()
+    member this.Pop() =
+        let fv = _valueStack.Pop()
+        this.AddNode fv |> ignore
+        fv
 
     /// <summary>
     /// Pops an <see cref="FplGenericNode"/> and propagates its name and signature to the next node on the stack.
@@ -36,6 +47,7 @@ type EvalStack() =
         if _valueStack.Count > 0 then
             let next = _valueStack.Peek()
             fv.EmbedInSymbolTable (Some next) 
+        this.AddNode fv |> ignore
 
     /// <summary>
     /// Pushes a new symbol table node onto the evaluation stack.
@@ -52,7 +64,9 @@ type EvalStack() =
     /// <summary>
     /// Clears the entire evaluation stack.
     /// </summary>
-    member this.Clear() = _valueStack.Clear()
+    member this.Clear() =
+        _valueStack.Clear()
+        _flattenedNodes.Clear()
 
     /// <summary>
     /// Finds the nearest preceding reference node on the stack.
@@ -63,3 +77,27 @@ type EvalStack() =
     member this.GetPrecedingReference() =
         _valueStack
         |> Seq.tryFind (fun fv -> fv.Name = PrimRefL)
+
+    /// <summary>
+    /// Checks whether a 1-based (line, column) position lies within the node's start and end positions.
+    /// </summary>
+    /// <param name="node">Node to test.</param>
+    /// <param name="line">1-based line (FParsec int64).</param>
+    /// <param name="column">1-based column (FParsec int64).</param>
+    /// <returns>True when the position lies inside the node.</returns>
+    member private this.ContainsCursor (node: FplGenericNode) (line: int64) (column: int64) =
+        let startPos = node.StartPos
+        let endPos = node.EndPos
+        (startPos.Line, startPos.Column) <= (line, column) && (line, column) <= (endPos.Line, endPos.Column)
+
+    // Try to find the innermost symbol table node containing the cursor: greatest start, then smallest end
+    member this.CursorNode (path:string) (line:int64) (column:int64) =
+        _flattenedNodes
+        |> Seq.filter (fun node ->
+            this.ContainsCursor node line column
+            && String.Equals(node.FilePath, path, StringComparison.OrdinalIgnoreCase))
+        |> Seq.sortBy (fun n ->
+            (n.StartPos.Line, n.StartPos.Column, -n.EndPos.Line, -n.EndPos.Column))
+        |> Seq.tryLast
+
+

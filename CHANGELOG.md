@@ -23,6 +23,9 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[parser]** `Ast.ErrorSyntax`/`ErrorSyntaxBacktracking`/`ErrorSyntaxChain` now additionally carry the enclosing building block's source span and its verbatim FPL source text (captured from the original, un-stripped source), enabling the formatting service to reprint syntactically invalid building blocks unchanged instead of emitting diagnostic messages as FPL code
 - **[language-server]** Add a and hook-up an initial formatting service for FPL 
 - **[language-server]** Wire user-configured `FormattingOptions` through to the formatting service: new `SettingsStore` singleton, `SettingsTranslation` module translating client JSON payloads into `FormattingOptions`, and a `SettingsPull` module issuing a live `workspace/configuration` request on every `textDocument/formatting` request, replacing the previously hardcoded `fplFormatDefaults`
+- **[language-server]** Add an alpha "go-to-definition" service ... (new)
+- **[interpreter]** Add `resolveDeclaration` ... (new)
+
 ### Changed
 - **[parser]** consolidate unit test namespaces and convert single-case test methods to datarow-driven test methods (if not already the case)
 - **[parser]** `Ast.PredicateSignature` and `Ast.FunctionalTermSignature` now record positions that also span their trailing `infix`, `prefix`, `postfix`, or `symbol` clause, so the formatting service can attach comments to the correct node

@@ -107,21 +107,9 @@ type ValidStmtStore() =
             let obj = Dictionary<string,string>()
             obj.Add("statementExpression", getExpr stmt.ValidityReason)
             obj.Add("reason", getReason stmt.ValidityReason)
-            let ultimateNodeOpt = stmt.Node.UltimateBlockNode
-            match ultimateNodeOpt with
-            | Some ultimateNode when ultimateNode.Parent.IsSome ->
-                match ultimateNode.Parent with
-                | Some theory ->
-                    obj.Add("blockName", ultimateNode.Type SignatureType.Mixed)
-                    obj.Add("theoryName", theory.FplId)
-                    match theory.FilePath with
-                    | Some filePath ->
-                        obj.Add("FilePath", filePath)
-                        obj.Add("Line", $"{stmt.Node.StartPos.Line}")
-                        obj.Add("Column", $"{stmt.Node.StartPos.Column}")
-                    | _ -> ()
-                | _ -> ()
-            | _ -> ()
+            obj.Add("FilePath", stmt.Node.FilePath)
+            obj.Add("Line", $"{stmt.Node.StartPos.Line}")
+            obj.Add("Column", $"{stmt.Node.StartPos.Column}")
             all.Add(obj)
 
         JsonSerializer.Serialize(all)

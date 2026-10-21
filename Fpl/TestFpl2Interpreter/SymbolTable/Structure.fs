@@ -33,7 +33,11 @@ open TestFpl2Interpreter.Helpers.Common
 [<TestClass>]
 type Structure() =
     let positions = (Position("",0,0,0), Position("",0,0,0))
-    let parent = new FplRoot()
+    let filePath = "file://Test/File/Path"
+    let parent =
+        let ret = new FplRoot()
+        ret.FilePath <- filePath
+        ret
 
     let rec findNamedItem firstTypeNode identifier (infiniteLoop:HashSet<obj>) (root:FplGenericNode) = 
         if infiniteLoop.Contains(root) then
@@ -99,301 +103,301 @@ type Structure() =
         | "FplArgInferenceAssume" ->
             let x = new FplArgInferenceAssume(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplArgInferenceDerived" ->
             let x = new FplArgInferenceDerived(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplArgInferenceRevoke" ->
             let proof = new FplProof(positions, parent, 0)
             let arg = new FplArgument(positions, proof, 0)
             let x = new FplArgInferenceRevoke(positions, arg)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplArgInferenceTrivial" ->
             let x = new FplArgInferenceTrivial(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplArgument" ->
             let x = new FplArgument(positions, parent, 0)
             mockSymbolArgument x 
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplAssertion" ->
             let x = new FplAssertion(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplAssignment" ->
             let x = new FplAssignment(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplAxiom" ->
             let x = new FplAxiom(positions, parent, 0)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplBase" ->
             let x = new FplBase(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplBaseConstructorCall" ->
             let x = new FplBaseConstructorCall(positions, parent)
             x.RefersTo <- Some (new FplDefaultConstructor("A", positions, parent)) // mock a base constructor reference
             x.Run()
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplCases" ->
             let x = new FplCases(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplCaseElse" ->
             let x = new FplCaseElse(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplCaseSingle" ->
             let x = new FplCaseSingle(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplClass" ->
             let x = new FplClass(positions, parent, 0)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplConjecture" ->
             let x = new FplConjecture(positions, parent, 0)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplConjunction" ->
             let x = new FplConjunction(positions, parent)
             mockSymbolTableEvaluationPredicate x 2
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplConstructor" ->
             parent.FplId <- "obj"
             let x = new FplConstructor(positions, parent)
             x.Value <- Some (new FplInstance(x.TypeId, positions, x))
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplCorollary" ->
             let x = new FplCorollary(positions, parent, 0)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplDecrement" ->
             let x = new FplDecrement(PrimDelegateDecrementL, positions, parent)
             let arg = new FplExtensionObj(positions, parent)
             arg.FplId <- "42"
             x.ArgList.Add arg
             x.Run()
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplDefaultConstructor" ->
             let x = new FplDefaultConstructor(LiteralObj, positions, parent)
             x.Value <- Some (new FplInstance(x.TypeId, positions, x))
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplDisjunction" ->
             let x = new FplDisjunction(positions, parent)
             mockSymbolTableEvaluationPredicate x 2
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplEquality" ->
             let x = new FplEquality(PrimDelegateEqualL, positions, parent)
             mockSymbolTableEvaluationPredicate x 2
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplEquivalence" ->
             let x = new FplEquivalence(positions, parent)
             mockSymbolTableEvaluationPredicate x 2
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplExclusiveOr" ->
             let x = new FplExclusiveOr(positions, parent)
             mockSymbolTableEvaluationPredicate x 2
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplExtension" ->
             let x = new FplExtension(positions, parent, 0)
             x.Run()
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplExtensionObj" ->
             let x = new FplExtensionObj(positions, parent)
             x.FplId <- "0"
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplForInStmt" ->
             let x = new FplForInStmt(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplForInStmtDomain" ->
             let x = new FplForInStmtDomain(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplForInStmtEntity" ->
             let x = new FplForInStmtEntity(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplFunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent, 0)
             let mapping = new FplMapping(positions, x)
             mapping.TypeId <- LiteralObj
             mapping.FplId <- LiteralObj
             x.ArgList.Add mapping
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplImplication" ->
             let x = new FplImplication(positions, parent)
             mockSymbolTableEvaluationPredicate x 2
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplInstance" ->
             let x = new FplInstance(LiteralObj, positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplIntrinsicInd" ->
             let x = new FplIntrinsicInd(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplIntrinsicFalse" ->
             let x = new FplIntrinsicFalse(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplIntrinsicTpl" ->
             let x = new FplIntrinsicTpl(LiteralTpl, positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplIntrinsicTrue" ->
             let x = new FplIntrinsicTrue(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplIntrinsicUndef" ->
             let x = new FplIntrinsicUndef(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplIsOperator" ->
             let x = new FplIsOperator(positions, parent)
             mockSymbolTableEvaluationPredicate x 2
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplJustificationItemByAx" ->
             let x = new FplJustificationItemByAx(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplJustificationItemByConj" ->
             let x = new FplJustificationItemByConj(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplJustificationItemByCor" ->
             let x = new FplJustificationItemByCor(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplJustificationItemByDef" ->
             let x = new FplJustificationItemByDef(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplJustificationItemByDefVar" ->
             let x = new FplJustificationItemByDefVar(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplJustificationItemByInf" ->
             let x = new FplJustificationItemByInf(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplJustificationItemByProofArgument" ->
             let x = new FplJustificationItemByProofArgument(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplJustificationItemByRefArgument" ->
             let x = new FplJustificationItemByRefArgument(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplJustificationItemByTheoremLikeStmt" ->
             let x = new FplJustificationItemByTheoremLikeStmt(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplLemma" ->
             let x = new FplLemma(positions, parent, 0)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplLocalization" ->
             let x = new FplLocalization(positions, parent, 0)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplMandatoryFunctionalTerm" ->
             let x = new FplMandatoryFunctionalTerm(positions, parent)
             let mapping = new FplMapping(positions, x)
             mapping.TypeId <- LiteralObj
             mapping.FplId <- LiteralObj
             x.ArgList.Add mapping
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplMandatoryPredicate" ->
             let x = new FplMandatoryPredicate(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplMapCaseElse" ->
             let x = new FplMapCaseElse(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplMapCaseSingle" ->
             let x = new FplMapCaseSingle(positions, parent)
             mockSymbolTableEvaluationPredicate x 2
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplMapCases" ->
             let x = new FplMapCases(positions, parent)
             mockSymbolTableEvaluationPredicate x 2
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplMapping" ->
             let x = new FplMapping(positions, parent)
             x.TypeId <- LiteralObj
             x.FplId <- LiteralObj
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplNegation" ->
             let x = new FplNegation(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplParent" ->
             let x = new FplParent(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
             x.Value <- Some (new FplIntrinsicTrue(positions, x))
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplPredicateList" ->
             let x = new FplPredicateList(positions, parent, 0)
             x.ArgList.Add (new FplIntrinsicTrue(positions, parent))
             x.ArgList.Add (new FplIntrinsicTrue(positions, parent))
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
             x.Run()
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplQuantifierAll" ->
             let x = new FplQuantifierAll(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplQuantifierExists" ->
             let x = new FplQuantifierExists(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplQuantifierExistsN" ->
             let x = new FplQuantifierExistsN(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplReference" ->
             let x = new FplReference(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplReturn" ->
             let x = new FplReturn(positions, parent)
             let arg = new FplIntrinsicInd(positions, parent)
             arg.FplId <- "$42"
             x.ArgList.Add arg
             x.Run()
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplRoot" ->
             let x = new FplRoot()
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplRuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent, 0)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplSelf" ->
             let x = new FplSelf(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplTheorem" ->
             let x = new FplTheorem(positions, parent, 0)
             mockSymbolTableEvaluationPredicate x 1
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplTheory" ->
-            let x = new FplTheory("", parent, "", 0)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            let x = new FplTheory("", parent, filePath, 0)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplTranslation" ->
             let x = new FplTranslation(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplUndetermined" ->
             let x = new FplUndetermined(LiteralObj,positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplVariable" -> 
             let x = new FplVariable("x", positions, parent) 
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | "FplVariableArray" ->
             let x = new FplVariableArray("x", positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed; x.FilePath]
         | _ -> 
             failwith $"Unknown node type {nodeType}"
 
@@ -418,8 +422,6 @@ type Structure() =
                 failwith($"Node type {nodeType} has unexpectedly no parent.")
         | None ->
             failwith($"Node type {nodeType} not found in the symbol table. Test is not implemented correctly.")
-
-
 
     [<DataRow("FplArgInferenceAssume")>]
     [<DataRow("FplArgInferenceDerived")>]
@@ -1613,7 +1615,6 @@ type Structure() =
         | _ -> 
             Assert.IsTrue(false, var)
 
-
     [<DataRow("FplArgInferenceAssume")>]
     [<DataRow("FplArgInferenceDerived")>]
     [<DataRow("FplArgInferenceRevoke")>]
@@ -1850,6 +1851,245 @@ type Structure() =
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplVariableArray" ->
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+        | _ -> 
+            Assert.IsTrue(false, $"Unimplemented test {var}")
+
+    [<DataRow("FplArgInferenceAssume")>]
+    [<DataRow("FplArgInferenceDerived")>]
+    [<DataRow("FplArgInferenceRevoke")>]
+    [<DataRow("FplArgInferenceTrivial")>]
+    [<DataRow("FplArgument")>]
+    [<DataRow("FplAssertion")>]
+    [<DataRow("FplAssignment")>]
+    [<DataRow("FplAxiom")>]
+    [<DataRow("FplBase")>]
+    [<DataRow("FplBaseConstructorCall")>]
+    [<DataRow("FplCases")>]
+    [<DataRow("FplCaseElse")>]
+    [<DataRow("FplCaseSingle")>]
+    [<DataRow("FplClass")>]
+    [<DataRow("FplConjecture")>]
+    [<DataRow("FplConjunction")>]
+    [<DataRow("FplConstructor")>]
+    [<DataRow("FplCorollary")>]
+    [<DataRow("FplDecrement")>]
+    [<DataRow("FplDefaultConstructor")>]
+    [<DataRow("FplDisjunction")>]
+    [<DataRow("FplEquality")>]
+    [<DataRow("FplEquivalence")>]
+    [<DataRow("FplExclusiveOr")>]
+    [<DataRow("FplExtension")>]
+    [<DataRow("FplExtensionObj")>]
+    [<DataRow("FplForInStmt")>]
+    [<DataRow("FplForInStmtDomain")>]
+    [<DataRow("FplForInStmtEntity")>]
+    [<DataRow("FplFunctionalTerm")>]
+    [<DataRow("FplImplication")>]
+    [<DataRow("FplInstance")>]
+    [<DataRow("FplIntrinsicInd")>]
+    [<DataRow("FplIntrinsicFalse")>]
+    [<DataRow("FplIntrinsicTpl")>]
+    [<DataRow("FplIntrinsicTrue")>]
+    [<DataRow("FplIntrinsicUndef")>]
+    [<DataRow("FplIsOperator")>]
+    [<DataRow("FplJustification")>]
+    [<DataRow("FplJustificationItemByAx")>]
+    [<DataRow("FplJustificationItemByConj")>]
+    [<DataRow("FplJustificationItemByCor")>]
+    [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByDefVar")>]
+    [<DataRow("FplJustificationItemByInf")>]
+    [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByRefArgument")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
+    [<DataRow("FplLanguage")>]
+    [<DataRow("FplLemma")>]
+    [<DataRow("FplLocalization")>]
+    [<DataRow("FplMandatoryFunctionalTerm")>]
+    [<DataRow("FplMandatoryPredicate")>]
+    [<DataRow("FplMapCases")>]
+    [<DataRow("FplMapCaseElse")>]
+    [<DataRow("FplMapCaseSingle")>]
+    [<DataRow("FplMapping")>]
+    [<DataRow("FplNegation")>]
+    [<DataRow("FplParent")>]
+    [<DataRow("FplPredicate")>]
+    [<DataRow("FplPredicateList")>]
+    [<DataRow("FplProof")>]
+    [<DataRow("FplProposition")>]
+    [<DataRow("FplQuantifierAll")>]
+    [<DataRow("FplQuantifierExists")>]
+    [<DataRow("FplQuantifierExistsN")>]
+    [<DataRow("FplReference")>]
+    [<DataRow("FplReturn")>]
+    [<DataRow("FplRoot")>]
+    [<DataRow("FplRuleOfInference")>]
+    [<DataRow("FplSelf")>]
+    [<DataRow("FplTheorem")>]
+    [<DataRow("FplTheory")>]
+    [<DataRow("FplTranslation")>]
+    [<DataRow("FplUndetermined")>]
+    [<DataRow("FplVariable")>]
+    [<DataRow("FplVariableArray")>]
+    [<TestMethod>]
+    member this.TestFplBlockTypeFilePath(var) =
+
+        let index = 7 // FileOath
+        match var with
+        | "FplArgInferenceAssume" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplArgInferenceDerived" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplArgInferenceRevoke" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplArgInferenceTrivial" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplArgument" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplAssertion" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplAssignment" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplAxiom" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplBase" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplBaseConstructorCall" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplCases" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplCaseElse" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplCaseSingle" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplClass" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplConjecture" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplConjunction" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplConstructor" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplCorollary" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplDecrement" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplDefaultConstructor" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplDisjunction" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplEquality" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplEquivalence" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplExclusiveOr" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplExtension" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplExtensionObj" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplForInStmt" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplForInStmtDomain" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplForInStmtEntity" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplFunctionalTerm" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplImplication" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplInstance" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplIntrinsicInd" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplIntrinsicFalse" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplIntrinsicTpl" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplIntrinsicTrue" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplIntrinsicUndef" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplIsOperator" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplJustification" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplJustificationItemByAx" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplJustificationItemByConj" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplJustificationItemByCor" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplJustificationItemByDef" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplJustificationItemByDefVar" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplJustificationItemByInf" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplJustificationItemByProofArgument" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplJustificationItemByRefArgument" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplJustificationItemByTheoremLikeStmt" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplLanguage" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplLemma" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplLocalization" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplMandatoryFunctionalTerm" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplMandatoryPredicate" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplMapCaseElse" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplMapCaseSingle" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplMapCases" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplMapping" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplNegation" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplParent" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplPredicate" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplPredicateList" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplProof" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplProposition" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplQuantifierAll" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplQuantifierExists" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplQuantifierExistsN" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplReference" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplReturn" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplRoot" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplRuleOfInference" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplSelf" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplTheorem" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplTheory" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplTranslation" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplUndetermined" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplVariable" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
+        | "FplVariableArray" ->
+            Assert.AreEqual<string>(filePath, (getName var).[index])
         | _ -> 
             Assert.IsTrue(false, $"Unimplemented test {var}")
 

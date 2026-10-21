@@ -248,14 +248,14 @@
         "publish": "vsce publish"
     },
     "dependencies": {
-        "katex": "^0.17.0",
+        "katex": "^0.19.0",
         "vscode-languageclient": "latest"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",
         "@types/vscode": "^1.81.0",
-        "@typescript-eslint/eslint-plugin": "^7.0.0",
-        "@typescript-eslint/parser": "^7.0.0",
+        "@typescript-eslint/eslint-plugin": "^8.71.2",
+        "@typescript-eslint/parser": "^8.71.2",
         "@vscode/vsce": "^4.0.0",
         "eslint": "^8.57.0",
         "typescript": "^5.4.0"

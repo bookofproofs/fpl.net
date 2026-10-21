@@ -58,6 +58,7 @@
         <Compile Include="SymbolTable\Creation\Localizations.fs" />
         <Compile Include="SymbolTable\Creation\TopLevel.fs" />
         <Compile Include="SymbolTable\Creation\Main.fs" />
+        <Compile Include="SymbolTable\GoToDefinition.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
 

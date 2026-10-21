@@ -166,6 +166,7 @@ type FplParent(positions: Positions, parent: FplGenericNode) as this =
     do 
         this.FplId <- LiteralParent
         this.TypeId <- LiteralUndef
+        this.FilePath <- parent.FilePath
 
     override this.Name = LiteralParent
     override this.ShortName = LiteralParent
@@ -270,6 +271,7 @@ type FplSelf(positions: Positions, parent: FplGenericNode) as this =
     do 
         this.FplId <- LiteralSelf
         this.TypeId <- LiteralUndef
+        this.FilePath <- parent.FilePath
 
     override this.Name = LiteralSelf
     override this.ShortName = LiteralSelf
