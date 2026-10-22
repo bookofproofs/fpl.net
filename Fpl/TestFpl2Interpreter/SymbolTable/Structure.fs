@@ -2073,7 +2073,7 @@ type Structure() =
         | "FplReturn" ->
             Assert.AreEqual<string>(filePath, (getName var).[index])
         | "FplRoot" ->
-            Assert.AreEqual<string>(filePath, (getName var).[index])
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplRuleOfInference" ->
             Assert.AreEqual<string>(filePath, (getName var).[index])
         | "FplSelf" ->

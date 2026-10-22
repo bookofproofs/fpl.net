@@ -100,4 +100,8 @@ type EvalStack() =
             (n.StartPos.Line, n.StartPos.Column, -n.EndPos.Line, -n.EndPos.Column))
         |> Seq.tryLast
 
+    /// <summary>
+    /// Read-only view of all symbol table nodes flattened during the evaluation.
+    /// </summary>
+    member this.FlattenedNodes : seq<FplGenericNode> = _flattenedNodes :> seq<FplGenericNode>
 
