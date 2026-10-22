@@ -1,14 +1,10 @@
-/// <summary>
-/// Entry point of the FPL language server (<c>FplLS</c>).
-/// Configures the dependency injection container, registers the LSP handlers
-/// (text document sync, completion, formatting, go-to-definition, and find-references),
-/// registers the custom requests <c>getTreeData</c> and <c>getWebviewData</c>,
-/// and starts the server over standard input and output.
-/// </summary>
-/// <remarks>
-/// The custom requests wait until the interpreter has finished evaluating (<c>heap.IsEvaluating</c>)
-/// before returning the symbol table or the valid-statement data as JSON.
-/// </remarks>
+// Entry point of the FPL language server (<c>FplLS</c>).
+// Configures the dependency injection container, registers the LSP handlers
+// (text document sync, completion, formatting, go-to-definition, and find-references),
+// registers the custom requests <c>getTreeData</c> and <c>getWebviewData</c>,
+// and starts the server over standard input and output.
+// The custom requests wait until the interpreter has finished evaluating (<c>heap.IsEvaluating</c>)
+// before returning the symbol table or the valid-statement data as JSON.
 open System
 open System.Threading.Tasks
 open Microsoft.Extensions.DependencyInjection
