@@ -54,6 +54,7 @@
         <Compile Include="ServiceFormatting\TestSettingsTranslation.fs" />
         <Compile Include="ServiceGoToDefinition\TestGoToDefinition.fs" />
         <Compile Include="ServiceFindReference\TestReferenceIndex.fs" />
+        <Compile Include="ServiceFindReference\TestFindReferences.fs" />
     </ItemGroup>
 
     <ItemGroup>

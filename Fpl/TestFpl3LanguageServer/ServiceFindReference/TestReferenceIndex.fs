@@ -40,16 +40,3 @@ type TestReferenceIndex() =
 
         Assert.AreEqual(0, findReferences index declOther |> List.length)
 
-    [<TestMethod>]
-    member _.TestCacheReusedForSameRootAndRebuiltForNewRoot() =
-        let root1 = new FplRoot()
-        let root2 = new FplRoot()
-        let declA = new FplAxiom(positions, parent, 0)
-        let nodes : FplGenericNode list = [ makeReference declA ]
-
-        let index1 = getReferenceIndex (root1 :> obj) nodes
-        let index2 = getReferenceIndex (root1 :> obj) []
-        let index3 = getReferenceIndex (root2 :> obj) []
-
-        Assert.IsTrue(obj.ReferenceEquals(index1, index2))
-        Assert.IsFalse(obj.ReferenceEquals(index1, index3))

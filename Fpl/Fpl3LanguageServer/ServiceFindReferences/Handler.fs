@@ -28,6 +28,8 @@ let private normalizePath (path: string) =
 /// <summary>
 /// Converts a symbol-table node to an LSP location, using the node's identifier span (approximation).
 /// </summary>
+/// <param name="node">Symbol-table node to convert.</param>
+/// <returns>The LSP <c>Location</c> of the node.</returns>
 let private toLocation (node: FplGenericNode) : Location =
     // FParsec int64 -> LSP int; FParsec lines are 1-based, LSP lines are 0-based
     let toLspLine (line: int64) = max 0 (int line - 1)
@@ -74,32 +76,14 @@ type ReferencesHandler(languageServer: ILanguageServer) =
 
                 let cursorNode = heap.Eval.CursorNode cursorPath line column
 
-                // The declaration is either the resolved target of the cursor node or the cursor node itself
-                let declarationOpt =
+                let nodes =
                     match cursorNode with
-                    | None -> None
+                    | None -> []
                     | Some node ->
-                        match resolveDeclaration node with
-                        | Some declaration -> Some declaration
-                        | None -> Some node
+                        findReferenceNodes node heap.Eval.FlattenedNodes
 
-                match declarationOpt with
-                | Some declaration ->
-                    let index = getReferenceIndex (box heap.SymbolTable.Root) heap.Eval.FlattenedNodes
-                    let references =
-                        findReferences index declaration
-                        |> List.filter (fun node -> not (obj.ReferenceEquals(node, declaration)))
-                        |> List.map toLocation
-                    let withDeclaration =
-                        if request.Context.IncludeDeclaration && declaration.FilePath <> "" then
-                            toLocation declaration :: references
-                        else
-                            references
-                    logMsg languageServer $"{withDeclaration.Length} location(s)" "references"
-                    return LocationContainer(withDeclaration)
-                | None ->
-                    logMsg languageServer "None" "no declaration under cursor"
-                    return LocationContainer()
+                logMsg languageServer $"{nodes.Length} location(s)" "references"
+                return LocationContainer(nodes |> List.map toLocation)
             }
 
         member _.SetCapability(cap: ReferenceCapability) =
