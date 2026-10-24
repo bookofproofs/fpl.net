@@ -36,6 +36,7 @@ let resolveDeclaration (node: FplGenericNode) : FplGenericNode option =
     | :? FplFunctionalTerm 
     | :? FplMandatoryFunctionalTerm 
     | :? FplMandatoryPredicate
+    | :? FplArgument
     | :? FplAxiom ->
         Some node
     | :? FplJustificationItemByRefArgument
