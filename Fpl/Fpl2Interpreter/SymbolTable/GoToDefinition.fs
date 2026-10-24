@@ -6,7 +6,11 @@ module Fpl2Interpreter.SymbolTable.GoToDefinition
 open System.Collections.Generic
 open Fpl2Interpreter.BasicTypes
 open Fpl2Interpreter.SymbolTable.Types1.TopLevel
+open Fpl2Interpreter.SymbolTable.Types2.Definitions
 open Fpl2Interpreter.SymbolTable.Types3.PredicativeBlocks
+open Fpl2Interpreter.SymbolTable.Types3.RulesOfInferences
+open Fpl2Interpreter.SymbolTable.Types3.DefinitionProperties
+open Fpl2Interpreter.SymbolTable.Types3.Extensions
 open Fpl2Interpreter.SymbolTable.Types4.Proofs
 
 /// <summary>
@@ -21,6 +25,19 @@ open Fpl2Interpreter.SymbolTable.Types4.Proofs
 /// </remarks>
 let resolveDeclaration (node: FplGenericNode) : FplGenericNode option =
     match node with
+    | :? FplTheorem 
+    | :? FplProposition 
+    | :? FplLemma 
+    | :? FplConjecture 
+    | :? FplRuleOfInference 
+    | :? FplExtension 
+    | :? FplClass 
+    | :? FplPredicate 
+    | :? FplFunctionalTerm 
+    | :? FplMandatoryFunctionalTerm 
+    | :? FplMandatoryPredicate
+    | :? FplAxiom ->
+        Some node
     | :? FplJustificationItemByRefArgument
     | :? FplJustificationItemByProofArgument -> node.RefersTo
     | :? FplProof
@@ -76,37 +93,38 @@ let findReferences (index: ReferenceIndex) (declaration: FplGenericNode) : FplGe
     | _ -> []
 
 /// <summary>
-/// Moves from a structural node without an identifier (for example a justification) up to the nearest
-/// ancestor that has one (for example the argument it belongs to). Stops at the root.
+/// Maps the node under the cursor to the node that the "go to definition" and "find references" services act on.
 /// </summary>
-/// <param name="node">Symbol-table node under the cursor.</param>
-/// <returns>The node itself if it has an identifier, otherwise its nearest named ancestor.</returns>
-let rec private toNamedNode (node: FplGenericNode) : FplGenericNode =
-    if node.FplId <> "" then
-        node
-    else
-        match node.Parent with
-        | Some parent when not (parent :? FplRoot) -> toNamedNode parent
-        | _ -> node
+/// <param name="cursorNode">Innermost symbol-table node containing the cursor.</param>
+/// <returns>The argument that owns a justification, otherwise the cursor node itself.</returns>
+/// <remarks>
+/// A justification has no identifier of its own. A cursor on a justification therefore refers to the
+/// argument it belongs to, which carries the identifier that is resolved.
+/// </remarks>
+let cursorTargetNode (cursorNode: FplGenericNode) : FplGenericNode =
+    match cursorNode with
+    | :? FplJustification ->
+        match cursorNode.Parent with
+        | Some argument -> argument
+        | None -> cursorNode
+    | _ -> cursorNode
 
 /// <summary>
 /// Returns the nodes to report for "find references" at the given cursor node.
 /// </summary>
-/// <param name="cursorNode">Symbol-table node under the cursor.</param>
+/// <param name="cursorNode">Innermost symbol-table node containing the cursor.</param>
 /// <param name="nodes">All flattened symbol-table nodes of the current evaluation.</param>
 /// <returns>The declaration followed by all nodes resolving to it.</returns>
 /// <remarks>
-/// The cursor node is first moved to its nearest named ancestor, so a cursor on a justification
-/// is treated as a cursor on the argument it belongs to. If the result does not resolve to a declaration,
-/// it is treated as the declaration itself.
+/// If the cursor target does not resolve to a declaration, it is treated as the declaration itself.
 /// The index is built on each call, so results never depend on earlier evaluations.
 /// </remarks>
 let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>) =
-    let named = toNamedNode cursorNode
+    let target = cursorTargetNode cursorNode
     let declaration =
-        match resolveDeclaration named with
-        | Some target -> target
-        | None -> named
+        match resolveDeclaration target with
+        | Some resolved -> resolved
+        | None -> target
     let index = buildReferenceIndex nodes
     let references =
         findReferences index declaration

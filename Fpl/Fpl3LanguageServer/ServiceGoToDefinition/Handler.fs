@@ -62,10 +62,10 @@ type DefinitionHandler(languageServer: ILanguageServer) =
                 logMsg languageServer $"{cursorPath} {line} {column}" "Coords" 
 
                 // Try to find the declaration / definition of the innermost symbol table node
-                let resolvedNodeOpt = 
+                let resolvedNodeOpt =
                     match cursorNode with
                     | None -> None
-                    | Some node -> resolveDeclaration node
+                    | Some node -> resolveDeclaration (cursorTargetNode node)
 
                 // Try to return the definition location to the F12 "go-to-definition" service
                 match resolvedNodeOpt with

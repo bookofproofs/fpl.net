@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="Helpers\SampleFpl.fs" />
         <Compile Include="MSTestSettings.fs" />
         <Compile Include="FileMgmt\TestPathEquivalentUri.fs" />
         <Compile Include="FileMgmt\TestDotNetDownload.fs" />
