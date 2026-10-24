@@ -134,11 +134,12 @@ type TestGoToDefinitionSameFile () =
         |> Seq.sortBy (fun node -> (node.StartPos.Line, node.StartPos.Column, -node.EndPos.Line, -node.EndPos.Column))
         |> Seq.tryLast
 
-    [<DataRow("FplJustificationItemByAx", "byax A1", 5, "axiom A1", 0)>]
-    [<DataRow("FplJustificationItemByAx", "byax A2", 5, "axiom A2", 0)>]
-    [<DataRow("FplJustificationItemByRefArgument", "3. 1,2,", 3, "1: ass f", 0)>]
+    [<DataRow("01", "FplJustificationItemByAx", "byax A1", 5, "axiom A1", 0)>]
+    [<DataRow("02", "FplJustificationItemByAx", "byax A2", 5, "axiom A2", 0)>]
+    [<DataRow("03", "FplJustificationItemByRefArgument", "3. 1,2,", 3, "1: ass f", 0)>]
+
     [<TestMethod>]
-    member this.TestGoToDefinitionDeclaration(nodeType: string, cursorAnchor: string, cursorOffset: int, declAnchor: string, declOffset: int) =
+    member this.TestGoToDefinitionDeclaration(no:string, nodeType: string, cursorAnchor: string, cursorOffset: int, declAnchor: string, declOffset: int) =
         prepareFplCode("TestGoToDefinition.fpl", fplCode, false) |> ignore
 
         let cursorLine, cursorColumn = locate fplCode cursorAnchor cursorOffset

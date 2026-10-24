@@ -76,20 +76,37 @@ let findReferences (index: ReferenceIndex) (declaration: FplGenericNode) : FplGe
     | _ -> []
 
 /// <summary>
+/// Moves from a structural node without an identifier (for example a justification) up to the nearest
+/// ancestor that has one (for example the argument it belongs to). Stops at the root.
+/// </summary>
+/// <param name="node">Symbol-table node under the cursor.</param>
+/// <returns>The node itself if it has an identifier, otherwise its nearest named ancestor.</returns>
+let rec private toNamedNode (node: FplGenericNode) : FplGenericNode =
+    if node.FplId <> "" then
+        node
+    else
+        match node.Parent with
+        | Some parent when not (parent :? FplRoot) -> toNamedNode parent
+        | _ -> node
+
+/// <summary>
 /// Returns the nodes to report for "find references" at the given cursor node.
 /// </summary>
 /// <param name="cursorNode">Symbol-table node under the cursor.</param>
 /// <param name="nodes">All flattened symbol-table nodes of the current evaluation.</param>
 /// <returns>The declaration followed by all nodes resolving to it.</returns>
 /// <remarks>
-/// If the cursor node does not resolve to a declaration, the cursor node itself is treated as the declaration.
+/// The cursor node is first moved to its nearest named ancestor, so a cursor on a justification
+/// is treated as a cursor on the argument it belongs to. If the result does not resolve to a declaration,
+/// it is treated as the declaration itself.
 /// The index is built on each call, so results never depend on earlier evaluations.
 /// </remarks>
 let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>) =
+    let named = toNamedNode cursorNode
     let declaration =
-        match resolveDeclaration cursorNode with
+        match resolveDeclaration named with
         | Some target -> target
-        | None -> cursorNode
+        | None -> named
     let index = buildReferenceIndex nodes
     let references =
         findReferences index declaration

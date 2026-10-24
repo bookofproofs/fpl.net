@@ -90,7 +90,13 @@ type TestFindReferences() =
         5. 3,4, byinf ModusPonens |- h
         6. 2,4 |- f ⇒ h
         7. 2 |- (g ⇒ h) ⇒ (f ⇒ h)
-        8. 6 |- (f ⇒ g) ⇒ ((g ⇒ h) ⇒ (f ⇒ h)) 
+        8. 6 |- (f ⇒ g) ⇒ ((g ⇒ h) ⇒ (f ⇒ h))
+        9. T1$1:4 |- trivial
+    }
+
+    prf T2$2
+    {
+        1. T2$1:1 |- trivial
     }
     """
 
@@ -143,7 +149,14 @@ type TestFindReferences() =
     [<DataRow("02b", "cor T1$2", 0, "39, 45, 63")>]
     [<DataRow("03", "inf ModusPonens", 0, "30, 54, 58, 75, 77")>]
     [<DataRow("03a", "byinf ModusPonens", 0, "30, 54, 58, 75, 77")>]
-    [<DataRow("04", "6", 0, "76, 78")>]
+    // find references to arguments that have justifications
+    [<DataRow("04", "6 |-", 0, "78, 80")>]
+    [<DataRow("04a", "6.", 0, "78, 80")>]
+    [<DataRow("05", "4. byax A1 |-", 0, "56, 58, 81")>]
+    [<DataRow("05a", "T1$1:4", 0, "56, 58, 81")>]
+    // find references to arguments that have no justifications
+    [<DataRow("06", "1,2, byinf ModusPonens |-", 0, "73, 75, 86")>]
+    [<DataRow("06a", "1:", 0, "73, 75, 86")>]
     [<TestMethod>]
     member _.TestFindReferencesLines(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string) =
 

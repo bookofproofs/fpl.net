@@ -451,7 +451,7 @@ type FplGenericStmt(positions: Positions, parent: FplGenericNode) =
 type FplGenericPredicate(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasValue(positions, parent)
     do 
-        this.FplId <- LiteralTrue
+        this.FplId <- String.Empty
         this.TypeId <- LiteralPred
 
     override this.RunOrder = None
@@ -461,7 +461,7 @@ type FplGenericPredicate(positions: Positions, parent: FplGenericNode) as this =
     /// </summary>
     /// <remarks>
     /// Derived predicate implementations may override this behavior but should call
-    /// the base behaviour if they rely on the default initialization sequence.
+    /// the base behavior if they rely on the default initialization sequence.
     /// </remarks>
     override this.Run() = 
         StaticDebug.Debug(this,Debug.Start) 

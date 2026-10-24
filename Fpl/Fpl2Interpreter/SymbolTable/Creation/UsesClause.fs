@@ -170,7 +170,7 @@ let createSubfolder (uri: PathEquivalentUri) subFolder =
 /// </summary>
 /// <param name="uri">A <c>PathEquivalentUri</c> representing the current file or location.</param>
 /// <param name="currentWebRepo">Base URL of the web repository (no trailing slash expected).</param>
-/// <param name="debugMode">Pass-through to control download behaviour for diagnostics.</param>
+/// <param name="debugMode">Pass-through to control download behavior for diagnostics.</param>
 /// <returns>The raw content of <c>libmap.txt</c> or an empty string on failure.</returns>
 let downloadLibMap (uri:PathEquivalentUri) (currentWebRepo: string) debugMode =
     let pos = Position("", 0, 1, 1)

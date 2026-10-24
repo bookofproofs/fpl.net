@@ -171,6 +171,6 @@ let tryFindJustification (prf:FplProof) justType =
     |> List.filter (fun fv -> fv.IsSome)
     |> List.map (fun fv -> fv.Value)
     |> List.map (fun fv -> fv :?> FplJustification)
-    |> List.map (fun fv -> fv.GetOrderedJustificationItems)
+    |> List.map (fun fv -> fv.OrderedJustificationItems)
     |> List.concat 
     |> List.tryFind (fun fv -> fv.Name = justType)
