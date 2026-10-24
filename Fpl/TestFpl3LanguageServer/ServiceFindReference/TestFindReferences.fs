@@ -73,6 +73,8 @@ type TestFindReferences() =
         qed
     }
 
+    cor T1$2 {true}
+
     thm T2 
     {
         dec f,g,h:pred;
@@ -135,8 +137,13 @@ type TestFindReferences() =
     /// Compares reference nodes by their start line only. Columns of block nodes are not reliable (see GoToDefinition).
     /// </summary>
     [<DataRow("01", "axiom A1", 0, "10, 52, 56")>]
-    [<DataRow("02", "byax A1", 5, "10, 52, 56")>]
-    [<DataRow("03", "theorem T1", 0, "39, 45")>]
+    [<DataRow("01a", "byax A1", 5, "10, 52, 56")>]
+    [<DataRow("02", "theorem T1", 0, "39, 45, 63")>]
+    [<DataRow("02a", "proof T1$1", 0, "39, 45, 63")>]
+    [<DataRow("02b", "cor T1$2", 0, "39, 45, 63")>]
+    [<DataRow("03", "inf ModusPonens", 0, "30, 54, 58, 75, 77")>]
+    [<DataRow("03a", "byinf ModusPonens", 0, "30, 54, 58, 75, 77")>]
+    [<DataRow("04", "6", 0, "76, 78")>]
     [<TestMethod>]
     member _.TestFindReferencesLines(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string) =
 
