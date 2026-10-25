@@ -176,7 +176,7 @@ type FplRoot() =
 /// Collects the symbol-table nodes that were evaluated during one build of the symbol table.
 /// Unlike the evaluation stack, it is not cleared when a single theory has been processed.
 /// </summary>
-type FlattenedNodes() =
+type NodesCollector() =
     let _nodes = HashSet<FplGenericNode>(HashIdentity.Reference)
 
     /// <summary>
@@ -202,12 +202,7 @@ type SymbolTable() =
     let mutable _mainTheory = ""
     let mutable _evalCounter = 0
     let _root = new FplRoot()
-    let _flattenedNodes = FlattenedNodes()
-
-    /// <summary>
-    /// All nodes evaluated while building this symbol table, across all theories and files.
-    /// </summary>
-    member _.FlattenedNodes = _flattenedNodes
+    let _nodesCollector = NodesCollector()
 
     /// <summary>
     /// Gets or sets the current main theory identifier that is used as a s starting point to create the run order.
@@ -215,7 +210,7 @@ type SymbolTable() =
     /// <remarks>
     /// The main theory is used as the entry point for the FPL interpreter. All other theories imported by the main theory will be interpreted.
     /// in the order they were imported. This process works by recursion and accounts for the "self-containment" requirement of
-    /// mathematical theories (see Proof-of-Concept paper "Formal Proving Language (FPL)", A. Piotrowski, 2021)
+    /// mathematical theories.
     /// </remarks>
     member this.MainTheory
         with get () = _mainTheory
@@ -320,6 +315,38 @@ type SymbolTable() =
     /// Clears the internal root and resets the main theory identifier.
     /// </summary>
     member this.Clear() =
-        _root.Clear() 
+        _root.Clear()
+        _nodesCollector.Clear()
         _mainTheory <- ""
 
+    /// <summary>
+    /// Checks whether a 1-based (line, column) position lies within the node's start and end positions.
+    /// </summary>
+    /// <param name="node">Node to test.</param>
+    /// <param name="line">1-based line (FParsec int64).</param>
+    /// <param name="column">1-based column (FParsec int64).</param>
+    /// <returns>True when the position lies inside the node.</returns>
+    member private this.ContainsCursor (node: FplGenericNode) (line: int64) (column: int64) =
+        let startPos = node.StartPos
+        let endPos = node.EndPos
+        (startPos.Line, startPos.Column) <= (line, column) && (line, column) <= (endPos.Line, endPos.Column)
+
+    // Try to find the innermost symbol table node containing the cursor: greatest start, then smallest end
+    member this.CursorNode (path:string) (line:int64) (column:int64) =
+        _nodesCollector.Nodes
+        |> Seq.filter (fun node ->
+            this.ContainsCursor node line column
+            && String.Equals(node.FilePath, path, StringComparison.OrdinalIgnoreCase))
+        |> Seq.sortBy (fun n ->
+            (n.StartPos.Line, n.StartPos.Column, -n.EndPos.Line, -n.EndPos.Column))
+        |> Seq.tryLast
+
+    /// <summary>
+    /// Read-only view of all symbol-table nodes.
+    /// </summary>
+    member this.Nodes = _nodesCollector.Nodes
+
+    /// <summary>
+    /// Exposes the reference of the NodesCollector of this symbol-table (needed e.g. in the type EvalStack, where the nodes can actually be added).
+    /// </summary>
+    member this.NodesCollector = _nodesCollector

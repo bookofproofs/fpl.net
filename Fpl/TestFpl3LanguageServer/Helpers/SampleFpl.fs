@@ -144,7 +144,7 @@ let testFilePath (fileName: string) =
 /// <param name="cursorOffset">Offset inside the anchor.</param>
 let cursorNodeAt (fileName: string) (code: string) (cursorAnchor: string) (cursorOffset: int) : FplGenericNode option =
     let line, column = locate code cursorAnchor cursorOffset
-    heap.Eval.CursorNode (testFilePath fileName) line column
+    heap.SymbolTable.CursorNode (testFilePath fileName) line column
 
 /// <summary>
 /// Writes an file with some content the innermost symbol-table node at the cursor position, using the same lookup as the language server.

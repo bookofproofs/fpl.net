@@ -23,11 +23,11 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[parser]** `Ast.ErrorSyntax`/`ErrorSyntaxBacktracking`/`ErrorSyntaxChain` now additionally carry the enclosing building block's source span and its verbatim FPL source text (captured from the original, un-stripped source), enabling the formatting service to reprint syntactically invalid building blocks unchanged instead of emitting diagnostic messages as FPL code
 - **[language-server]** Add a and hook-up an initial formatting service for FPL 
 - **[language-server]** Wire user-configured `FormattingOptions` through to the formatting service: new `SettingsStore` singleton, `SettingsTranslation` module translating client JSON payloads into `FormattingOptions`, and a `SettingsPull` module issuing a live `workspace/configuration` request on every `textDocument/formatting` request, replacing the previously hardcoded `fplFormatDefaults`
-- **[language-server]** Add an alpha "go-to-definition" service.
-- **[interpreter]** Add `resolveDeclaration` ... (new)
-- **[language-server]** Add a find-references service (`textDocument/references`) that returns all locations resolving to the declaration under the cursor, optionally including the declaration itself (`ReferenceContext.IncludeDeclaration`)
-- **[interpreter]** Add an inverse reference index (declaration → referencing nodes), built once per evaluation and cached per symbol-table root, and expose the flattened evaluation nodes through `EvalStack.FlattenedNodes`
-- 
+- **[language-server]** Add an alpha "go-to-definition" service, including navigation from justifications to the argument they cite.
+- **[interpreter]** Add `resolveDeclaration` to map a symbol-table node to its declaration, including proofs and corollaries (they resolve to their theorem-like statement).
+- **[language-server]** Add a find-references service (`textDocument/references`) that returns all locations, across all files, that refer to the declaration under the cursor. The declaration is included when the client requests it (`ReferenceContext.IncludeDeclaration`).
+- **[interpreter]** Add `SymbolTable.NodesCollector`, which records every node evaluated while the symbol table is built, across all theories and files, to support the reference lookups.
+
 ### Changed
 - **[parser]** consolidate unit test namespaces and convert single-case test methods to datarow-driven test methods (if not already the case)
 - **[parser]** `Ast.PredicateSignature` and `Ast.FunctionalTermSignature` now record positions that also span their trailing `infix`, `prefix`, `postfix`, or `symbol` clause, so the formatting service can attach comments to the correct node

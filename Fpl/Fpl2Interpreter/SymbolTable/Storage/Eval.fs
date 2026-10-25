@@ -13,7 +13,7 @@ open Fpl2Interpreter.SymbolTable.Types1.TopLevel
 /// <summary>
 /// A stack memory storing potential new nodes of the symbol table during its evaluation process.
 /// </summary>
-type EvalStack(flattenedNodes: FlattenedNodes) =
+type EvalStack(nodesCollector: NodesCollector) =
     let _valueStack = Stack<FplGenericNode>()
 
     /// <summary>
@@ -25,7 +25,7 @@ type EvalStack(flattenedNodes: FlattenedNodes) =
     /// Records the node in the flattened nodes of the symbol table.
     /// </summary>
     member private this.AddNode (node: FplGenericNode) =
-        flattenedNodes.Add node
+        nodesCollector.Add node
 
     /// <summary>
     /// Pops an <see cref="FplGenericNode"/> from the stack without propagating its name and signature to the next node.
@@ -77,31 +77,4 @@ type EvalStack(flattenedNodes: FlattenedNodes) =
     member this.GetPrecedingReference() =
         _valueStack
         |> Seq.tryFind (fun fv -> fv.Name = PrimRefL)
-
-    /// <summary>
-    /// Checks whether a 1-based (line, column) position lies within the node's start and end positions.
-    /// </summary>
-    /// <param name="node">Node to test.</param>
-    /// <param name="line">1-based line (FParsec int64).</param>
-    /// <param name="column">1-based column (FParsec int64).</param>
-    /// <returns>True when the position lies inside the node.</returns>
-    member private this.ContainsCursor (node: FplGenericNode) (line: int64) (column: int64) =
-        let startPos = node.StartPos
-        let endPos = node.EndPos
-        (startPos.Line, startPos.Column) <= (line, column) && (line, column) <= (endPos.Line, endPos.Column)
-
-    // Try to find the innermost symbol table node containing the cursor: greatest start, then smallest end
-    member this.CursorNode (path:string) (line:int64) (column:int64) =
-        flattenedNodes.Nodes
-        |> Seq.filter (fun node ->
-            this.ContainsCursor node line column
-            && String.Equals(node.FilePath, path, StringComparison.OrdinalIgnoreCase))
-        |> Seq.sortBy (fun n ->
-            (n.StartPos.Line, n.StartPos.Column, -n.EndPos.Line, -n.EndPos.Column))
-        |> Seq.tryLast
-
-    /// <summary>
-    /// Read-only view of all symbol table nodes flattened during the evaluation.
-    /// </summary>
-    member this.FlattenedNodes : seq<FplGenericNode> = flattenedNodes.Nodes
 

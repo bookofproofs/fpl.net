@@ -25,7 +25,7 @@ open Fpl2Interpreter.SymbolTable.Storage.ValidStmts
 type HeapMemory() = 
     let _validStmtStore = ValidStmtStore()
     let _symbolTable = SymbolTable()
-    let _evalStack = EvalStack(_symbolTable.FlattenedNodes)
+    let _evalStack = EvalStack(_symbolTable.NodesCollector)
     let _helper = Helper()
     let _state = State()
     let _parsedAsts = ParsedAstList()

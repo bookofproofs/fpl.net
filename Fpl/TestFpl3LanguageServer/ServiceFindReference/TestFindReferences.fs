@@ -35,11 +35,11 @@ type TestFindReferences() =
         prepareFplCode("TestSecondCode.fpl", fplSecondCode, false) |> ignore
 
         let cursorLine, cursorColumn = locate fplFirstCode cursorAnchor cursorOffset
-        let cursorNode = heap.Eval.CursorNode path cursorLine cursorColumn
+        let cursorNode = heap.SymbolTable.CursorNode path cursorLine cursorColumn
         Assert.IsTrue(cursorNode.IsSome, $"No node found at '{cursorAnchor}'.")
 
         let references =
-            findReferenceNodes cursorNode.Value heap.Eval.FlattenedNodes
+            findReferenceNodes cursorNode.Value heap.SymbolTable.Nodes
 
         let actual =
             references

@@ -74,13 +74,13 @@ type ReferencesHandler(languageServer: ILanguageServer) =
                 let line = int64 request.Position.Line + 1L
                 let column = int64 request.Position.Character + 1L
 
-                let cursorNode = heap.Eval.CursorNode cursorPath line column
+                let cursorNode = heap.SymbolTable.CursorNode cursorPath line column
 
                 let nodes =
                     match cursorNode with
                     | None -> []
                     | Some node ->
-                        findReferenceNodes node heap.Eval.FlattenedNodes
+                        findReferenceNodes node heap.SymbolTable.Nodes
 
                 logMsg languageServer $"{nodes.Length} location(s)" "references"
                 return LocationContainer(nodes |> List.map toLocation)

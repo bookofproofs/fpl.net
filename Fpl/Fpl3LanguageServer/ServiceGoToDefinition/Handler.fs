@@ -53,7 +53,7 @@ type DefinitionHandler(languageServer: ILanguageServer) =
                 let column = int64 request.Position.Character + 1L
 
                 // Try to find the innermost symbol table node containing the cursor: greatest start, then smallest end
-                let cursorNode = heap.Eval.CursorNode cursorPath line column
+                let cursorNode = heap.SymbolTable.CursorNode cursorPath line column
 
                 if cursorNode.IsSome then 
                     logMsg languageServer $"{cursorNode.Value.Name} {cursorNode.Value.Type SignatureType.Name}" "cursorNode" 
