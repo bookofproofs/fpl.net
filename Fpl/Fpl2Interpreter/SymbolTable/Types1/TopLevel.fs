@@ -5,6 +5,7 @@
 module Fpl2Interpreter.SymbolTable.Types1.TopLevel
 open System
 open System.Text
+open System.Collections.Generic
 open FParsec
 open Fpl0Base.Primitives
 open Fpl2Interpreter.BasicTypes
@@ -172,6 +173,28 @@ type FplRoot() =
         this.Scope.Clear()
 
 /// <summary>
+/// Collects the symbol-table nodes that were evaluated during one build of the symbol table.
+/// Unlike the evaluation stack, it is not cleared when a single theory has been processed.
+/// </summary>
+type FlattenedNodes() =
+    let _nodes = HashSet<FplGenericNode>(HashIdentity.Reference)
+
+    /// <summary>
+    /// Adds a node. Duplicates by reference are ignored.
+    /// </summary>
+    member _.Add(node: FplGenericNode) = _nodes.Add node |> ignore
+
+    /// <summary>
+    /// Read-only view of all collected nodes.
+    /// </summary>
+    member _.Nodes : seq<FplGenericNode> = _nodes :> seq<FplGenericNode>
+
+    /// <summary>
+    /// Removes all collected nodes. Call this only when the symbol table is rebuilt.
+    /// </summary>
+    member _.Clear() = _nodes.Clear()
+
+/// <summary>
 /// Represents the in-memory symbol table used by the interpreter. Holds the root node,
 /// current main theory identifier, and an evaluation counter used for re-evaluations.
 /// </summary>
@@ -179,6 +202,12 @@ type SymbolTable() =
     let mutable _mainTheory = ""
     let mutable _evalCounter = 0
     let _root = new FplRoot()
+    let _flattenedNodes = FlattenedNodes()
+
+    /// <summary>
+    /// All nodes evaluated while building this symbol table, across all theories and files.
+    /// </summary>
+    member _.FlattenedNodes = _flattenedNodes
 
     /// <summary>
     /// Gets or sets the current main theory identifier that is used as a s starting point to create the run order.
