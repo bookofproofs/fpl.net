@@ -31,9 +31,10 @@ type TestFindReferences() =
     [<TestMethod>]
     member _.TestFindReferencesLines(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string) =
 
-        prepareFplCode("TestFindReferences.fpl", fplCode, false) |> ignore
-        let path = normalizePath @"C:\Dev\fpl.net\Fpl\TestFpl3LanguageServer\bin\Debug\net8.0\TestFindReferences.fpl"
-        let cursorLine, cursorColumn = locate fplCode cursorAnchor cursorOffset
+        let path = normalizePath (writeCode fplFirstCode "TestFirstCode.fpl")
+        prepareFplCode("TestSecondCode.fpl", fplSecondCode, false) |> ignore
+
+        let cursorLine, cursorColumn = locate fplFirstCode cursorAnchor cursorOffset
         let cursorNode = heap.Eval.CursorNode path cursorLine cursorColumn
         Assert.IsTrue(cursorNode.IsSome, $"No node found at '{cursorAnchor}'.")
 

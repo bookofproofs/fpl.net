@@ -32,10 +32,11 @@ type TestGoToDefinitionSameFile () =
 
     [<TestMethod>]
     member this.TestGoToDefinitionDeclaration(no:string, cursorAnchor: string, cursorOffset: int, expectedPos: string) =
-        prepareFplCode("TestGoToDefinition.fpl", fplCode, false) |> ignore
 
-        let path = normalizePath @"C:\Dev\fpl.net\Fpl\TestFpl3LanguageServer\bin\Debug\net8.0\TestGoToDefinition.fpl"
-        let cursorLine, cursorColumn = locate fplCode cursorAnchor cursorOffset
+        let path = normalizePath (writeCode fplFirstCode "TestFirstCode.fpl")
+        prepareFplCode("TestSecondCode.fpl", fplSecondCode, false) |> ignore
+
+        let cursorLine, cursorColumn = locate fplFirstCode cursorAnchor cursorOffset
         let cursorNode = heap.Eval.CursorNode path cursorLine cursorColumn
 
         Assert.IsTrue(cursorNode.IsSome, $"No node found at {cursorLine}:{cursorColumn}.")
@@ -43,5 +44,5 @@ type TestGoToDefinitionSameFile () =
         let declaration = resolveDeclaration (cursorTargetNode cursorNode.Value)
         Assert.IsTrue(declaration.IsSome, $"node at '{cursorAnchor}' is {cursorNode.Value.Name} and does not resolve to a declaration.")
 
-        let actualPos = fplCode.Substring((int)declaration.Value.StartPos.Index,expectedPos.Length)
+        let actualPos = fplFirstCode.Substring((int)declaration.Value.StartPos.Index,expectedPos.Length)
         Assert.AreEqual<string>(expectedPos, actualPos)

@@ -1,5 +1,6 @@
 module TestFpl3LanguageServer.Helpers.SampleFpl
 
+
 open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -10,7 +11,7 @@ open Fpl2Interpreter.SymbolTable.Storage.Heap
 /// Shared FPL sample code for the find-references and go-to-definition tests.
 /// Append new cases at the end so that existing line numbers in the data rows stay valid.
 /// </summary>
-let fplCode = """
+let fplFirstCode = """
     // auxiliary definitions
     def pred Impl(f, g: pred) infix "⇒" 0
     {
@@ -99,6 +100,11 @@ let fplCode = """
     }
     """
 
+let fplSecondCode = """
+    uses TestFirstCode
+
+    """
+
 /// <summary>
 /// Converts a unique anchor text plus an offset inside it into a 1-based (line, column) position.
 /// </summary>
@@ -139,3 +145,11 @@ let testFilePath (fileName: string) =
 let cursorNodeAt (fileName: string) (code: string) (cursorAnchor: string) (cursorOffset: int) : FplGenericNode option =
     let line, column = locate code cursorAnchor cursorOffset
     heap.Eval.CursorNode (testFilePath fileName) line column
+
+/// <summary>
+/// Writes an file with some content the innermost symbol-table node at the cursor position, using the same lookup as the language server.
+/// </summary>
+let writeCode (content:string) (fileName:string) =
+    let path = Path.Combine(Directory.GetCurrentDirectory(), fileName)
+    File.WriteAllText(path, content)
+    path 
