@@ -6,6 +6,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl2Interpreter.BasicTypes
 open Fpl2Interpreter.SymbolTable.Storage.Heap
+open TestFpl2Interpreter.Helpers.Common
 
 /// <summary>
 /// Shared FPL sample code for the find-references and go-to-definition tests.
@@ -98,10 +99,19 @@ let fplFirstCode = """
     {
         1. T2$1:1 |- trivial
     }
+
+    prop Pr {true}
+
+    lem Le {true}
+
+    conj Co {true}
     """
 
 let fplSecondCode = """
     uses TestFirstCode
+
+    cor Le$1 {true}
+    cor Le$1$2 {true}
 
     """
 
@@ -153,3 +163,25 @@ let writeCode (content:string) (fileName:string) =
     let path = Path.Combine(Directory.GetCurrentDirectory(), fileName)
     File.WriteAllText(path, content)
     path 
+
+let assertPrepareWorked cursorAnchor cursorOffset where =
+    let pathFirstCode = normalizePath (writeCode fplFirstCode "TestFirstCode.fpl")
+    let pathSecondCode = normalizePath (writeCode fplSecondCode "TestSecondCode.fpl")
+    // second code is main theory
+    prepareFplCode("TestSecondCode.fpl", fplSecondCode, false) |> ignore
+
+    let codeToLookForAnchors =
+        match where with
+        | 1 -> fplFirstCode
+        | 2 -> fplSecondCode
+        | _ -> failwith $"unknown code number to look for {where}"
+
+    let pathToLookForAnchors =
+        match where with
+        | 1 -> pathFirstCode
+        | 2 -> pathSecondCode
+        | _ -> failwith $"unknown code number to look for {where}"
+
+    let cursorLine, cursorColumn = locate codeToLookForAnchors cursorAnchor cursorOffset
+    let cursorNode = heap.SymbolTable.CursorNode pathToLookForAnchors cursorLine cursorColumn
+    (cursorLine, cursorColumn, cursorNode)
