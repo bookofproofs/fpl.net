@@ -113,6 +113,13 @@ let fplSecondCode = """
     cor Le$1 {true}
     cor Le$1$2 {true}
 
+    prf Le$1$2$1 
+    {
+        1. bycor Le$1 |- true
+        2. byconj Co |- true
+        3. Le, Pr |- true
+        4. bycor Le$1$2 |- true
+    }
     """
 
 /// <summary>
