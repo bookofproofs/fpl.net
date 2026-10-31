@@ -111,6 +111,22 @@ let cursorTargetNode (cursorNode: FplGenericNode) : FplGenericNode =
         | None -> cursorNode
     | _ -> cursorNode
 
+
+/// <summary>
+/// Returns true if both nodes belong to the same justification kind for find-references purposes.
+/// Argument references by ref-argument and by proof-argument are treated as the same kind.
+/// </summary>
+let private isSameJustificationKind (a: FplGenericNode) (b: FplGenericNode) : bool =
+    let isArgumentReference (node: FplGenericNode) =
+        match node with
+        | :? FplJustificationItemByRefArgument
+        | :? FplJustificationItemByProofArgument -> true
+        | _ -> false
+    if isArgumentReference a && isArgumentReference b then
+        true
+    else
+        a.GetType() = b.GetType()
+
 /// <summary>
 /// Returns the nodes to report for "find references" at the given cursor node.
 /// </summary>
@@ -125,19 +141,19 @@ let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>)
     let target = cursorTargetNode cursorNode
     match target with
     | :? FplGenericJustificationItem ->
-        // justification items: X.RefersTo.Value, X, and all N of the same F# class with N.RefersTo = X.RefersTo
+        // justification items: X.RefersTo.Value, X, and all N of the same kind with N.RefersTo = X.RefersTo
         match target.RefersTo with
         | Some refersTo ->
-            let sameClassReferences =
+            let sameKindReferences =
                 nodes
                 |> Seq.filter (fun node ->
-                    node.GetType() = target.GetType()
+                    isSameJustificationKind target node
                     && (match node.RefersTo with
                         | Some r -> obj.ReferenceEquals(r, refersTo)
                         | None -> false))
                 |> List.ofSeq
             let seen = HashSet<FplGenericNode>(HashIdentity.Reference)
-            (refersTo :: target :: sameClassReferences)
+            (refersTo :: target :: sameKindReferences)
             |> List.filter (fun node -> seen.Add node)
         | None -> [target]
     | _ ->
