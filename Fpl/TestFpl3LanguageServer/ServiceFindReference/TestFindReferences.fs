@@ -33,33 +33,32 @@ type TestFindReferences() =
                 first.Value + " " + second.Value
 
 
-    [<DataRow("01", "axiom A1", 0, "1~axiom A1, 1~byax A1, 1~byax A1", 1)>]
-    [<DataRow("01a", "byax A1", 5, "1~axiom A1, 1~byax A1, 1~byax A1", 1)>]
-    [<DataRow("02", "theorem T1", 0, "1~cor T1$2, 1~proof T1$1, 1~theorem T1", 1)>]
-    [<DataRow("02a", "cor T1$2", 0, "1~cor T1$2, 1~proof T1$1, 1~theorem T1", 1)>]
-    [<DataRow("02b", "cor T1$2", 0, "1~cor T1$2, 1~proof T1$1, 1~theorem T1", 1)>]
-    [<DataRow("03", "inf ModusPonens", 0, "1~byinf ModusPonens, 1~byinf ModusPonens, 1~byinf ModusPonens, 1~byinf ModusPonens, 1~inf ModusPonens", 1)>]
-    [<DataRow("03a", "byinf ModusPonens", 0, "1~byinf ModusPonens, 1~byinf ModusPonens, 1~byinf ModusPonens, 1~byinf ModusPonens, 1~inf ModusPonens", 1)>]
+    [<DataRow("01", "axiom A1", 0, "1~10~axiom A1, 1~52~byax A1, 1~56~byax A1", 1)>]
+    [<DataRow("01a", "byax A1", 5, "1~10~axiom A1, 1~52~byax A1, 1~56~byax A1", 1)>]
+    [<DataRow("02", "theorem T1", 0, "1~39~theorem T1, 1~45~proof T1$1, 1~63~cor T1$2", 1)>]
+    [<DataRow("02a", "cor T1$2", 0, "1~39~theorem T1, 1~63~cor T1$2", 1)>]
+    [<DataRow("03", "inf ModusPonens", 0, "1~30~inf ModusPonens, 1~54~byinf ModusPonens, 1~58~byinf ModusPonens, 1~75~byinf ModusPonens, 1~77~byinf ModusPonens", 1)>]
+    [<DataRow("03a", "byinf ModusPonens", 0, "1~30~inf ModusPonens, 1~54~byinf ModusPonens, 1~58~byinf ModusPonens, 1~75~byinf ModusPonens, 1~77~byinf ModusPonens", 1)>]
     // find references to arguments that have justifications
-    [<DataRow("04", "6 |-", 0, "1~6 |-, 1~6. 2,4", 1)>]
-    [<DataRow("04a", "6.", 0, "1~6 |-, 1~6. 2,4", 1)>]
-    [<DataRow("05", "4. byax A1 |-", 0, "1~4, 3,, 1~4. byax, 1~T1$1:4 |-", 1)>]
-    [<DataRow("05a", "T1$1:4", 0, "1~4, 3,, 1~4. byax, 1~T1$1:4 |-", 1)>]
+    [<DataRow("04", "6 |-", 0, "1~78~6. 2,4, 1~80~6 |-", 1)>]
+    [<DataRow("04a", "6.", 0, "1~78~6. 2,4, 1~80~6 |-", 1)>]
+    [<DataRow("05", "4. byax A1 |-", 0, "1~56~4. byax, 1~58~4, 3,, 1~81~T1$1:4 |-", 1)>]
+    [<DataRow("05a", "T1$1:4", 0, "1~56~4. byax, 1~58~4, 3,, 1~81~T1$1:4 |-", 1)>]
     // find references to arguments that have no justifications
-    [<DataRow("06", "1,2, byinf ModusPonens |-", 0, "1~1,2, byinf, 1~1: ass, 1~T2$1:1 |-", 1)>]
-    [<DataRow("06a", "1:", 0, "1~1,2, byinf, 1~1: ass, 1~T2$1:1 |-", 1)>]
+    [<DataRow("06", "1,2, byinf ModusPonens |-", 0, "1~73~1: ass, 1~75~1,2, byinf, 1~86~T2$1:1 |-", 1)>]
+    [<DataRow("06a", "1:", 0, "1~73~1: ass, 1~75~1,2, byinf, 1~86~T2$1:1 |-", 1)>]
     // cross-file referencing
-    [<DataRow("07", "lem Le", 0, "1~lem Le, 2~Le, Pr, 2~cor Le$1", 1)>]
-    [<DataRow("07a", "Le, Pr", 0, "1~lem Le, 2~Le, Pr, 2~cor Le$1", 2)>]
-    [<DataRow("08", "conj Co", 0, "1~conj Co, 2~byconj Co", 1)>]
-    [<DataRow("08a", "byconj Co", 0, "1~conj Co, 2~byconj Co", 2)>]
-    [<DataRow("09", "cor Le$1", 0, "1~lem Le, 2~bycor Le$1, 2~cor Le$1", 2)>] // find references of a corollary includes its parent (here: lemma), bycor Le$1, and the corollary itself
-    [<DataRow("09a", "bycor Le$1", 0, "2~bycor Le$1, 2~cor Le$1", 2)>] // find references of bycor includes its parent (here: corollary), and itself
-    [<DataRow("10", "cor Le$1$2", 0, "2~cor Le$1, 2~cor Le$1$2, 2~bycor Le$1$2", 2)>] // find references of a subcorollary includes its parent (here: corollary), itself, and bycor Le$1$2
-    [<DataRow("10a", "bycor Le$1$2", 0, "2~cor Le$1$2, 2~bycor Le$1$2", 2)>] // find references of bycor subcorollary finds the subcorollary and itself
+    [<DataRow("07", "lem Le", 0, "1~91~lem Le, 2~4~cor Le$1, 2~11~Le, Pr", 1)>]
+    [<DataRow("07a", "Le, Pr", 0, "1~91~lem Le, 2~4~cor Le$1, 2~11~Le, Pr", 2)>]
+    [<DataRow("08", "conj Co", 0, "1~93~conj Co, 2~10~byconj Co", 1)>]
+    [<DataRow("08a", "byconj Co", 0, "1~93~conj Co, 2~10~byconj Co", 2)>]
+    [<DataRow("09", "cor Le$1", 0, "1~91~lem Le, 2~4~cor Le$1, 2~5~cor Le$1$2, 2~9~bycor Le$1, 2~13~bycor Le$1", 2)>] 
+    [<DataRow("09a", "bycor Le$1", 0, "2~4~cor Le$1, 2~9~bycor Le$1, 2~12~bycor Le$1", 2)>] 
+    [<DataRow("10", "cor Le$1$2", 0, "2~4~cor Le$1, 2~5~cor Le$1$2, 2~7~prf Le$1$2$1, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
+    [<DataRow("10a", "bycor Le$1$2", 0, "2~5~cor Le$1$2, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
     
     [<TestMethod>]
-    member _.TestFindReferencesLines(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string, where:int) =
+    member _.TestFindReferences(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string, where:int) =
 
         let (cursorLine, cursorColumn, cursorNode) = assertPrepareWorked cursorAnchor cursorOffset where 
 
@@ -68,17 +67,17 @@ type TestFindReferences() =
 
         let actual =
             references
+            |> List.sortBy (fun node -> (node.FilePath.Contains("TestSecondCode"), node.StartPos.Line))
             |> List.map (fun node ->
                 if node.FilePath.Contains("TestFirstCode") then
                     let minCutOff = min 100 (fplFirstCode.Length - (int)node.StartPos.Index)
-                    $"1~{firstRelevantTokens( fplFirstCode.Substring((int)node.StartPos.Index, minCutOff) )}"
+                    $"1~{node.StartPos.Line}~{firstRelevantTokens( fplFirstCode.Substring((int)node.StartPos.Index, minCutOff) )}"
                 elif node.FilePath.Contains("TestSecondCode") then
                     let minCutOff = min 100 (fplSecondCode.Length - (int)node.StartPos.Index)
-                    $"2~{firstRelevantTokens( fplSecondCode.Substring((int)node.StartPos.Index, minCutOff) )}"
-                else 
+                    $"2~{node.StartPos.Line}~{firstRelevantTokens( fplSecondCode.Substring((int)node.StartPos.Index, minCutOff) )}"
+                else
                     failwith $"Unspecified theory {node.FilePath}"
             )
-            |> List.sort
             |> List.map (fun f -> $"{f}")
             |> String.concat ", "
 

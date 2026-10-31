@@ -122,12 +122,47 @@ let cursorTargetNode (cursorNode: FplGenericNode) : FplGenericNode =
 /// </remarks>
 let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>) =
     let target = cursorTargetNode cursorNode
-    let declaration =
-        match resolveDeclaration target with
-        | Some resolved -> resolved
-        | None -> target
-    let index = buildReferenceIndex nodes
-    let references =
-        findReferences index declaration
-        |> List.filter (fun node -> not (obj.ReferenceEquals(node, declaration)))
-    declaration :: references
+    match target with
+    | :? FplJustificationItemByCor ->
+        // class C: a bycor cursor lists the corollary it refers to and itself
+        (Option.toList (resolveDeclaration target)) @ [target]
+    | _ ->
+        // proofs and corollaries are their own declarations here (class B),
+        // all other nodes resolve as before
+        let declaration =
+            match target with
+            | :? FplProof
+            | :? FplCorollary -> target
+            | _ -> defaultArg (resolveDeclaration target) target
+
+        let parentNodes =
+            match declaration with
+            | :? FplProof
+            | :? FplCorollary ->
+                match declaration.Parent with
+                | Some parent when not (parent :? FplRoot) && not (parent :? FplTheory) -> [parent]
+                | _ -> []
+            | _ -> []
+
+        // class A: nodes that refer to the declaration
+        let referencing =
+            nodes
+            |> Seq.filter (fun node ->
+                match node.RefersTo with
+                | Some refersTo -> obj.ReferenceEquals(refersTo, declaration)
+                | None -> false)
+            |> List.ofSeq
+
+        // class B: proofs and corollaries embedded as children
+        let children =
+            nodes
+            |> Seq.filter (fun node ->
+                (node :? FplProof || node :? FplCorollary)
+                && (match node.Parent with
+                    | Some parent -> obj.ReferenceEquals(parent, declaration)
+                    | None -> false))
+            |> List.ofSeq
+
+        let seen = HashSet<FplGenericNode>(HashIdentity.Reference)
+        (parentNodes @ [declaration] @ children @ referencing)
+        |> List.filter (fun node -> seen.Add node)

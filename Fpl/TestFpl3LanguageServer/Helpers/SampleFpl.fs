@@ -119,6 +119,8 @@ let fplSecondCode = """
         2. byconj Co |- true
         3. Le, Pr |- true
         4. bycor Le$1$2 |- true
+        5. bycor Le$1 |- true
+        6. bycor Le$1$2 |- true
     }
     """
 
