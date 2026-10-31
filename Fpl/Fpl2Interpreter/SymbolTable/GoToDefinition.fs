@@ -5,6 +5,7 @@ module Fpl2Interpreter.SymbolTable.GoToDefinition
 
 open System.Collections.Generic
 open Fpl2Interpreter.BasicTypes
+open Fpl2Interpreter.SymbolTable.ExpressionMatching
 open Fpl2Interpreter.SymbolTable.Types1.TopLevel
 open Fpl2Interpreter.SymbolTable.Types2.Definitions
 open Fpl2Interpreter.SymbolTable.Types3.PredicativeBlocks
@@ -123,12 +124,24 @@ let cursorTargetNode (cursorNode: FplGenericNode) : FplGenericNode =
 let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>) =
     let target = cursorTargetNode cursorNode
     match target with
-    | :? FplJustificationItemByCor ->
-        // class C: a bycor cursor lists the corollary it refers to and itself
-        (Option.toList (resolveDeclaration target)) @ [target]
+    | :? FplGenericJustificationItem ->
+        // justification items: X.RefersTo.Value, X, and all N of the same F# class with N.RefersTo = X.RefersTo
+        match target.RefersTo with
+        | Some refersTo ->
+            let sameClassReferences =
+                nodes
+                |> Seq.filter (fun node ->
+                    node.GetType() = target.GetType()
+                    && (match node.RefersTo with
+                        | Some r -> obj.ReferenceEquals(r, refersTo)
+                        | None -> false))
+                |> List.ofSeq
+            let seen = HashSet<FplGenericNode>(HashIdentity.Reference)
+            (refersTo :: target :: sameClassReferences)
+            |> List.filter (fun node -> seen.Add node)
+        | None -> [target]
     | _ ->
-        // proofs and corollaries are their own declarations here (class B),
-        // all other nodes resolve as before
+        // proofs and corollaries are their own declarations here, all other nodes resolve as before
         let declaration =
             match target with
             | :? FplProof
@@ -144,7 +157,7 @@ let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>)
                 | _ -> []
             | _ -> []
 
-        // class A: nodes that refer to the declaration
+        // nodes that refer to the declaration
         let referencing =
             nodes
             |> Seq.filter (fun node ->
@@ -153,7 +166,7 @@ let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>)
                 | None -> false)
             |> List.ofSeq
 
-        // class B: proofs and corollaries embedded as children
+        // proofs and corollaries embedded as children
         let children =
             nodes
             |> Seq.filter (fun node ->

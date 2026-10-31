@@ -43,17 +43,17 @@ type TestFindReferences() =
     [<DataRow("04", "6 |-", 0, "1~78~6. 2,4, 1~80~6 |-", 1)>]
     [<DataRow("04a", "6.", 0, "1~78~6. 2,4, 1~80~6 |-", 1)>]
     [<DataRow("05", "4. byax A1 |-", 0, "1~56~4. byax, 1~58~4, 3,, 1~81~T1$1:4 |-", 1)>]
-    [<DataRow("05a", "T1$1:4", 0, "1~56~4. byax, 1~58~4, 3,, 1~81~T1$1:4 |-", 1)>]
+    [<DataRow("05a", "T1$1:4", 0, "1~56~4. byax, 1~81~T1$1:4 |-", 1)>]
     // find references to arguments that have no justifications
     [<DataRow("06", "1,2, byinf ModusPonens |-", 0, "1~73~1: ass, 1~75~1,2, byinf, 1~86~T2$1:1 |-", 1)>]
     [<DataRow("06a", "1:", 0, "1~73~1: ass, 1~75~1,2, byinf, 1~86~T2$1:1 |-", 1)>]
     // cross-file referencing
     [<DataRow("07", "lem Le", 0, "1~91~lem Le, 2~4~cor Le$1, 2~11~Le, Pr", 1)>]
-    [<DataRow("07a", "Le, Pr", 0, "1~91~lem Le, 2~4~cor Le$1, 2~11~Le, Pr", 2)>]
+    [<DataRow("07a", "Le, Pr", 0, "1~91~lem Le, 2~11~Le, Pr", 2)>]
     [<DataRow("08", "conj Co", 0, "1~93~conj Co, 2~10~byconj Co", 1)>]
     [<DataRow("08a", "byconj Co", 0, "1~93~conj Co, 2~10~byconj Co", 2)>]
     [<DataRow("09", "cor Le$1", 0, "1~91~lem Le, 2~4~cor Le$1, 2~5~cor Le$1$2, 2~9~bycor Le$1, 2~13~bycor Le$1", 2)>] 
-    [<DataRow("09a", "bycor Le$1", 0, "2~4~cor Le$1, 2~9~bycor Le$1, 2~12~bycor Le$1", 2)>] 
+    [<DataRow("09a", "bycor Le$1", 0, "2~4~cor Le$1, 2~9~bycor Le$1, 2~13~bycor Le$1", 2)>] 
     [<DataRow("10", "cor Le$1$2", 0, "2~4~cor Le$1, 2~5~cor Le$1$2, 2~7~prf Le$1$2$1, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
     [<DataRow("10a", "bycor Le$1$2", 0, "2~5~cor Le$1$2, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
     
