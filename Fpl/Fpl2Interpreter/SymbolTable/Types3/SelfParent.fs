@@ -69,6 +69,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
     ///   - <c>ID021</c> for duplicate parent-constructor calls,
     ///   - <c>ID022</c> for invalid parameter usage for intrinsic classes,
     ///   - <c>ID017</c> when the referenced base class is missing or unresolved.
+    ///   - <c>ID028</c> when the base constructor call is misplaced.
     /// </remarks>
     override this.CheckConsistency() = 
         base.CheckConsistency()
