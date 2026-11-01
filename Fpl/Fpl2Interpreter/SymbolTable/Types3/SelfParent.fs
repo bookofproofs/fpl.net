@@ -13,6 +13,7 @@
 /// lightweight because their main purpose is symbol-table semantics and diagnostics.
 /// </remarks>
 module Fpl2Interpreter.SymbolTable.Types3.SelfParent
+open System
 open Fpl0Base.Primitives
 open Fpl0Base.Errors.Messages
 open Fpl0Base.Errors.Emitter
@@ -88,54 +89,58 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
 
         match outerClassOpt with
         | Some (:? FplClass as outerClass) ->
-            let baseClassObjectOpt = 
-                outerClass.ArgList 
-                |> Seq.filter (fun pc -> pc.FplId = this.FplId)
-                |> Seq.tryHead
-                |> Option.map (fun (pc:FplGenericNode) -> pc :?> FplBase)
-
-            let classCandidates =
-                outerClass.ArgList
-                |> Seq.map (fun fv ->
-                    match fv.RefersTo with
-                    | Some cl -> qualifiedNameSimple cl
-                    | None -> $"unknown class `{fv.FplId}`")
-                |> Seq.sort |> numbered
-
-            match baseClassObjectOpt with 
-            | Some baseClassObject ->
-                match baseClassObject.RefersTo with
-                | Some baseClass ->
-                    // now, try to match a constructor of the parentClass based on the signature of this base constructor call
-                    match baseClass.IsIntrinsic, this.ArgList.Count with
-                    | true, 0 ->
-                        // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 parameters
-                        // add "default constructor reference"
-                        let defaultConstructor = new FplDefaultConstructor(baseClass.FplId, (this.StartPos, this.EndPos), this)
-                        defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
-                        defaultConstructor.ToBeConstructedClass <- Some baseClass
-                        registerParentConstructor()
-                    | true, _ ->
-                        // the call uses parameters that are not possible for calling a non-existing constructor 
-                        // obj() or an intrinsic class
-                        this.ErrorOccurred <- emitID022Diagnostics baseClass.FplId this.StartPos this.EndPos
-                    | false, _ ->
-                        let parentClass = baseClass :?> FplClass
-                        let constructors = parentClass.GetConstructors()
-                        match checkSIG04Diagnostics this constructors with
-                        | Some ctor ->
-                            let name = ctor.Type SignatureType.Mixed
-                            this.Scope.TryAdd(name, ctor) |> ignore
-                        | None -> ()
-                        registerParentConstructor()
-                | None ->
-                    // The base class is syntactically present, but the declaration is unresolved.
-                    // Still count the constructor invocation so ID020 is not raised incorrectly.
-                    registerParentConstructor()
-                    this.ErrorOccurred <- emitID017Diagnostics this.FplId classCandidates true this.StartPos this.EndPos
+            match enclosingConstructorOpt with
+            | Some (:? FplClass as outerClass1) when Object.ReferenceEquals(outerClass, outerClass1)->
+                this.ErrorOccurred <- emitID028Diagnostics this.FplId this.StartPos
             | _ ->
-                    this.ErrorOccurred <- emitID017Diagnostics this.FplId classCandidates true this.StartPos this.EndPos
-                    registerParentConstructor()
+                let baseClassObjectOpt = 
+                    outerClass.ArgList 
+                    |> Seq.filter (fun pc -> pc.FplId = this.FplId)
+                    |> Seq.tryHead
+                    |> Option.map (fun (pc:FplGenericNode) -> pc :?> FplBase)
+
+                let classCandidates =
+                    outerClass.ArgList
+                    |> Seq.map (fun fv ->
+                        match fv.RefersTo with
+                        | Some cl -> qualifiedNameSimple cl
+                        | None -> $"unknown class `{fv.FplId}`")
+                    |> Seq.sort |> numbered
+
+                match baseClassObjectOpt with 
+                | Some baseClassObject ->
+                    match baseClassObject.RefersTo with
+                    | Some baseClass ->
+                        // now, try to match a constructor of the parentClass based on the signature of this base constructor call
+                        match baseClass.IsIntrinsic, this.ArgList.Count with
+                        | true, 0 ->
+                            // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 parameters
+                            // add "default constructor reference"
+                            let defaultConstructor = new FplDefaultConstructor(baseClass.FplId, (this.StartPos, this.EndPos), this)
+                            defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
+                            defaultConstructor.ToBeConstructedClass <- Some baseClass
+                            registerParentConstructor()
+                        | true, _ ->
+                            // the call uses parameters that are not possible for calling a non-existing constructor 
+                            // obj() or an intrinsic class
+                            this.ErrorOccurred <- emitID022Diagnostics baseClass.FplId this.StartPos this.EndPos
+                        | false, _ ->
+                            let parentClass = baseClass :?> FplClass
+                            let constructors = parentClass.GetConstructors()
+                            match checkSIG04Diagnostics this constructors with
+                            | Some ctor ->
+                                let name = ctor.Type SignatureType.Mixed
+                                this.Scope.TryAdd(name, ctor) |> ignore
+                            | None -> ()
+                            registerParentConstructor()
+                    | None ->
+                        // The base class is syntactically present, but the declaration is unresolved.
+                        // Still count the constructor invocation so ID020 is not raised incorrectly.
+                        registerParentConstructor()
+                        this.ErrorOccurred <- emitID017Diagnostics this.FplId classCandidates true this.StartPos this.EndPos
+                | _ ->
+                        this.ErrorOccurred <- emitID017Diagnostics this.FplId classCandidates true this.StartPos this.EndPos
+                        registerParentConstructor()
         | _ ->
             // this case never happens, 
             // if so the bug will become apparent by failing to call the parent class constructor

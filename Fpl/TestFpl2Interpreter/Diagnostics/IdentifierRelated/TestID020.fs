@@ -31,6 +31,8 @@ type TestID020() =
     [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Obj(); } }", 1)>]
     [<DataRow("04a", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } }", 0)>]
     [<DataRow("05", "def cl A2:B2 { ctor A2() {dec base.B2(); } }", 0)>]
+    // calling base constructor should not be allowed outside a constructor but this should trigger ID028 instead
+    [<DataRow("06", "def class Cls def class Sub : Cls { dec base.Cls(); ctor Sub() { } }", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures", 0)>]
     [<TestMethod>]
     member this.TestID020(no:string, fplCode:string, expected) =

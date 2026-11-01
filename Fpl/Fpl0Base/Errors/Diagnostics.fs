@@ -87,6 +87,7 @@ type DiagnosticCode =
     | ID024 of string * string
     | ID025 of string * string
     | ID027 of string
+    | ID028 of string 
     // logic-related error codes
     | LG001 of string * string * string
     | LG002 of string * int
@@ -196,6 +197,7 @@ type DiagnosticCode =
             | ID024 _ -> "ID024"
             | ID025 _ -> "ID025"
             | ID027 _ -> "ID027"
+            | ID028 _ -> "ID028"
             // logic-related error codes
             | LG001 _ -> "LG001"
             | LG002 _ -> "LG002"
@@ -307,6 +309,7 @@ type DiagnosticCode =
             | ID024 (signature, conflict) -> errID024 signature conflict
             | ID025 (candidate, nodeType)  -> errID025 candidate nodeType
             | ID027 name -> errID027 name
+            | ID028 name -> errID028 name
             // logic-related error codes
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> errLG001 typeOfPredicate argument typeOfExpression
             | LG002 (nodeTypeName, times) -> errLG002 nodeTypeName times

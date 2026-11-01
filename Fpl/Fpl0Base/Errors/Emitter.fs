@@ -541,6 +541,25 @@ let emitID027Diagnostics name pos1 pos2 =
     Some (diagnostic.Code.Code)
 
 /// <summary>
+/// Emit ID028 diagnostic at a single position (start=end).
+/// </summary>
+/// <param name="identifier">Identifier involved.</param>
+/// <param name="pos1">Position for the diagnostic (used as both start and end).</param>
+/// <returns>Some diagnostic code string when emitted.</returns>
+let emitID028Diagnostics identifier pos1 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos1
+            Diagnostic.Code = ID028 identifier
+        }
+    diagnosticsContainer.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+/// <summary>
 /// Emit LG001 diagnostic when a predicate is applied to an argument of the wrong type.
 /// </summary>
 /// <param name="argType">Type of the argument expression.</param>

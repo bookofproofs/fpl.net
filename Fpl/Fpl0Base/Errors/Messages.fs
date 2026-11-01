@@ -221,6 +221,8 @@ let errID025 candidate nodeType = $"Cannot reference {candidate} inside {nodeTyp
 /// <summary>Illegal recursion in for statement diagnostic.</summary>
 let errID027 name = $"Illegal recursion detected in `for` statement. The entity `{name}` cannot serve as its own iteration domain."
 
+/// <summary>Illegal recursion in for statement diagnostic.</summary>
+let errID028 name = $"Base constructor `{name}` was called outside a constructor. Move the call into the body of a constructor."
 
 // logic-related error codes
 
