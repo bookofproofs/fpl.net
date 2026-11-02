@@ -1,0 +1,1 @@
+    def class Cls def class Sub : Cls { dec x:Cls x:=Cls() ; ctor Sub() { } }

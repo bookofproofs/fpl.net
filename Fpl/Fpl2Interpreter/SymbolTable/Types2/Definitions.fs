@@ -10,6 +10,7 @@
 /// than throwing exceptions.
 /// </remarks>
 module Fpl2Interpreter.SymbolTable.Types2.Definitions
+open System
 open System.Collections.Generic
 open FParsec
 open Fpl1Parser.Types
@@ -524,12 +525,21 @@ type FplConstructor(positions: Positions, parent: FplGenericNode) as this =
     override this.CheckConsistency () = 
         base.CheckConsistency()
         // check if the constructor calls all necessary parent classes
-        let parentClassOpt = this.UltimateBlockNode
-        match parentClassOpt with
-        | Some (:? FplClass as parentClass) ->
-            parentClass.ArgList 
+        let outerClassOpt = this.UltimateBlockNode
+        match outerClassOpt with
+        | Some (:? FplClass as outerClass) ->
+            let misplacedBaseConstructorCalls = HashSet<string>()
+            // the class body should not call base constructor calls, if it does, we collect these calls
+            outerClass.ArgList
+            |> Seq.filter (fun fv -> fv.Name = PrimBaseConstructorCall)
+            |> Seq.iter (fun fv -> misplacedBaseConstructorCalls.Add fv.FplId |> ignore)
+
+            // The constructor's parent constructor calls should call all base classes constructors.
+            // Issue ID020, if it doesn't, except there was a misplaced call (that would issue ID028, and ID020 would be a false-positive in this case)
+            outerClass.ArgList 
+            |> Seq.filter (fun fv -> fv.Name = LiteralBase)
             |> Seq.iter (fun fv -> 
-                if not (this.ParentConstructorCalls.Contains fv.FplId) then
+                if not (this.ParentConstructorCalls.Contains fv.FplId) && not (misplacedBaseConstructorCalls.Contains fv.FplId) then
                     fv.ErrorOccurred <- emitID020Diagnostics fv.FplId fv.StartPos
             )
         | _ -> ()
@@ -584,7 +594,7 @@ and FplClass(positions: Positions, parent: FplGenericNode, runOrder) as this =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
     override this.IsClass () = true
-    
+
     /// <summary>
     /// Return the list of constructors declared in this class.
     /// </summary>
