@@ -343,94 +343,6 @@ let checkVAR04Diagnostics (fv:FplGenericNode) =
     )
 
 /// <summary>
-/// Concrete variable node used for ordinary variables.
-/// </summary>
-/// <param name="fplId">Variable name.</param>
-/// <param name="positions">Source positions for diagnostics.</param>
-/// <param name="parent">Parent AST/symbol node.</param>
-type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericVariable(fplId, positions, parent)
-    let mutable _isExpressionAssigned = false
-
-    override this.Name = PrimVariableL
-
-    override this.ShortName = PrimVariable
-
-
-    /// <summary>
-    /// Indicates whether this variable has been assigned an expression in the symbol table.
-    /// </summary>
-    /// <remarks>
-    /// If true, <c>RefersTo</c> points to the expression node assigned to this variable.
-    /// </remarks>
-    member this.IsExpressionAssigned
-        with get () = _isExpressionAssigned
-        and set (value) = 
-            _isExpressionAssigned <- value
-
-    /// <summary>
-    /// Creates a deep copy of this variable preserving binding, usage and initialization state.
-    /// </summary>
-    /// <returns>A cloned <c>FplVariable</c>.</returns>
-    override this.Clone () =
-        let ret = new FplVariable(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        if this.IsBound then 
-            ret.SetIsBound()
-        if this.IsUsed then 
-            ret.SetIsUsed()
-        ret.IsSignatureVariable <- this.IsSignatureVariable 
-        ret.IsInitialized <- this.IsInitialized
-        ret
-
-    /// <summary>
-    /// Sets the runtime value for this variable and applies template usage checks when relevant.
-    /// </summary>
-    /// <param name="fv">Value node to assign.</param>
-    /// <remarks>
-    /// If the variable refers to a template (<c>FplIntrinsicTpl</c>), this triggers
-    /// template usage consistency checks (SIG12).
-    /// </remarks>
-    override this.SetValue fv =
-        base.SetValue fv
-        // if the type of a variable is a template, check for SIG12 consistency of all assigned values (if any)
-        match this.RefersTo with 
-        | Some (:? FplIntrinsicTpl as tpl) -> tpl.TrySetTemplateUsage fv (SIG12("", "", "", "").Code)
-        | _ -> ()
-
-    /// <summary>
-    /// Returns a textual representation of the variable's current value or its undecided/declared state.
-    /// </summary>
-    /// <returns>
-    /// - <c>LiteralUndef</c> if the variable type is undefined
-    /// - <c>LiteralUndet</c> if a value exists but the variable is not initialized/bound
-    /// - the representation of the assigned value when initialized or bound
-    /// </returns>
-    override this.Represent() = // done
-        let unsetRepresentation =
-            match this.TypeId with
-            | LiteralUndef -> LiteralUndef
-            | _ -> LiteralUndet 
-        match this.Value with 
-        | None -> unsetRepresentation
-        | Some ref ->
-            let subRepr = ref.Represent()
-            if this.IsInitialized || this.IsBound then 
-                subRepr
-            else
-                unsetRepresentation
-
-    /// <summary>
-    /// Runtime evaluation for the variable node: sets default value if no value is assigned.
-    /// </summary>
-    override this.Run() =
-        StaticDebug.Debug(this,Debug.Start)
-        match this.Value with 
-        | None -> this.SetDefaultValue()
-        | _ -> ()
-        StaticDebug.Debug(this,Debug.Stop)
-
-/// <summary>
 /// Interface for nodes that expose dimensionality and index/type-setting helpers.
 /// </summary>
 type IHasDimensions =
@@ -572,6 +484,123 @@ type FplMapping(positions: Positions, parent: FplGenericNode) as this =
 
     override this.RunOrder = None
 
+[<AbstractClass>]
+/// <summary>
+/// Occurrence of a type identifier in a variable declaration (e.g. <c>Cls</c> in <c>x:Cls</c>).
+/// Positioned at the type identifier, not at the variable name.
+/// </summary>
+type FplGenericVariableWithType(fplId, positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericVariable(fplId, positions, parent)
+    let mutable _typeOccurrence:FplGenericNode option = None
+
+    /// <summary>
+    /// Sets the positioned type occurrence of a type identifier in a variable declaration (e.g. <c>Cls</c> in <c>x:Cls</c>).
+    /// </summary>
+    member this.SetTypeOccurrence (typeNodeOpt:FplGenericNode option, pos1:Position, pos2:Position) =
+        let typeNode = FplMapping((pos1,pos2), this)
+        typeNode.RefersTo <- typeNodeOpt
+        _typeOccurrence <- Some typeNode
+
+    /// <summary>
+    /// Overrides the type occurrence with some other.
+    /// </summary>
+    member this.SetTypeOccurrence (typeNode:FplMapping) =
+        _typeOccurrence <- Some typeNode
+
+    /// <summary>
+    /// Gets the positioned type occurrence of a type identifier in a variable declaration (e.g. <c>Cls</c> in <c>x:Cls</c>).
+    /// </summary>
+    member this.TypeOccurence 
+        with get () = _typeOccurrence
+
+/// <summary>
+/// Concrete variable node used for ordinary variables.
+/// </summary>
+/// <param name="fplId">Variable name.</param>
+/// <param name="positions">Source positions for diagnostics.</param>
+/// <param name="parent">Parent AST/symbol node.</param>
+type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericVariableWithType(fplId, positions, parent)
+    let mutable _isExpressionAssigned = false
+
+    override this.Name = PrimVariableL
+
+    override this.ShortName = PrimVariable
+
+
+    /// <summary>
+    /// Indicates whether this variable has been assigned an expression in the symbol table.
+    /// </summary>
+    /// <remarks>
+    /// If true, <c>RefersTo</c> points to the expression node assigned to this variable.
+    /// </remarks>
+    member this.IsExpressionAssigned
+        with get () = _isExpressionAssigned
+        and set (value) = 
+            _isExpressionAssigned <- value
+
+    /// <summary>
+    /// Creates a deep copy of this variable preserving binding, usage and initialization state.
+    /// </summary>
+    /// <returns>A cloned <c>FplVariable</c>.</returns>
+    override this.Clone () =
+        let ret = new FplVariable(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        if this.IsBound then 
+            ret.SetIsBound()
+        if this.IsUsed then 
+            ret.SetIsUsed()
+        ret.IsSignatureVariable <- this.IsSignatureVariable 
+        ret.IsInitialized <- this.IsInitialized
+        ret
+
+    /// <summary>
+    /// Sets the runtime value for this variable and applies template usage checks when relevant.
+    /// </summary>
+    /// <param name="fv">Value node to assign.</param>
+    /// <remarks>
+    /// If the variable refers to a template (<c>FplIntrinsicTpl</c>), this triggers
+    /// template usage consistency checks (SIG12).
+    /// </remarks>
+    override this.SetValue fv =
+        base.SetValue fv
+        // if the type of a variable is a template, check for SIG12 consistency of all assigned values (if any)
+        match this.RefersTo with 
+        | Some (:? FplIntrinsicTpl as tpl) -> tpl.TrySetTemplateUsage fv (SIG12("", "", "", "").Code)
+        | _ -> ()
+
+    /// <summary>
+    /// Returns a textual representation of the variable's current value or its undecided/declared state.
+    /// </summary>
+    /// <returns>
+    /// - <c>LiteralUndef</c> if the variable type is undefined
+    /// - <c>LiteralUndet</c> if a value exists but the variable is not initialized/bound
+    /// - the representation of the assigned value when initialized or bound
+    /// </returns>
+    override this.Represent() = // done
+        let unsetRepresentation =
+            match this.TypeId with
+            | LiteralUndef -> LiteralUndef
+            | _ -> LiteralUndet 
+        match this.Value with 
+        | None -> unsetRepresentation
+        | Some ref ->
+            let subRepr = ref.Represent()
+            if this.IsInitialized || this.IsBound then 
+                subRepr
+            else
+                unsetRepresentation
+
+    /// <summary>
+    /// Runtime evaluation for the variable node: sets default value if no value is assigned.
+    /// </summary>
+    override this.Run() =
+        StaticDebug.Debug(this,Debug.Start)
+        match this.Value with 
+        | None -> this.SetDefaultValue()
+        | _ -> ()
+        StaticDebug.Debug(this,Debug.Stop)
+
 /// <summary>
 /// Variable array type supporting indexed values and multi-dimensional index types.
 /// </summary>
@@ -583,7 +612,7 @@ type FplMapping(positions: Positions, parent: FplGenericNode) as this =
 /// declaration for dimension index types.
 /// </remarks>
 type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericVariable(fplId, positions, parent)
+    inherit FplGenericVariableWithType(fplId, positions, parent)
     let _dimensionTypes = new List<FplGenericNode>()
     let mutable _dimensionTypesBeingSet = false
     let _valueKeys = new Dictionary<string,int>() // used to store the keys of all values
@@ -609,6 +638,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
     member this.SetType (typeId:string) (typeNodeOpt:FplGenericNode option) pos1 pos2 = 
         if not _dimensionTypesBeingSet then 
             this.TypeId <- $"*{typeId}"
+            this.SetTypeOccurrence(typeNodeOpt, pos1, pos2)
             // TODO prefer RefersTo over Scope when storing the type node of the variable array 
             match typeNodeOpt with 
             | Some typeNode -> this.Scope.TryAdd(typeId, typeNode) |> ignore

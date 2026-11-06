@@ -13,6 +13,7 @@ open Fpl2Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl2Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl2Interpreter.SymbolTable.Types3.Extensions
 open Fpl2Interpreter.SymbolTable.Types4.Proofs
+open Fpl2Interpreter.SymbolTable.Types2.Variables
 
 /// <summary>
 /// Returns the declaration node that the given node refers to, if one exists.
@@ -173,14 +174,25 @@ let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>)
                 | _ -> []
             | _ -> []
 
-        // nodes that refer to the declaration
-        let referencing =
+        // nodes that refer to the declaration; variables are excluded because their RefersTo is
+        // their declared type, which is reported by the type occurrence node at the type identifier
+        let typeOccurences = HashSet<FplGenericNode>(HashIdentity.Reference)
+        let referencingPre =
             nodes
             |> Seq.filter (fun node ->
-                match node.RefersTo with
-                | Some refersTo -> obj.ReferenceEquals(refersTo, declaration)
-                | None -> false)
-            |> List.ofSeq
+                match node with
+                | :? FplVariable as var ->
+                    match var.TypeOccurence with
+                    | Some typeOcc when typeOcc.RefersTo.IsSome && obj.ReferenceEquals(typeOcc.RefersTo.Value, declaration) ->
+                        typeOccurences.Add typeOcc |> ignore
+                        false
+                    | _ -> false
+                | _ ->
+                    match node.RefersTo with
+                    | Some refersTo -> obj.ReferenceEquals(refersTo, declaration)
+                    | None -> false)
+            |> Seq.toList
+        let referencing = referencingPre @ (typeOccurences |> Seq.toList)
 
         // proofs and corollaries embedded as children
         let children =

@@ -122,6 +122,62 @@ let fplSecondCode = """
         5. bycor Le$1 |- true
         6. bycor Le$1$2 |- true
     }
+
+    // group 1: variables used several times
+    axiom A4
+    {
+        dec x, y: pred;
+        (x ⇒ (y ⇒ x)) ⇒ (x ⇒ x)
+    }
+
+    // group 2: predicate used by byDef
+    def pred Q(f: pred) 
+    {
+        f
+    }
+
+    thm T3
+    {
+        dec f: pred;
+        Q(f)
+    }
+
+    prf T3$1
+    {
+        1. bydef Q |- f
+    }
+
+    // group 8: justification referring to a declaration in the second file (invalid by design)
+    prf T3$2
+    {
+        1. byax ExtAx |- true
+    }
+
+    // group 3: functional term (grammar unverified)
+    def func Id(f: pred) -> pred
+    {
+        return f
+    }
+
+    // groups 4 and 5: classes with inheritance and a property (grammar unverified)
+    def class Cls
+    {
+        ctor Cls() { }
+        prty pred Pp() { Id(true) }
+    }
+
+    def class Sub : Cls
+    {
+        dec
+            x:Cls
+            x:=Cls()
+        ;
+        ctor Sub() { dec base.Cls(); }
+        prty func T()->Cls
+    }
+
+    def cl Cl1
+    def pred Cl1Test(x,y,z:Cl1)
     """
 
 /// <summary>

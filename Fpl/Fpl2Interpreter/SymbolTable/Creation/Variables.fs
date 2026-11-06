@@ -9,6 +9,7 @@
 /// The evaluator has side effects on the global <c>heap</c> (evaluation stack, parsed symbol table, scopes).
 /// </remarks>
 module Fpl2Interpreter.SymbolTable.Creation.Variables
+open System.Collections.Generic
 open Fpl0Base.Primitives
 open Fpl1Parser.Types
 open Fpl0Base.Errors.Emitter
@@ -48,6 +49,7 @@ let evalVariables ast =
         let parent = heap.Eval.PeekEvalStack()
         parent.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
         // create all variables of the named variable declaration in the current scope
+        let typeOccurenceOfWholeVariableList = List<FplGenericNode>()
         variableListAst |> List.iter (fun varAst ->
             match variableTypeAst with 
             | Ast.ArrayType((posMan1, posMan2),(mainTypeAst,  indexAllowedTypeListAst)) ->
@@ -63,13 +65,21 @@ let evalVariables ast =
                     indexAllowedTypeListAst |> List.map evalRef.Value |> ignore
                     heap.Eval.PopEvalStack()
                 | _ -> ()
-            | Ast.SimpleVariableType((_, _),simplVariableTypeAst) ->
+            | Ast.SimpleVariableType((posType1, posType2),simplVariableTypeAst) ->
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariable(varName, (varPos1, varPos2), parent)
                     newVar.IsSignatureVariable <- (heap.Helper.InSignatureEvaluation && hasSignature parent)
                     heap.Eval.PushEvalStack(newVar)
                     evalRef.Value simplVariableTypeAst
+                    newVar.SetTypeOccurrence(newVar.RefersTo, posType1, posType2)
+                    // make sure, every variable from the variableList refer (by reference) to the same type occurrence  
+                    match newVar.TypeOccurence with
+                    | Some occurence when typeOccurenceOfWholeVariableList.Count = 0 ->
+                        typeOccurenceOfWholeVariableList.Add occurence
+                    | _ when typeOccurenceOfWholeVariableList.Count = 1 ->
+                        newVar.SetTypeOccurrence(typeOccurenceOfWholeVariableList[0]:?>FplMapping)
+                    | _ -> () // fallback should never happen since first SetTypeOccurence makes newVar.RefersTo to be Some
                     heap.Eval.PopEvalStack()
                 | _ -> ()
             | _ -> ()

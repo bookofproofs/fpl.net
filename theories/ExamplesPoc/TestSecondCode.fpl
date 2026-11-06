@@ -1,3 +1,4 @@
+    
     uses TestFirstCode
 
     cor Le$1 {true}
@@ -62,5 +63,9 @@
             x:Cls
             x:=Cls()
         ;
-        ctor Sub() { }
+        ctor Sub() { dec base.Cls(); }
+        prty func T()->Cls
     }
+
+    def cl Cl1
+    def pred Cl1Test(x,y,z:Cl1)

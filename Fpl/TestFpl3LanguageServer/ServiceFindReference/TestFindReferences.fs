@@ -56,7 +56,42 @@ type TestFindReferences() =
     [<DataRow("09a", "bycor Le$1", 0, "2~4~cor Le$1, 2~9~bycor Le$1, 2~13~bycor Le$1", 2)>] 
     [<DataRow("10", "cor Le$1$2", 0, "2~4~cor Le$1, 2~5~cor Le$1$2, 2~7~prf Le$1$2$1, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
     [<DataRow("10a", "bycor Le$1$2", 0, "2~5~cor Le$1$2, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
+
+    // NOT TESTED YET - group 1: variables (expected value TBD after running)
+    [<DataRow("V01", "(y ⇒ x)", 5, "TBD", 2)>]
+
+    // group 2: predicate and byDef
+    [<DataRow("P01", "pred Q", 5, "2~25~pred Q(f:, 2~38~bydef Q", 2)>]
+    [<DataRow("P01a", "bydef Q", 5, "2~25~pred Q(f:, 2~38~bydef Q", 2)>]
+
+    // group 3: functional term 
+    [<DataRow("F01", "def func Id", 4, "2~48~func Id(f:, 2~57~Id(true) }", 2)>]
+    [<DataRow("F01a", "Id(true)", 1, "2~48~func Id(f:, 2~57~Id(true) }", 2)>]
+
+    // classes 
+    [<DataRow("C01", "class Cls", 0, "2~54~class Cls, 2~60~Cls, 2~63~Cls, 2~67~Cls", 2)>]
+    [<DataRow("C01a", "Sub : Cls", 6, "2~54~class Cls, 2~60~Cls, 2~63~Cls, 2~67~Cls", 2)>]
+    [<DataRow("C02", "cl Cl1", 0, "2~70~cl Cl1, 2~71~Cl1)", 2)>]
+    [<DataRow("C02", "z:Cl1", 2, "2~70~cl Cl1, 2~71~Cl1)", 2)>]
+
+    // properties TODO
+
+    // constructors
     
+    [<DataRow("Co1", "ctor Cls()", 6, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls()", 2)>]
+    [<DataRow("Co1a", "x:=Cls()", 3, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls()", 2)>]
+    [<DataRow("Co1b", "base.Cls()", 6, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls()", 2)>]
+
+    // group 6: proposition as cursor target 
+    [<DataRow("PR01", "prop Pr", 5, "1~89~prop Pr, 2~11~Pr |-", 1)>]
+    [<DataRow("PR01a", "Le, Pr |-", 4, "1~89~prop Pr, 2~11~Pr |-", 2)>]
+
+    // NOT TESTED YET - group 8: reverse multi-file, only the first-file reference is returned
+    [<DataRow("R01", "byax ExtAx", 5, "1~TBD~byax ExtAx", 2)>]
+
+    // NOT TESTED YET - group 10: unresolved reference, only the target itself (line 21 unverified)
+    [<DataRow("U01", "byax NoSuch", 5, "2~21~byax NoSuch", 2)>]
+
     [<TestMethod>]
     member _.TestFindReferences(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string, where:int) =
 
