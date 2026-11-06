@@ -336,7 +336,8 @@ type SymbolTable() =
         _nodesCollector.Nodes
         |> Seq.filter (fun node ->
             this.ContainsCursor node line column
-            && String.Equals(node.FilePath, path, StringComparison.OrdinalIgnoreCase))
+            && String.Equals(node.FilePath, path, StringComparison.OrdinalIgnoreCase)
+            && node.FplId<>String.Empty)
         |> Seq.sortBy (fun n ->
             (n.StartPos.Line, n.StartPos.Column, -n.EndPos.Line, -n.EndPos.Column))
         |> Seq.tryLast

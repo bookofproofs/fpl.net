@@ -130,8 +130,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
                             let constructors = parentClass.GetConstructors()
                             match checkSIG04Diagnostics this constructors with
                             | Some ctor ->
-                                let name = ctor.Type SignatureType.Mixed
-                                this.Scope.TryAdd(name, ctor) |> ignore
+                                this.RefersTo <- Some ctor
                             | None -> ()
                             registerParentConstructor()
                     | None ->

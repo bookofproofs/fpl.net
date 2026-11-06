@@ -78,9 +78,9 @@ type TestFindReferences() =
 
     // constructors
     
-    [<DataRow("Co1", "ctor Cls()", 6, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls()", 2)>]
-    [<DataRow("Co1a", "x:=Cls()", 3, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls()", 2)>]
-    [<DataRow("Co1b", "base.Cls()", 6, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls()", 2)>]
+    [<DataRow("Co1", "ctor Cls()", 6, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls(); }", 2)>]
+    [<DataRow("Co1a", "x:=Cls()", 4, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls(); }", 2)>]
+    [<DataRow("Co1b", "base.Cls()", 6, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls(); }", 2)>]
 
     // group 6: proposition as cursor target 
     [<DataRow("PR01", "prop Pr", 5, "1~89~prop Pr, 2~11~Pr |-", 1)>]
@@ -97,6 +97,7 @@ type TestFindReferences() =
 
         let (cursorLine, cursorColumn, cursorNode) = assertPrepareWorked cursorAnchor cursorOffset where 
 
+        
         let references =
             findReferenceNodes cursorNode.Value heap.SymbolTable.Nodes
 
