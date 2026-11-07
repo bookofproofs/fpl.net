@@ -95,6 +95,19 @@ type TestFindReferences() =
     // group 8: non existing reference
     [<DataRow("R01", "byax ExtAx", 5, "2~44~byax ExtAx", 2)>]
 
+    // infix operation
+    [<DataRow("I01", "pred Inf", 0, "2~76~pred Inf(a,, 2~77~=> y, 2~77~=> z}", 2)>]
+    [<DataRow("I01a", "x => y", 2, "2~76~pred Inf(a,, 2~77~=> y, 2~77~=> z}", 2)>]
+    [<DataRow("I01b", "y => z", 3, "2~76~pred Inf(a,, 2~77~=> y, 2~77~=> z}", 2)>]
+
+    // postfix operation
+    [<DataRow("Pos01", "func Post", 0, "2~79~func Post(a:, 2~80~' }", 2)>]
+    [<DataRow("Pos01a", "x'", 1, "2~79~func Post(a:, 2~80~' }", 2)>]
+
+    // prefix operation
+    [<DataRow("Pre01", "func Pre", 0, "2~82~func Pref(a:, 2~83~-x }", 2)>]
+    [<DataRow("Pre01a", "-x", 0, "2~82~func Pref(a:, 2~83~-x }", 2)>]
+
     [<TestMethod>]
     member _.TestFindReferences(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string, where:int) =
 

@@ -67,5 +67,8 @@
         prty func T()->Cls
     }
 
-    def cl Cl1
-    def pred Cl1Test(x,y,z:Cl1)
+    def cl Cl1 
+    def pred Cl1Test(x,y,z:Cl1) 
+
+    def cl Cl2 symbol "∅" 
+    def pred Cl2Test() { ∅ = ∅ }

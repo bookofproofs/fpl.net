@@ -178,6 +178,19 @@ let fplSecondCode = """
 
     def cl Cl1
     def pred Cl1Test(x,y,z:Cl1)
+
+    def cl Cl2 symbol "∅" 
+    def pred Cl2Test() { ∅ = ∅ }
+
+    def pred Inf(a, b: obj) infix "=>" 1
+    def pred InfTest() { dec x,y,z:obj; x => y => z}
+
+    def func Post(a: obj) -> obj postfix "'" 
+    def pred PostTest() { dec x:obj; x' }
+
+    def func Pref(a: obj) -> obj prefix "-" 
+    def pred PrefTest() { dec x:obj; -x }
+
     """
 
 /// <summary>
