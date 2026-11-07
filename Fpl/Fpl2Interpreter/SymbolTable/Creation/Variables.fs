@@ -136,6 +136,10 @@ let evalVariables ast =
             heap.Eval.PushEvalStack(newVar)
             heap.Eval.PopEvalStack()
         | PrimRefL ->
+            // a reference node is a usage of a name; take the token positions from the AST,
+            // not the positions of the enclosing expression that were used as placeholders
+            fv.StartPos <- pos1
+            fv.EndPos <- pos2
             match box parentFv with 
             | :? IHasDotted as dotted when dotted.DottedChild.IsSome ->
                 fv.FplId <- name

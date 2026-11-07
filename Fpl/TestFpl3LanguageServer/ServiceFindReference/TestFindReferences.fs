@@ -58,12 +58,17 @@ type TestFindReferences() =
     [<DataRow("10", "cor Le$1$2", 0, "2~4~cor Le$1, 2~5~cor Le$1$2, 2~7~prf Le$1$2$1, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
     [<DataRow("10a", "bycor Le$1$2", 0, "2~5~cor Le$1$2, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
 
-    // NOT TESTED YET - group 1: variables (expected value TBD after running)
-    [<DataRow("V01", "(x ⇒ (y ⇒ x))", 1, "TBD", 2)>]
+    // group 1: variables
+    [<DataRow("V01", "x, y:", 0, "2~20~x, y:, 2~21~x ⇒, 2~21~x)) ⇒, 2~21~x ⇒, 2~21~x)", 2)>]
+    [<DataRow("V01a", "(x ⇒ (y ⇒ x))", 1, "2~20~x, y:, 2~21~x ⇒, 2~21~x)) ⇒, 2~21~x ⇒, 2~21~x)", 2)>]
+    [<DataRow("V01b", "y ⇒ x", 4, "2~20~x, y:, 2~21~x ⇒, 2~21~x)) ⇒, 2~21~x ⇒, 2~21~x)", 2)>]
+    [<DataRow("V01c", "x ⇒ x", 0, "2~20~x, y:, 2~21~x ⇒, 2~21~x)) ⇒, 2~21~x ⇒, 2~21~x)", 2)>]
+    [<DataRow("V01d", "x ⇒ x", 4, "2~20~x, y:, 2~21~x ⇒, 2~21~x)) ⇒, 2~21~x ⇒, 2~21~x)", 2)>]
 
     // group 2: predicate and byDef
-    [<DataRow("P01", "pred Q", 5, "2~25~pred Q(f:, 2~38~bydef Q", 2)>]
-    [<DataRow("P01a", "bydef Q", 5, "2~25~pred Q(f:, 2~38~bydef Q", 2)>]
+    [<DataRow("P01", "pred Q", 5, "2~25~pred Q(f:, 2~33~Q(f), 2~38~bydef Q", 2)>]
+    [<DataRow("P01a", "Q(f)", 0, "2~25~pred Q(f:, 2~33~Q(f), 2~38~bydef Q", 2)>]
+    [<DataRow("P01b", "bydef Q", 6, "2~25~pred Q(f:, 2~33~Q(f), 2~38~bydef Q", 2)>]
 
     // group 3: functional term 
     [<DataRow("F01", "def func Id", 4, "2~48~func Id(f:, 2~57~Id(true) }", 2)>]
@@ -87,7 +92,7 @@ type TestFindReferences() =
     [<DataRow("PR01", "prop Pr", 5, "1~89~prop Pr, 2~11~Pr |-", 1)>]
     [<DataRow("PR01a", "Le, Pr |-", 4, "1~89~prop Pr, 2~11~Pr |-", 2)>]
 
-    // NOT TESTED YET - group 8: reverse multi-file, only the first-file reference is returned
+    // group 8: non existing reference
     [<DataRow("R01", "byax ExtAx", 5, "2~44~byax ExtAx", 2)>]
 
     [<TestMethod>]
