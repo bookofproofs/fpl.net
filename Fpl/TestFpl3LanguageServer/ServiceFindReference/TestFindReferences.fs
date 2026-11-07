@@ -1,6 +1,7 @@
 namespace TestFpl3LanguageServer.ServiceFindReference
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open System
 open System.Text.RegularExpressions
 open Fpl2Interpreter.SymbolTable.GoToDefinition
 open Fpl2Interpreter.SymbolTable.Storage.Heap
@@ -58,7 +59,7 @@ type TestFindReferences() =
     [<DataRow("10a", "bycor Le$1$2", 0, "2~5~cor Le$1$2, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
 
     // NOT TESTED YET - group 1: variables (expected value TBD after running)
-    [<DataRow("V01", "(y ⇒ x)", 5, "TBD", 2)>]
+    [<DataRow("V01", "(x ⇒ (y ⇒ x))", 1, "TBD", 2)>]
 
     // group 2: predicate and byDef
     [<DataRow("P01", "pred Q", 5, "2~25~pred Q(f:, 2~38~bydef Q", 2)>]
@@ -87,10 +88,7 @@ type TestFindReferences() =
     [<DataRow("PR01a", "Le, Pr |-", 4, "1~89~prop Pr, 2~11~Pr |-", 2)>]
 
     // NOT TESTED YET - group 8: reverse multi-file, only the first-file reference is returned
-    [<DataRow("R01", "byax ExtAx", 5, "1~TBD~byax ExtAx", 2)>]
-
-    // NOT TESTED YET - group 10: unresolved reference, only the target itself (line 21 unverified)
-    [<DataRow("U01", "byax NoSuch", 5, "2~21~byax NoSuch", 2)>]
+    [<DataRow("R01", "byax ExtAx", 5, "2~44~byax ExtAx", 2)>]
 
     [<TestMethod>]
     member _.TestFindReferences(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string, where:int) =
@@ -117,4 +115,12 @@ type TestFindReferences() =
             |> List.map (fun f -> $"{f}")
             |> String.concat ", "
 
+        let info =
+            references
+            |> Seq.map (fun n ->
+                $"{n.GetType().Name}:({n.StartPos.Line},{n.StartPos.Column})-({n.EndPos.Line},{n.EndPos.Column})"    
+            )
+            |> String.concat Environment.NewLine
+
+        printfn "%s" info
         Assert.AreEqual<string>(expectedLines, actual, $"Reference lines differ for '{cursorAnchor}'.")

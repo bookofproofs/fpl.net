@@ -5,6 +5,7 @@ module Fpl2Interpreter.SymbolTable.GoToDefinition
 
 open System.Collections.Generic
 open Fpl2Interpreter.BasicTypes
+open Fpl2Interpreter.SymbolTable.Types2.References
 open Fpl2Interpreter.SymbolTable.ExpressionMatching
 open Fpl2Interpreter.SymbolTable.Types1.TopLevel
 open Fpl2Interpreter.SymbolTable.Types2.Definitions
@@ -110,6 +111,10 @@ let cursorTargetNode (cursorNode: FplGenericNode) : FplGenericNode =
         match cursorNode.Parent with
         | Some argument -> argument
         | None -> cursorNode
+    | :? FplReference ->
+        match cursorNode.RefersTo with
+        | Some ref -> ref
+        | None -> cursorNode
     | _ -> cursorNode
 
 
@@ -161,6 +166,7 @@ let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>)
         // proofs and corollaries are their own declarations here, all other nodes resolve as before
         let declaration =
             match target with
+            | :? FplGenericVariable
             | :? FplProof
             | :? FplCorollary -> target
             | _ -> defaultArg (resolveDeclaration target) target
