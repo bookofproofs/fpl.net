@@ -18,7 +18,7 @@ open Fpl3LanguageServer.Buffers.DocSync
 open Fpl3LanguageServer.Buffers.SettingsStore
 open Fpl3LanguageServer.ServicesDiagnostics.Diags
 open Fpl3LanguageServer.ServiceAutoCompletion.Handler
-open Fpl3LanguageServer.ServiceFormatting.Handler
+open Fpl3LanguageServer.ServiceFormatting.FormattingHandler
 open Fpl3LanguageServer.ServiceGoToDefinition.GoToDefinitionHandler
 open Fpl3LanguageServer.ServiceFindReferences.FindReferencesHandler
 

@@ -1,4 +1,4 @@
-module Fpl3LanguageServer.ServiceFormatting.Handler
+module Fpl3LanguageServer.ServiceFormatting.FormattingHandler
 open System.Threading
 open System.Threading.Tasks
 open OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities
