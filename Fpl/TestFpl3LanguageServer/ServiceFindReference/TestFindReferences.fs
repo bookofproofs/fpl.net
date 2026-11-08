@@ -134,6 +134,8 @@ type TestFindReferences() =
     [<DataRow("IS01", "cl IsCl", 3, "2~107~cl IsCl, 2~108~IsCl)}", 2)>]
     [<DataRow("IS01a", "is(x,IsCl)", 5, "2~107~cl IsCl, 2~108~IsCl)}", 2)>]
 
+    // TODO: Alias
+
     [<TestMethod>]
     member _.TestFindReferences(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string, where:int) =
 

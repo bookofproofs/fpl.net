@@ -145,9 +145,14 @@ let evalPredicates ast =
         heap.Eval.PushEvalStack(operand)
         evalRef.Value isOpArgAst
         heap.Eval.PopEvalStack()
-        fvNew.ArgList |> Seq.iter checkSY010 
+        fvNew.ArgList |> Seq.iter checkSY010
         let typeOfOperand = new FplMapping((pos1, pos2), fvNew) 
         heap.Eval.PushEvalStack(typeOfOperand)
+        match variableTypeAst with
+        | Ast.SimpleVariableType ((posType1,posType2),_) ->
+            typeOfOperand.StartPos <- posType1
+            typeOfOperand.EndPos <- posType2
+        | _ -> ()
         evalRef.Value variableTypeAst
         heap.Eval.PopEvalStack()
         heap.Eval.PopEvalStack()
