@@ -143,6 +143,7 @@ let private isSameJustificationKind (a: FplGenericNode) (b: FplGenericNode) : bo
 /// <remarks>
 /// If the cursor target does not resolve to a declaration, it is treated as the declaration itself.
 /// The index is built on each call, so results never depend on earlier evaluations.
+/// This implementation always includes the declaration, if one exists.
 /// </remarks>
 let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>) =
     let target = cursorTargetNode cursorNode
