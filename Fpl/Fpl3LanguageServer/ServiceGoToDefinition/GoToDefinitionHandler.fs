@@ -1,4 +1,4 @@
-module Fpl3LanguageServer.ServiceGoToDefinition.Handler
+module Fpl3LanguageServer.ServiceGoToDefinition.GoToDefinitionHandler
 open System
 open System.IO
 open System.Threading
