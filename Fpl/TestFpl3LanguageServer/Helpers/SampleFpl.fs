@@ -191,7 +191,27 @@ let fplSecondCode = """
     def func Pref(a: obj) -> obj prefix "-" 
     def pred PrefTest() { dec x:obj; -x }
 
-    """
+    // group 9: properties (FplMandatoryPredicate and FplMandatoryFunctionalTerm)
+    def cl PropCl {intr prty pred PropP() }
+    def pred PropTest() { dec x:PropCl; x.PropP() }
+    def cl PropFuncCl {intr prty func PropF()->obj }
+    def pred PropFuncTest() { dec x:PropFuncCl; x.PropF() }
+
+    // group 10: extensions (FplExtension and FplExtensionObj)
+    ext Digits x @ /\d+/ -> N {return x}
+    def pred ExtTest() {@1}
+
+    // group 11: array type occurrences (main types, involve FplVariableArray)
+    def cl ArrCl {intr}
+    def pred ArrTypeTest() {dec arr:*ind[ArrCl]; true}
+
+    // group 12: array type occurrences (including index references)
+    def cl ArrIdx {intr}
+    def pred ArrIdxTest() {dec i:ArrIdx arr:*ind[obj] arr[i]:=undef; true}
+
+    // group 13: array variable references (involve FplVariableArray)
+    def pred ArrVarTest() {dec i,j:ind x:*pred[ind,ind] x[i,j]:=x[j,i]; true}
+"""
 
 /// <summary>
 /// Converts a unique anchor text plus an offset inside it into a 1-based (line, column) position.

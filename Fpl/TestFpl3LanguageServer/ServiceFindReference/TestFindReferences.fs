@@ -81,11 +81,24 @@ type TestFindReferences() =
     [<DataRow("C02", "cl Cl1", 0, "2~70~cl Cl1, 2~71~Cl1)", 2)>]
     [<DataRow("C02a", "z:Cl1", 3, "2~70~cl Cl1, 2~71~Cl1)", 2)>]
 
-    // properties (involve FplMandatoryPredicate and FplMandatoryFunctionalTerm) TODO
-    // extensions (involve FplExtension and FplExtensionObj) TODO
-    // array type occurrences (main types, involve FplVariableArray) TODO
-    // array type occurrences (including index references, involve FplVariableArray) TODO
-    // array variable references (involve FplVariableArray) TODO
+    // group 9: properties (FplMandatoryPredicate and FplMandatoryFunctionalTerm)
+    [<DataRow("Pp01", "prty pred PropP", 10, "2~86~prty pred, 2~87~x.PropP() }", 2)>]
+    [<DataRow("Pp01a", "x.PropP()", 2, "2~86~prty pred, 2~87~x.PropP() }", 2)>]
+    [<DataRow("Pp02", "prty func PropF", 10, "2~88~prty func, 2~89~x.PropF() }", 2)>]
+    [<DataRow("Pp02a", "x.PropF()", 2, "2~88~prty func, 2~89~x.PropF() }", 2)>]
+
+    // group 10: extensions (FplExtension and FplExtensionObj)
+    [<DataRow("Ext01", "ext Digits", 4, "2~92~ext Digits, 2~93~@1}", 2)>]
+    [<DataRow("Ext01a", "@1}", 0, "2~92~ext Digits, 2~93~@1}", 2)>]
+
+    // group 11: array type occurrences (main types, involve FplVariableArray)
+    [<DataRow("Arr01", "cl ArrCl", 3, "2~96~cl ArrCl, 2~97~ArrCl]; true}", 2)>]
+
+    // group 12: array type occurrences (including index references)
+    [<DataRow("Arr02", "cl ArrIdx", 3, "2~100~cl ArrIdx, 2~101~ArrIdx arr:*ind[obj]", 2)>]
+
+    // group 13: array variable references (involve FplVariableArray)
+    [<DataRow("Arr03", "x:*pred[ind,ind]", 0, "2~104~x:*pred[ind,ind] x[i,j]:=x[j,i];, 2~104~x[i,j]:=x[j,i]; true}, 2~104~x[j,i]; true}", 2)>]
 
     // constructors
     [<DataRow("Co1", "ctor Cls()", 6, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls(); }", 2)>]
