@@ -1,3 +1,12 @@
+/// <summary>
+/// Language server handler for the textDocument/definition request (go-to-definition, F12) of FPL files.
+/// </summary>
+/// <remarks>
+/// The handler resolves the symbol-table node under the cursor, maps it to its declaration with
+/// <c>cursorTargetNode</c> and <c>resolveDeclaration</c> from <c>Fpl2Interpreter.SymbolTable.GoToDefinition</c>,
+/// and returns the declaration's location as a <c>LocationOrLocationLinks</c> with one entry.
+/// Positions are converted between the 0-based LSP convention and the 1-based FParsec convention of the symbol table.
+/// </remarks>
 module Fpl3LanguageServer.ServiceGoToDefinition.GoToDefinitionHandler
 open System
 open System.IO
@@ -15,10 +24,16 @@ open Fpl3LanguageServer.Buffers.Logging
 
 /// <summary>
 /// Normalizes a file path so that paths from the editor (backslashes) and from the symbol table
-/// (forward slashes) can be compared. Empty paths stay empty.
+/// (forward slashes) can be compared.
 /// </summary>
-/// <param name="path">File path to normalize.</param>
-/// <returns>Full path with forward slashes and no trailing separator.</returns>
+/// <param name="path">File path to normalize. May be <c>null</c>, empty, or whitespace.</param>
+/// <returns>
+/// The full path with forward slashes and no trailing separator, or an empty string if <paramref name="path"/>
+/// is <c>null</c>, empty, or whitespace.
+/// </returns>
+/// <remarks>
+/// <c>Path.GetFullPath</c> can throw for malformed paths. The function does not catch this exception.
+/// </remarks>
 let private normalizePath (path: string) =
     if String.IsNullOrWhiteSpace path then
         ""
@@ -28,17 +43,45 @@ let private normalizePath (path: string) =
 /// <summary>
 /// Handles textDocument/definition requests by resolving the declaration of the symbol under the cursor.
 /// </summary>
+/// <param name="languageServer">The language server instance used for logging.</param>
+/// <remarks>
+/// The handler registers for files matching <c>**/*.fpl</c>.
+/// </remarks>
 type DefinitionHandler(languageServer: ILanguageServer) =
 
+    /// <summary>
+    /// Document selector that limits the registration to FPL source files.
+    /// </summary>
     let documentSelector = DocumentSelector(DocumentFilter(Pattern = "**/*.fpl"))
 
+    /// <summary>
+    /// The client capability for definitions, stored by <c>SetCapability</c>. The handler does not read it.
+    /// </summary>
     let mutable capability = DefinitionCapability()
 
     interface IDefinitionHandler with
 
+        /// <summary>
+        /// Returns the registration options that tell the client which documents this handler supports.
+        /// </summary>
+        /// <returns>A <c>DefinitionRegistrationOptions</c> with the FPL document selector.</returns>
         member _.GetRegistrationOptions() =
             DefinitionRegistrationOptions(DocumentSelector = documentSelector)
 
+        /// <summary>
+        /// Handles a definition request: finds the node under the cursor, resolves its declaration, and returns
+        /// the declaration's location.
+        /// </summary>
+        /// <param name="request">The request with the document URI and the 0-based cursor position.</param>
+        /// <param name="cancellationToken">Cancellation token of the request. The handler does not check it.</param>
+        /// <returns>
+        /// A task that yields a <c>LocationOrLocationLinks</c> with one location, or an empty result if no
+        /// declaration is found.
+        /// </returns>
+        /// <remarks>
+        /// The method waits in a busy loop until <c>heap.IsEvaluating</c> is false. This blocks the thread that runs
+        /// the task while the interpreter is busy.
+        /// </remarks>
         member _.Handle(request: DefinitionParams, cancellationToken: CancellationToken) : Task<LocationOrLocationLinks> =
             task {
                 logMsg languageServer "Task<LocationOrLocationLinks>" "DefinitionHandler.Handle"
@@ -92,5 +135,12 @@ type DefinitionHandler(languageServer: ILanguageServer) =
                     return LocationOrLocationLinks()
             }
 
+        /// <summary>
+        /// Stores the definition capability that the client reported during initialization.
+        /// </summary>
+        /// <param name="cap">The client's <c>DefinitionCapability</c>.</param>
+        /// <remarks>
+        /// The stored value is not used by <c>Handle</c>. Keep it only if other parts of the server need it.
+        /// </remarks>
         member _.SetCapability(cap: DefinitionCapability) =
             capability <- cap
