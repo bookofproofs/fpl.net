@@ -81,9 +81,11 @@ type TestFindReferences() =
     [<DataRow("C02", "cl Cl1", 0, "2~70~cl Cl1, 2~71~Cl1)", 2)>]
     [<DataRow("C02a", "z:Cl1", 3, "2~70~cl Cl1, 2~71~Cl1)", 2)>]
 
-    // properties TODO
-    // extensions TODO
-    // arrays TODO
+    // properties (involve FplMandatoryPredicate and FplMandatoryFunctionalTerm) TODO
+    // extensions (involve FplExtension and FplExtensionObj) TODO
+    // array type occurrences (main types, involve FplVariableArray) TODO
+    // array type occurrences (including index references, involve FplVariableArray) TODO
+    // array variable references (involve FplVariableArray) TODO
 
     // constructors
     [<DataRow("Co1", "ctor Cls()", 6, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls(); }", 2)>]
@@ -152,11 +154,5 @@ type TestFindReferences() =
             match n.Parent with
             | Some p -> $"{p.GetType().Name}@{p.StartPos.Line}:{p.StartPos.Column}-{p.EndPos.Line}:{p.EndPos.Column}" :: ancestors p
             | None -> []
-
-        printfn "CURSOR-C02a: %s@%d:%d-%d:%d" (cursorNode.Value.GetType().Name) cursorNode.Value.StartPos.Line cursorNode.Value.StartPos.Column cursorNode.Value.EndPos.Line cursorNode.Value.EndPos.Column
-        printfn "ANCESTORS-C02a: %s" (String.Join(" < ", ancestors cursorNode.Value))
-        for n in heap.SymbolTable.Nodes do
-            if n.FplId = "Cl1" then
-                printfn "NODE-Cl1: %s@%d:%d-%d:%d refersTo=%A" (n.GetType().Name) n.StartPos.Line n.StartPos.Column n.EndPos.Line n.EndPos.Column (n.RefersTo |> Option.map (fun r -> r.FplId))
 
         Assert.AreEqual<string>(expectedLines, actual, $"Reference lines differ for '{cursorAnchor}'.")

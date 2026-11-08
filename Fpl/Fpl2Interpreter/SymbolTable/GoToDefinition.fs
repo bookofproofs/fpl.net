@@ -153,7 +153,7 @@ let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>)
             let sameKindReferences =
                 nodes
                 |> Seq.filter (fun node ->
-                    isSameJustificationKind target node
+                    (isSameJustificationKind target node || (node :? FplReference))
                     && (match node.RefersTo with
                         | Some r -> obj.ReferenceEquals(r, refersTo)
                         | None -> false))
