@@ -982,21 +982,21 @@ type Structure() =
         let index = 2 // FplId
         match var with
         | "FplArgInferenceAssume" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplArgInferenceDerived" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplArgInferenceRevoke" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplArgInferenceTrivial" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplArgument" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplAssertion" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplAssignment" ->
             Assert.AreEqual<string>(PrimAssignment, (getName var).[index])
         | "FplAxiom" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplBase" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplBaseConstructorCall" ->
@@ -1010,13 +1010,13 @@ type Structure() =
         | "FplClass" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplConjecture" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplConjunction" ->
             Assert.AreEqual<string>(LiteralAnd, (getName var).[index])        
         | "FplConstructor" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCorollary" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplDecrement" ->
             Assert.AreEqual<string>(PrimDelegateDecrementL, (getName var).[index])        
         | "FplDefaultConstructor" ->
@@ -1058,35 +1058,35 @@ type Structure() =
         | "FplIsOperator" ->
             Assert.AreEqual<string>(LiteralIs, (getName var).[index])        
         | "FplJustification" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplJustificationItemByAx" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplJustificationItemByConj" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplJustificationItemByCor" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplJustificationItemByDef" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplJustificationItemByDefVar" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplJustificationItemByInf" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplJustificationItemByProofArgument" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplJustificationItemByRefArgument" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplJustificationItemByTheoremLikeStmt" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplLanguage" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplLemma" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplLocalization" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
             Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
         | "FplMandatoryPredicate" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplMapCaseElse" ->
             Assert.AreEqual<string>(PrimMapCaseElse, (getName var).[index])
         | "FplMapCaseSingle" ->
@@ -1104,9 +1104,9 @@ type Structure() =
         | "FplPredicateList" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplProof" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplProposition" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplQuantifierAll" ->
             Assert.AreEqual<string>(LiteralAll, (getName var).[index])
         | "FplQuantifierExists" ->
@@ -1124,7 +1124,7 @@ type Structure() =
         | "FplSelf" ->
             Assert.AreEqual<string>(LiteralSelf, (getName var).[index])
         | "FplTheorem" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(String.Empty, (getName var).[index])
         | "FplTheory" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplTranslation" ->
@@ -2073,7 +2073,7 @@ type Structure() =
         | "FplReturn" ->
             Assert.AreEqual<string>(filePath, (getName var).[index])
         | "FplRoot" ->
-            Assert.AreEqual<string>(filePath, (getName var).[index])
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplRuleOfInference" ->
             Assert.AreEqual<string>(filePath, (getName var).[index])
         | "FplSelf" ->

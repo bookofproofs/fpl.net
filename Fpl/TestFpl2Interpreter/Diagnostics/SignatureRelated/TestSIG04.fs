@@ -537,6 +537,9 @@ type TestSIG04() =
     [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}}""", 0)>]    
     [<DataRow("72", "def pred S() {dec parent():=true; true}", 0)>] // SIG04 won't be issued due to preceding errors (ID015)
     [<DataRow("72a", "thm S {dec self():=true; true}", 0)>] // SIG04 won't be issued due to preceding errors (ID015)
+    [<DataRow("73", "def class Cls {} def class Sub : Cls { ctor Sub() { dec base.Cls(); } }", 0)>] // SIG04 is not issued when calling default constructor
+    [<DataRow("73a", "def class Cls {ctor Cls() {}} def class Sub : Cls { ctor Sub() { dec base.Cls(); } }", 0)>] // SIG04 is not issued when calling explicit constructor
+
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =

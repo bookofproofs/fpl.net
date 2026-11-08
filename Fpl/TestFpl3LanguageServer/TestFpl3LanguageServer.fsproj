@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="Helpers\SampleFpl.fs" />
         <Compile Include="MSTestSettings.fs" />
         <Compile Include="FileMgmt\TestPathEquivalentUri.fs" />
         <Compile Include="FileMgmt\TestDotNetDownload.fs" />
@@ -53,6 +54,8 @@
         <Compile Include="ServiceAutoCompletion\TestWord.fs" />
         <Compile Include="ServiceFormatting\TestSettingsTranslation.fs" />
         <Compile Include="ServiceGoToDefinition\TestGoToDefinition.fs" />
+        <Compile Include="ServiceFindReference\TestReferenceIndex.fs" />
+        <Compile Include="ServiceFindReference\TestFindReferences.fs" />
     </ItemGroup>
 
     <ItemGroup>

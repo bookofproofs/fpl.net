@@ -1,156 +1,142 @@
 namespace TestFpl3LanguageServer.ServiceGoToDefinition
 
-open System
-open System.Collections.Generic
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Fpl2Interpreter.BasicTypes
+open TestFpl3LanguageServer.Helpers.SampleFpl
 open Fpl2Interpreter.SymbolTable.GoToDefinition
-open Fpl2Interpreter.SymbolTable.Storage.Heap
-open TestFpl2Interpreter.Helpers.Common
-
 
 
 [<TestClass>]
 type TestGoToDefinitionSameFile () =
+    [<DataRow("01", "byax A1", 5, "axiom A1", 1)>]
+    [<DataRow("02", "byax A2", 5, "axiom A2", 1)>]
+    [<DataRow("03", "3. 1,2,", 3, "1: ass f", 1)>]
 
-    let fplCode = """
-    // auxiliary definitions
-    def pred Impl(f, g: pred) infix "⇒" 0
-    {
-        impl(f,g)
-    }
+    [<DataRow("01", "axiom A1", 0, "axiom A1", 1)>]
+    [<DataRow("01a", "byax A1", 5, "axiom A1", 1)>]
+    [<DataRow("02", "theorem T1", 0,"theorem T1", 1)>]
+    [<DataRow("02a", "proof T1$1", 0, "theorem T1", 1)>]
+    [<DataRow("02b", "cor T1$2", 0, "theorem T1", 1)>]
+    [<DataRow("03", "inf ModusPonens", 0, "inf ModusPonens", 1)>]
+    [<DataRow("03a", "byinf ModusPonens", 0, "inf ModusPonens", 1)>]
+    // find declarations of arguments that have justifications
+    [<DataRow("04", "6 |-", 0, "6. 2,4", 1)>]
+    [<DataRow("04a", "6.", 0, "6. 2,4", 1)>]
+    [<DataRow("05", "4. byax A1 |-", 0, "4. byax A1 ", 1)>]
+    [<DataRow("05a", "T1$1:4", 0, "4. byax A1 ", 1)>]
+    // find references of arguments that have no justifications
+    [<DataRow("06", "1,2, byinf ModusPonens |-", 0, "1: ass f", 1)>]
+    [<DataRow("06a", "1:", 0, "1: ass f", 1)>]
+    // cross-file referencing
+    [<DataRow("07", "lem Le", 0, "lem Le", 1)>]
+    [<DataRow("07a", "Le, Pr", 0, "lem Le", 2)>]
+    [<DataRow("08", "conj Co", 0, "conj Co", 1)>]
+    [<DataRow("08a", "byconj Co", 0, "conj Co", 2)>]
+    [<DataRow("09", "cor Le$1", 0, "lem Le", 2)>] // go-to-definition of corollary reveals its parent node (here lemma)
+    [<DataRow("09a", "bycor Le$1", 0, "cor Le$1 {", 2)>] // bycor corollary goes to its declaration
+    [<DataRow("10", "cor Le$1$2", 0, "cor Le$1 {", 2)>] // go-to-definition of corollary reveals its parent node (here corollary)
+    [<DataRow("10a", "bycor Le$1$2", 0, "cor Le$1$2 {", 2)>] // bycor corollary goes to its declaration
 
- 
-    // weakening rule
-    axiom A1
-    {
-        dec f, g: pred;
-        f ⇒ (g ⇒ f)
-    }
+    // group 1: variables
+    [<DataRow("V01", "x, y:", 0, "x, y: pred", 2)>]
+    [<DataRow("V01a", "(x ⇒ (y ⇒ x))", 1, "x, y: pred", 2)>]
+    [<DataRow("V01b", "y ⇒ x", 4, "x, y: pred", 2)>]
+    [<DataRow("V01c", "x ⇒ x", 0, "x, y: pred", 2)>]
+    [<DataRow("V01d", "x ⇒ x", 4, "x, y: pred", 2)>]
 
-    // impl distributive
-    axiom A2 
-    {
-        dec f, g, h: pred;
-        (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))
-    }
+    // group 2: predicate and byDef
+    [<DataRow("P01", "pred Q", 5, "pred Q", 2)>]
+    [<DataRow("P01a", "Q(f)", 0, "pred Q", 2)>]
+    [<DataRow("P01b", "bydef Q", 6, "pred Q", 2)>]
 
-    // contraposition
-    axiom A3 
-    {
-        dec f, g: pred;
-        (¬f ⇒ ¬g) ⇒ (g ⇒ f)
-    }
+    // group 3: functional term 
+    [<DataRow("F01", "def func Id", 4, "func Id", 2)>]
+    [<DataRow("F01a", "Id(true)", 1, "func Id", 2)>]
 
-    inf ModusPonens
-    {
-        dec f, g: pred;
-        pre:
-            f, f ⇒ g 
-        con:
-            g
-    }
+    // classes 
+    [<DataRow("C01", "class Cls", 0, "class Cls", 2)>]
+    [<DataRow("C01a", "Sub : Cls", 6, "class Cls", 2)>]
+    [<DataRow("C02", "cl Cl1", 0, "cl Cl1", 2)>]
+    [<DataRow("C02a", "z:Cl1", 3, "cl Cl1", 2)>]
 
-    theorem T1
-    {
-        dec f:pred;
-        f ⇒ f
-    }
+    // group 9: properties (FplMandatoryPredicate and FplMandatoryFunctionalTerm)
+    [<DataRow("Pp01", "prty pred PropP", 10, "prty pred PropP", 2)>]
+    [<DataRow("Pp01a", "x.PropP()", 2, "prty pred PropP", 2)>]
+    [<DataRow("Pp02", "prty func PropF", 10, "prty func PropF", 2)>]
+    [<DataRow("Pp02a", "x.PropF()", 2, "prty func PropF", 2)>]
 
-    proof T1$1 
-    {
-        // Direct Proof
-        // Strategy: Assume that the premise is true, then prove that the conclusion also must be true.
-    
-        1. byax A2 |- 
-        (f ⇒ ((f ⇒ f) ⇒ f)) ⇒ ((f ⇒ (f ⇒ f)) ⇒ (f ⇒ f))
-        2. byax A1 |- 
-        f ⇒ ((f ⇒ f) ⇒ f)
-        3. 2, 1, byinf ModusPonens |- 
-        (f ⇒ (f ⇒ f)) ⇒ (f ⇒ f)
-        4. byax A1 |- 
-        f ⇒ (f ⇒ f)
-        5. 4, 3, byinf ModusPonens |- 
-        f ⇒ f
-        qed
-    }
+    // group 10: extensions (FplExtension and FplExtensionObj)
+    [<DataRow("Ext01", "ext Digits", 4, "ext Digits", 2)>]
+    [<DataRow("Ext01a", "@1}", 0, "ext Digits", 2)>]
 
-    thm T2 
-    {
-        dec f,g,h:pred;
-        (f ⇒ g) ⇒ ((g ⇒ h) ⇒ (f ⇒ h)) 
-    }
+    // group 11: array type occurrences (main types, involve FplVariableArray)
+    [<DataRow("Arr01", "cl ArrCl", 3, "cl ArrCl", 2)>]
 
-    prf T2$1 
-    {
-        1: ass f
-        2: ass f ⇒ g
-        3. 1,2, byinf ModusPonens |- g
-        4: ass g ⇒ h
-        5. 3,4, byinf ModusPonens |- h
-        6. 2,4 |- f ⇒ h
-        7. 2 |- (g ⇒ h) ⇒ (f ⇒ h)
-        8. 6 |- (f ⇒ g) ⇒ ((g ⇒ h) ⇒ (f ⇒ h)) 
-    }
-    """
+    // group 12: array type occurrences (including index references)
+    [<DataRow("Arr02", "cl ArrIdx", 3, "cl ArrIdx", 2)>]
 
-    /// <summary>
-    /// Converts a unique anchor text plus an offset inside it into a 0-based (line, column) position.
-    /// </summary>
-    let locate (code: string) (anchor: string) (offset: int) : int64 * int64 =
-        let index = code.IndexOf(anchor, StringComparison.Ordinal)
-        Assert.IsTrue(index >= 0, $"Anchor '{anchor}' not found.")
-        let target = index + offset
-        let before = code.Substring(0, target)
-        let line = before.Split('\n').Length
-        let column = target - (before.LastIndexOf('\n') + 1) 
-        (int64 line, int64 column)
+    // group 13: array variable references (involve FplVariableArray)
+    [<DataRow("Arr03", "x:*pred[ind,ind]", 0, "x:*pred[ind,ind]", 2)>]
 
-    /// <summary>
-    /// Collects every node reachable from the root via Scope and ArgList, each node once.
-    /// </summary>
-    let collectNodes (root: FplGenericNode) =
-        let visited = HashSet<FplGenericNode>(HashIdentity.Reference)
-        let result = List<FplGenericNode>()
-        let rec walk (node: FplGenericNode) =
-            if visited.Add node then
-                result.Add node
-                for child in node.Scope.Values do
-                    walk child
-                for child in node.ArgList do
-                    walk child
-        walk root
-        result
+    // constructors
+    [<DataRow("Co1", "ctor Cls()", 6, "ctor Cls()", 2)>]
+    [<DataRow("Co1a", "x:=Cls()", 4, "ctor Cls()", 2)>]
+    [<DataRow("Co1b", "base.Cls()", 6, "ctor Cls()", 2)>]
 
-    /// <summary>
-    /// Finds the innermost node of the given type name that contains the 1-based cursor position.
-    /// </summary>
-    let findCursorNode (typeName: string) (line: int64) (column: int64) : FplGenericNode option =
-        collectNodes heap.Root
-        |> Seq.filter (fun node ->
-            node.GetType().Name = typeName
-            && (node.StartPos.Line, node.StartPos.Column) <= (line, column)
-            && (line, column) <= (node.EndPos.Line, node.EndPos.Column))
-        |> Seq.sortBy (fun node -> (node.StartPos.Line, node.StartPos.Column, -node.EndPos.Line, -node.EndPos.Column))
-        |> Seq.tryLast
+    // group 6: proposition as cursor target 
+    [<DataRow("PR01", "prop Pr", 5, "prop Pr", 1)>]
+    [<DataRow("PR01a", "Le, Pr |-", 4, "prop Pr", 2)>]
 
-    [<DataRow("FplJustificationItemByAx", "byax A1", 5, "axiom A1", 0)>]
-    [<DataRow("FplJustificationItemByAx", "byax A2", 5, "axiom A2", 0)>]
-    [<DataRow("FplJustificationItemByRefArgument", "3. 1,2,", 3, "1: ass f", 0)>]
+    // infix operation
+    [<DataRow("I01", "pred Inf", 0, "pred Inf", 2)>]
+    [<DataRow("I01a", "x => y", 2, "pred Inf", 2)>]
+    [<DataRow("I01b", "y => z", 3, "pred Inf", 2)>]
+
+    // postfix operation
+    [<DataRow("Pos01", "func Post", 0, "func Post", 2)>]
+    [<DataRow("Pos01a", "x'", 1, "func Post", 2)>]
+
+    // prefix operation
+    [<DataRow("Pre01", "func Pre", 0, "func Pref", 2)>]
+    [<DataRow("Pre01a", "-x", 0, "func Pref", 2)>]
+
+    // symbol operation
+    [<DataRow("Sym01", "cl Cl2", 0, "cl Cl2", 2)>]
+    [<DataRow("Sym01a", "∅ = ∅", 0, "cl Cl2", 2)>]
+    [<DataRow("Sym02a", "∅ = ∅", 4, "cl Cl2", 2)>]
+
+    // group 14: is operator (the second argument is a type reference)
+    [<DataRow("IS01", "cl IsCl", 3, "cl IsCl", 2)>]
+    [<DataRow("IS01a", "is(x,IsCl)", 5, "cl IsCl", 2)>]
+
+    // TODO: Alias
     [<TestMethod>]
-    member this.TestGoToDefinitionDeclaration(nodeType: string, cursorAnchor: string, cursorOffset: int, declAnchor: string, declOffset: int) =
-        prepareFplCode("TestGoToDefinition.fpl", fplCode, false) |> ignore
+    member this.TestGoToDeclaration(no:string, cursorAnchor: string, cursorOffset: int, expectedPos: string, where:int) =
 
-        let cursorLine, cursorColumn = locate fplCode cursorAnchor cursorOffset
-        let cursorNode = findCursorNode nodeType cursorLine cursorColumn
-        Assert.IsTrue(cursorNode.IsSome, $"No {nodeType} found at {cursorLine}:{cursorColumn}.")
+        let (cursorLine, cursorColumn, cursorNode) = assertPrepareWorked cursorAnchor cursorOffset where 
 
-        let declaration = resolveDeclaration cursorNode.Value
-        Assert.IsTrue(declaration.IsSome, $"{nodeType} at '{cursorAnchor}' does not resolve to a declaration.")
+        Assert.IsTrue(cursorNode.IsSome, $"No node found at {cursorLine}:{cursorColumn} at code #{where}.")
 
-        let expectedLine, expectedColumn = locate fplCode declAnchor declOffset
-        Assert.AreEqual<int64>(expectedLine, declaration.Value.StartPos.Line, $"Line mismatch for '{declAnchor}'.")
-        Assert.AreEqual<int64>(
-            expectedColumn,
-            declaration.Value.StartPos.Column,
-            $"Column mismatch for '{declAnchor}': declaration {declaration.Value.GetType().Name} starts at column {declaration.Value.StartPos.Column}.")
+        let declaration = resolveDeclaration (cursorTargetNode cursorNode.Value)
+        Assert.IsTrue(declaration.IsSome, $"node at '{cursorAnchor}' is {cursorNode.Value.Name} and does not resolve to a declaration.")
+
+        let actualPos =
+            if declaration.Value.FilePath.Contains("TestFirstCode") then 
+                fplFirstCode.Substring((int)declaration.Value.StartPos.Index,expectedPos.Length)
+            elif declaration.Value.FilePath.Contains("TestSecondCode") then 
+                fplSecondCode.Substring((int)declaration.Value.StartPos.Index,expectedPos.Length)
+            else
+                failwith $"unknown file input {declaration.Value.FilePath}"
+        Assert.AreEqual<string>(expectedPos, actualPos)
+
+    // group 8: non existing reference
+    [<DataRow("R01", "byax ExtAx", 5, "2~44~byax ExtAx", 2)>]
+    [<TestMethod>]
+    member this.TestGoToNonExistingDeclaration(no:string, cursorAnchor: string, cursorOffset: int, expectedPos: string, where:int) =
+
+        let (cursorLine, cursorColumn, cursorNode) = assertPrepareWorked cursorAnchor cursorOffset where 
+
+        Assert.IsTrue(cursorNode.IsSome, $"No node found at {cursorLine}:{cursorColumn} at code #{where}.")
+
+        let declaration = resolveDeclaration (cursorTargetNode cursorNode.Value)
+        Assert.IsTrue(declaration.IsNone, $"node at '{cursorAnchor}' is {cursorNode.Value.Name} and resolve to a declaration, but was ment to be non-existing, please use a non-existing identifier for this test.")
+

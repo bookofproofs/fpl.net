@@ -115,7 +115,8 @@ let hasBracketsOrParentheses (fv:FplGenericNode) =
     | LiteralCtorL 
     | PrimDefaultConstructor 
     | PrimMandatoryPredicateL
-    | PrimMandatoryFunctionalTermL -> true
+    | PrimMandatoryFunctionalTermL
+    | PrimBaseConstructorCall -> true
     | PrimRefL -> 
         let refFv = fv :?> FplReference
         (refFv.ArgType = ArgType.Parentheses || refFv.ArgType = ArgType.Brackets)
@@ -927,6 +928,3 @@ let checkSIG08_SIG10Diagnostics (referenceToArray:FplGenericNode) =
     match referenceToArray with 
     | :? FplReference as refToArray -> matchIndexesWithDimensions refToArray
     | _ -> ()
-
-
-

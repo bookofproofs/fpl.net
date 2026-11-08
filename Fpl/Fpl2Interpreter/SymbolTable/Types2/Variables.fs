@@ -16,6 +16,7 @@ open Fpl1Parser.Types
 open Fpl2Interpreter.BasicTypes
 open Fpl2Interpreter.Helpers.Basic
 open Fpl2Interpreter.Helpers.Debug
+open Fpl2Interpreter.SymbolTable.Storage.Heap
 open Fpl2Interpreter.SymbolTable.Types2.Intrinsic
 
 /// <summary>
@@ -343,13 +344,191 @@ let checkVAR04Diagnostics (fv:FplGenericNode) =
     )
 
 /// <summary>
+/// Interface for nodes that expose dimensionality and index/type-setting helpers.
+/// </summary>
+type IHasDimensions =
+    /// <summary>
+    /// Number of index dimensions.
+    /// </summary>
+    abstract member Dimensionality : int
+    /// <summary>
+    /// Allowed types for each dimension (index types).
+    /// </summary>
+    abstract member DimensionTypes : List<FplGenericNode>
+    /// <summary>
+    /// Helper to set main type and index allowed-types during symbol table construction.
+    /// </summary>
+    /// <param name="typeId">Type identifier for the main or index type.</param>
+    /// <param name="typeNodeOpt">Optional node the type refers to.</param>
+    /// <param name="pos1">Start position used for the created index-type node.</param>
+    /// <param name="pos2">End position used for the created index-type node.</param>
+    abstract member SetType : string -> FplGenericNode option -> Position -> Position -> unit
+
+/// <summary>
+/// Represents mapping/index types used as function/mapping signatures or index types.
+/// </summary>
+/// <param name="positions">Source positions for diagnostics.</param>
+/// <param name="parent">Parent AST/symbol node.</param>
+/// <remarks>
+/// Mapping nodes may be used as both main types and index-allowed types. They support
+/// array-style mappings when designated via <c>SetIsArray</c>.
+/// </remarks>
+type FplMapping(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
+    let _dimensionTypes = new List<FplGenericNode>()
+    let mutable _dimensionTypesBeingSet = false
+    let mutable _isArrayMapping = false
+
+    do
+        this.FilePath <- parent.FilePath
+
+    /// <summary>
+    /// Mark this mapping as an array mapping (affects Type rendering).
+    /// </summary>
+    member this.SetIsArray() = _isArrayMapping <- true
+
+    /// <summary>
+    /// Number of index dimensions declared for this mapping.
+    /// </summary>
+    member this.Dimensionality = _dimensionTypes.Count
+
+    /// <summary>
+    /// List of nodes describing allowed types for each dimension.
+    /// </summary>
+    member this.DimensionTypes = _dimensionTypes
+
+    /// <summary>
+    /// Sets the main type for the mapping or adds an index allowed-type depending on internal state.
+    /// </summary>
+    /// <param name="typeId">Type identifier to set.</param>
+    /// <param name="typeNodeOpt">Optional node the type refers to.</param>
+    /// <param name="pos1">Start position for created index type node if needed.</param>
+    /// <param name="pos2">End position for created index type node if needed.</param>
+    /// <remarks>
+    /// The first call sets the main type and any subsequent calls add index-allowed types.
+    /// </remarks>
+    member this.SetType (typeId:string) (typeNodeOpt:FplGenericNode option) pos1 pos2 = 
+        if not _dimensionTypesBeingSet then 
+            this.TypeId <-
+                if _isArrayMapping then 
+                    $"*{typeId}"
+                else
+                    typeId
+            this.FplId <- this.TypeId
+            this.RefersTo <- typeNodeOpt 
+            _dimensionTypesBeingSet <- true
+        else
+            let indexAllowedType = FplMapping((pos1,pos2), this) 
+            indexAllowedType.TypeId <- typeId
+            indexAllowedType.FplId <- this.TypeId
+            indexAllowedType.RefersTo <- typeNodeOpt 
+            this.DimensionTypes.Add indexAllowedType
+
+    interface IHasDimensions with
+        member this.Dimensionality = _dimensionTypes.Count
+        member this.DimensionTypes = _dimensionTypes
+        member this.SetType typeId typeNodeOpt pos1 pos2 = this.SetType typeId typeNodeOpt pos1 pos2
+
+    override this.Name = PrimMappingL
+    override this.ShortName = PrimMapping
+
+    /// <summary>
+    /// Clone this mapping node (shallow copy of parts).
+    /// </summary>
+    override this.Clone () =
+        let ret = new FplMapping((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.IsMapping () = true
+
+    /// <summary>
+    /// Returns the textual/type representation for this mapping node.
+    /// </summary>
+    /// <param name="signatureType">Specifies how to render nested mapping types.</param>
+    /// <returns>Formatted mapping type string; includes array dimension information if applicable.</returns>
+    override this.Type signatureType = 
+        let pars = getParamTuple this signatureType
+        let propagate = propagateSignatureType signatureType
+
+        let myMapping = 
+            if this.ArgList.Count > 0 then 
+                let arg = this.ArgList[0]
+                match arg with 
+                | :? FplMapping ->
+                    Some(arg)
+                | _ -> None
+            else
+                None
+        let mainType = 
+            match this.ArgType, myMapping with
+            | ArgType.Parentheses, None -> $"{this.TypeId}({pars})"
+            | _, None -> this.TypeId
+            | _, Some map -> $"{this.TypeId}({pars}) -> {map.Type(propagate)}" 
+
+        if not _isArrayMapping then
+            mainType
+        else
+            let dimensionTypes = signatureSep "," this.DimensionTypes signatureType
+            $"{mainType}[{dimensionTypes}]"
+
+    /// <summary>
+    /// Returns a fallback representation used for functional term inference.
+    /// </summary>
+    override this.Represent() = // done
+        // a fall back value representation for intrinsic functional terms
+        $"dec {this.Type(SignatureType.Type)}"
+
+    override this.Run() = 
+        // FplMapping has nothing to do in run
+        ()
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
+
+    override this.RunOrder = None
+
+[<AbstractClass>]
+/// <summary>
+/// Occurrence of a type identifier in a variable declaration (e.g. <c>Cls</c> in <c>x:Cls</c>).
+/// Positioned at the type identifier, not at the variable name.
+/// </summary>
+type FplGenericVariableWithType(fplId, positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericVariable(fplId, positions, parent)
+    let mutable _typeOccurrence:FplGenericNode option = None
+
+    /// <summary>
+    /// Sets the positioned type occurrence of a type identifier in a variable declaration (e.g. <c>Cls</c> in <c>x:Cls</c>).
+    /// </summary>
+    member this.SetTypeOccurrence (typeNodeOpt:FplGenericNode option, pos1:Position, pos2:Position) =
+        let typeNode = FplMapping((pos1,pos2), this)
+        match typeNodeOpt with
+        | Some t ->
+            typeNode.FplId <- t.FplId
+            typeNode.TypeId <- t.TypeId
+        | _ -> ()
+        typeNode.RefersTo <- typeNodeOpt
+        _typeOccurrence <- Some typeNode
+
+    /// <summary>
+    /// Overrides the type occurrence with some other.
+    /// </summary>
+    member this.SetTypeOccurrence (typeNode:FplMapping) =
+        _typeOccurrence <- Some typeNode
+
+    /// <summary>
+    /// Gets the positioned type occurrence of a type identifier in a variable declaration (e.g. <c>Cls</c> in <c>x:Cls</c>).
+    /// </summary>
+    member this.TypeOccurrence 
+        with get () = _typeOccurrence
+
+/// <summary>
 /// Concrete variable node used for ordinary variables.
 /// </summary>
 /// <param name="fplId">Variable name.</param>
 /// <param name="positions">Source positions for diagnostics.</param>
 /// <param name="parent">Parent AST/symbol node.</param>
 type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericVariable(fplId, positions, parent)
+    inherit FplGenericVariableWithType(fplId, positions, parent)
     let mutable _isExpressionAssigned = false
 
     override this.Name = PrimVariableL
@@ -431,148 +610,6 @@ type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
         StaticDebug.Debug(this,Debug.Stop)
 
 /// <summary>
-/// Interface for nodes that expose dimensionality and index/type-setting helpers.
-/// </summary>
-type IHasDimensions =
-    /// <summary>
-    /// Number of index dimensions.
-    /// </summary>
-    abstract member Dimensionality : int
-    /// <summary>
-    /// Allowed types for each dimension (index types).
-    /// </summary>
-    abstract member DimensionTypes : List<FplGenericNode>
-    /// <summary>
-    /// Helper to set main type and index allowed-types during symbol table construction.
-    /// </summary>
-    /// <param name="typeId">Type identifier for the main or index type.</param>
-    /// <param name="typeNodeOpt">Optional node the type refers to.</param>
-    /// <param name="pos1">Start position used for the created index-type node.</param>
-    /// <param name="pos2">End position used for the created index-type node.</param>
-    abstract member SetType : string -> FplGenericNode option -> Position -> Position -> unit
-
-/// <summary>
-/// Represents mapping/index types used as function/mapping signatures or index types.
-/// </summary>
-/// <param name="positions">Source positions for diagnostics.</param>
-/// <param name="parent">Parent AST/symbol node.</param>
-/// <remarks>
-/// Mapping nodes may be used as both main types and index-allowed types. They support
-/// array-style mappings when designated via <c>SetIsArray</c>.
-/// </remarks>
-type FplMapping(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericNode(positions, Some parent)
-    let _dimensionTypes = new List<FplGenericNode>()
-    let mutable _dimensionTypesBeingSet = false
-    let mutable _isArrayMapping = false
-
-    do
-        this.FilePath <- parent.FilePath
-
-    /// <summary>
-    /// Mark this mapping as an array mapping (affects Type rendering).
-    /// </summary>
-    member this.SetIsArray() = _isArrayMapping <- true
-
-    /// <summary>
-    /// Number of index dimensions declared for this mapping.
-    /// </summary>
-    member this.Dimensionality = _dimensionTypes.Count
-
-    /// <summary>
-    /// List of nodes describing allowed types for each dimension.
-    /// </summary>
-    member this.DimensionTypes = _dimensionTypes
-
-    /// <summary>
-    /// Sets the main type for the mapping or adds an index allowed-type depending on internal state.
-    /// </summary>
-    /// <param name="typeId">Type identifier to set.</param>
-    /// <param name="typeNodeOpt">Optional node the type refers to.</param>
-    /// <param name="pos1">Start position for created index type node if needed.</param>
-    /// <param name="pos2">End position for created index type node if needed.</param>
-    /// <remarks>
-    /// The first call sets the main type and any subsequent calls add index-allowed types.
-    /// </remarks>
-    member this.SetType (typeId:string) (typeNodeOpt:FplGenericNode option) pos1 pos2 = 
-        if not _dimensionTypesBeingSet then 
-            this.TypeId <-
-                if _isArrayMapping then 
-                    $"*{typeId}"
-                else
-                    typeId
-            this.RefersTo <- typeNodeOpt 
-            _dimensionTypesBeingSet <- true
-        else
-            let indexAllowedType = FplMapping((pos1,pos2), this) 
-            indexAllowedType.TypeId <- typeId
-            indexAllowedType.RefersTo <- typeNodeOpt 
-            this.DimensionTypes.Add indexAllowedType
-
-    interface IHasDimensions with
-        member this.Dimensionality = _dimensionTypes.Count
-        member this.DimensionTypes = _dimensionTypes
-        member this.SetType typeId typeNodeOpt pos1 pos2 = this.SetType typeId typeNodeOpt pos1 pos2
-
-    override this.Name = PrimMappingL
-    override this.ShortName = PrimMapping
-
-    /// <summary>
-    /// Clone this mapping node (shallow copy of parts).
-    /// </summary>
-    override this.Clone () =
-        let ret = new FplMapping((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.IsMapping () = true
-
-    /// <summary>
-    /// Returns the textual/type representation for this mapping node.
-    /// </summary>
-    /// <param name="signatureType">Specifies how to render nested mapping types.</param>
-    /// <returns>Formatted mapping type string; includes array dimension information if applicable.</returns>
-    override this.Type signatureType = 
-        let pars = getParamTuple this signatureType
-        let propagate = propagateSignatureType signatureType
-
-        let myMapping = 
-            if this.ArgList.Count > 0 then 
-                let arg = this.ArgList[0]
-                match arg with 
-                | :? FplMapping ->
-                    Some(arg)
-                | _ -> None
-            else
-                None
-        let mainType = 
-            match this.ArgType, myMapping with
-            | ArgType.Parentheses, None -> $"{this.TypeId}({pars})"
-            | _, None -> this.TypeId
-            | _, Some map -> $"{this.TypeId}({pars}) -> {map.Type(propagate)}" 
-
-        if not _isArrayMapping then
-            mainType
-        else
-            let dimensionTypes = signatureSep "," this.DimensionTypes signatureType
-            $"{mainType}[{dimensionTypes}]"
-
-    /// <summary>
-    /// Returns a fallback representation used for functional term inference.
-    /// </summary>
-    override this.Represent() = // done
-        // a fall back value representation for intrinsic functional terms
-        $"dec {this.Type(SignatureType.Type)}"
-
-    override this.Run() = 
-        // FplMapping has nothing to do in run
-        ()
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
-
-    override this.RunOrder = None
-
-/// <summary>
 /// Variable array type supporting indexed values and multi-dimensional index types.
 /// </summary>
 /// <param name="fplId">Identifier of the variable array.</param>
@@ -583,7 +620,7 @@ type FplMapping(positions: Positions, parent: FplGenericNode) as this =
 /// declaration for dimension index types.
 /// </remarks>
 type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericVariable(fplId, positions, parent)
+    inherit FplGenericVariableWithType(fplId, positions, parent)
     let _dimensionTypes = new List<FplGenericNode>()
     let mutable _dimensionTypesBeingSet = false
     let _valueKeys = new Dictionary<string,int>() // used to store the keys of all values
@@ -609,6 +646,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
     member this.SetType (typeId:string) (typeNodeOpt:FplGenericNode option) pos1 pos2 = 
         if not _dimensionTypesBeingSet then 
             this.TypeId <- $"*{typeId}"
+            this.SetTypeOccurrence(typeNodeOpt, pos1, pos2)
             // TODO prefer RefersTo over Scope when storing the type node of the variable array 
             match typeNodeOpt with 
             | Some typeNode -> this.Scope.TryAdd(typeId, typeNode) |> ignore
@@ -617,7 +655,10 @@ type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
         else
             let indexAllowedType = FplMapping((pos1,pos2), this) 
             indexAllowedType.TypeId <- typeId
+            indexAllowedType.FplId <- typeId
+            heap.SymbolTable.NodesCollector.Add indexAllowedType
             indexAllowedType.RefersTo <- typeNodeOpt
+
             this.DimensionTypes.Add indexAllowedType
 
     interface IHasDimensions with

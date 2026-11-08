@@ -23,8 +23,10 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[parser]** `Ast.ErrorSyntax`/`ErrorSyntaxBacktracking`/`ErrorSyntaxChain` now additionally carry the enclosing building block's source span and its verbatim FPL source text (captured from the original, un-stripped source), enabling the formatting service to reprint syntactically invalid building blocks unchanged instead of emitting diagnostic messages as FPL code
 - **[language-server]** Add a and hook-up an initial formatting service for FPL 
 - **[language-server]** Wire user-configured `FormattingOptions` through to the formatting service: new `SettingsStore` singleton, `SettingsTranslation` module translating client JSON payloads into `FormattingOptions`, and a `SettingsPull` module issuing a live `workspace/configuration` request on every `textDocument/formatting` request, replacing the previously hardcoded `fplFormatDefaults`
-- **[language-server]** Add an alpha "go-to-definition" service ... (new)
-- **[interpreter]** Add `resolveDeclaration` ... (new)
+- **[language-server]** Add an alpha "go-to-definition" service, including navigation from justifications to the argument they cite.
+- **[interpreter]** Add `resolveDeclaration` to map a symbol-table node to its declaration, including proofs and corollaries (they resolve to their theorem-like statement).
+- **[language-server]** Add a find-references service (`textDocument/references`) that returns all locations, across all files, that refer to the declaration under the cursor. The declaration is included when the client requests it (`ReferenceContext.IncludeDeclaration`).
+- **[interpreter]** Add `SymbolTable.NodesCollector`, which records every node evaluated while the symbol table is built, across all theories and files, to support the reference lookups.
 
 ### Changed
 - **[parser]** consolidate unit test namespaces and convert single-case test methods to datarow-driven test methods (if not already the case)
@@ -35,7 +37,7 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[parser]** Fixed the formatting service corrupting FPL building blocks containing syntax errors: `PrettyPrint` previously rendered the internal diagnostic message text of `ErrorSyntax`/`ErrorSyntaxBacktracking`/`ErrorSyntaxChain` AST nodes verbatim as if it were FPL source; it now reprints the original, unmodified source text of the faulty building block instead
 - **[parser]** Fixed `PrettyPrint` emitting duplicated parentheses around constructor, predicate-instance, and functional-term-instance parameter lists (e.g. `ctor Magma((x: tplSet, op: BinOp))`), caused by `ConstructorSignature`/`PredicateInstanceSignature`/`FunctionalTermInstanceSignature` wrapping an already self-parenthesizing `ParamTuple` node in an extra set of parentheses
 - **[parser]** Fixed the formatting service emitting a comment after the wrong anchor when a trailing comment followed a signature with a symbolic clause, e.g. `def pred Impl(f, g: pred) /*a*/ infix "=>" 0`, which previously moved the comment inside the parameter list
--   
+
 ## [v5.1.1] - 2026-09-27
 ### Added
 - **[vscode]** New release 5.1.1, automate syncing and checking vscode-extension specific version number, CHANGELOG and RELEASE NOTES with the corresponding centralized repository files

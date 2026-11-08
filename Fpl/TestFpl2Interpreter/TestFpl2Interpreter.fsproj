@@ -81,6 +81,7 @@
         <Compile Include="Diagnostics\IdentifierRelated\TestID024.fs" />
         <Compile Include="Diagnostics\IdentifierRelated\TestID025.fs" />
         <Compile Include="Diagnostics\IdentifierRelated\TestID027.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID028.fs" />
         <Compile Include="Diagnostics\LogicRelated\TestLG001.fs" />
         <Compile Include="Diagnostics\LogicRelated\TestLG002.fs" />
         <Compile Include="Diagnostics\LogicRelated\TestLG003.fs" />

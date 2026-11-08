@@ -751,16 +751,16 @@ type TestFplValueScopeFplId() =
         let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
         let mapping = base1.ArgList[0]
         match var with
-        | "base1" -> Assert.AreEqual<string>("", mapping.FplId)
-        | "base2" -> Assert.AreEqual<string>("", mapping.FplId)
-        | "base3" -> Assert.AreEqual<string>("", mapping.FplId)
-        | "base4" -> Assert.AreEqual<string>("", mapping.FplId)
-        | "base5" -> Assert.AreEqual<string>("", mapping.FplId)
-        | "base6" -> Assert.AreEqual<string>("", mapping.FplId)
-        | "base7" -> Assert.AreEqual<string>("", mapping.FplId)
-        | "base8" -> Assert.AreEqual<string>("", mapping.FplId)
-        | "base9" -> Assert.AreEqual<string>("", mapping.FplId)
-        | "base10" -> Assert.AreEqual<string>("", mapping.FplId)
+        | "base1" -> Assert.AreEqual<string>(LiteralObj, mapping.FplId)
+        | "base2" -> Assert.AreEqual<string>(LiteralInd, mapping.FplId)
+        | "base3" -> Assert.AreEqual<string>(LiteralFunc, mapping.FplId)
+        | "base4" -> Assert.AreEqual<string>(LiteralPred, mapping.FplId)
+        | "base5" -> Assert.AreEqual<string>("A", mapping.FplId)
+        | "base6" -> Assert.AreEqual<string>(LiteralPred, mapping.FplId)
+        | "base7" -> Assert.AreEqual<string>(LiteralPred, mapping.FplId)
+        | "base8" -> Assert.AreEqual<string>(LiteralFunc, mapping.FplId)
+        | "base9" -> Assert.AreEqual<string>(LiteralPred, mapping.FplId)
+        | "base10" -> Assert.AreEqual<string>(LiteralPred, mapping.FplId)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 

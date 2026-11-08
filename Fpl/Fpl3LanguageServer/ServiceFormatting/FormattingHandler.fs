@@ -1,4 +1,12 @@
-module Fpl3LanguageServer.ServiceFormatting.Handler
+/// <summary>
+/// Language server handler for the textDocument/formatting request of FPL files.
+/// </summary>
+/// <remarks>
+/// The handler parses the buffer, collects comments and node positions, builds a trivia map that
+/// associates comments with nodes, and calls the FPL pretty-printer to produce the formatted text.
+/// The result is returned as one full-document <c>TextEdit</c>.
+/// </remarks>
+module Fpl3LanguageServer.ServiceFormatting.FormattingHandler
 open System.Threading
 open System.Threading.Tasks
 open OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities
@@ -23,17 +31,48 @@ open Fpl3LanguageServer.ServiceFormatting.SettingsPull
 /// Handles textDocument/formatting requests, delegating to the FPL pretty-printer
 /// to compute a full-document text edit that reformats the buffer.
 /// </summary>
+/// <param name="languageServer">The language server instance used for logging and configuration requests.</param>
+/// <param name="bufferManager">Provides the current text of open FPL buffers.</param>
+/// <param name="settingsStore">Caches the most recent formatting options.</param>
+/// <remarks>
+/// The handler registers for files matching <c>**/*.fpl</c>.
+/// </remarks>
 type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferManager, settingsStore: SettingsStore) =
 
+    /// <summary>
+    /// Document selector that limits the registration to FPL source files.
+    /// </summary>
     let documentSelector = DocumentSelector(DocumentFilter(Pattern = "**/*.fpl"))
 
+    /// <summary>
+    /// The client capability for document formatting, stored by <c>SetCapability</c>. The handler does not read it.
+    /// </summary>
     let mutable capability = DocumentFormattingCapability()
 
     interface IDocumentFormattingHandler with
 
+        /// <summary>
+        /// Returns the registration options that tell the client which documents this handler supports.
+        /// </summary>
+        /// <returns>A <c>DocumentFormattingRegistrationOptions</c> with the FPL document selector.</returns>
         member _.GetRegistrationOptions() =
             DocumentFormattingRegistrationOptions(DocumentSelector = documentSelector)
 
+        /// <summary>
+        /// Handles a formatting request: parses the buffer, pretty-prints it with the client's current options,
+        /// and returns one edit that replaces the whole document.
+        /// </summary>
+        /// <param name="request">The request with the document URI and the client's formatting options.</param>
+        /// <param name="cancellationToken">Cancellation token of the request. The handler does not check it.</param>
+        /// <returns>
+        /// A task that yields a <c>TextEditContainer</c>. The container is empty if no buffer exists for the document.
+        /// </returns>
+        /// <remarks>
+        /// The current formatting options are pulled from the client on every request through
+        /// <c>pullCurrentOptionsAsync</c>. The result is also written to <c>settingsStore</c>.
+        /// The indentation used by the pretty-printer comes from <c>printAll</c> and the pulled options. The
+        /// <c>request.Options</c> values are not used for that.
+        /// </remarks>
         member _.Handle(request: DocumentFormattingParams, cancellationToken: CancellationToken) : Task<TextEditContainer> =
             task {
                 logMsg languageServer "Task<TextEditContainer>" "FormattingHandler.Handle"
@@ -43,8 +82,6 @@ type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferMan
                     return TextEditContainer()
                 else
                     let originalText = buffer.ToString()
-                    let indentSize =
-                        if request.Options.InsertSpaces then int request.Options.TabSize else 4
 
                     // Parse (comment-stripped input, same pipeline the interpreter uses)
                     let asts, _ = fplParser originalText
@@ -79,5 +116,12 @@ type FormattingHandler(languageServer: ILanguageServer, bufferManager: BufferMan
                     return TextEditContainer([| TextEdit(Range = fullRange, NewText = formattedText) |])
             }
 
+        /// <summary>
+        /// Stores the formatting capability that the client reported during initialization.
+        /// </summary>
+        /// <param name="cap">The client's <c>DocumentFormattingCapability</c>.</param>
+        /// <remarks>
+        /// The stored value is not used by <c>Handle</c>. Keep it only if other parts of the server need it.
+        /// </remarks>
         member _.SetCapability(cap: DocumentFormattingCapability) =
             capability <- cap
