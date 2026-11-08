@@ -74,9 +74,10 @@ let evalVariables ast =
                     evalRef.Value simplVariableTypeAst
                     newVar.SetTypeOccurrence(newVar.RefersTo, posType1, posType2)
                     // make sure, every variable from the variableList refer (by reference) to the same type occurrence  
-                    match newVar.TypeOccurence with
+                    match newVar.TypeOccurrence with
                     | Some occurence when typeOccurenceOfWholeVariableList.Count = 0 ->
                         typeOccurenceOfWholeVariableList.Add occurence
+                        heap.SymbolTable.NodesCollector.Add occurence
                     | _ when typeOccurenceOfWholeVariableList.Count = 1 ->
                         newVar.SetTypeOccurrence(typeOccurenceOfWholeVariableList[0]:?>FplMapping)
                     | _ -> () // fallback should never happen since first SetTypeOccurence makes newVar.RefersTo to be Some

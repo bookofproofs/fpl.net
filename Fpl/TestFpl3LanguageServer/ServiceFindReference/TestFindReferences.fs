@@ -3,6 +3,7 @@ namespace TestFpl3LanguageServer.ServiceFindReference
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open System
 open System.Text.RegularExpressions
+open Fpl2Interpreter.BasicTypes
 open Fpl2Interpreter.SymbolTable.GoToDefinition
 open Fpl2Interpreter.SymbolTable.Storage.Heap
 open TestFpl3LanguageServer.Helpers.SampleFpl
@@ -78,12 +79,13 @@ type TestFindReferences() =
     [<DataRow("C01", "class Cls", 0, "2~54~class Cls, 2~60~Cls, 2~63~Cls, 2~67~Cls", 2)>]
     [<DataRow("C01a", "Sub : Cls", 6, "2~54~class Cls, 2~60~Cls, 2~63~Cls, 2~67~Cls", 2)>]
     [<DataRow("C02", "cl Cl1", 0, "2~70~cl Cl1, 2~71~Cl1)", 2)>]
-    [<DataRow("C02", "z:Cl1", 2, "2~70~cl Cl1, 2~71~Cl1)", 2)>]
+    [<DataRow("C02a", "z:Cl1", 3, "2~70~cl Cl1, 2~71~Cl1)", 2)>]
 
     // properties TODO
+    // extensions TODO
+    // arrays TODO
 
     // constructors
-    
     [<DataRow("Co1", "ctor Cls()", 6, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls(); }", 2)>]
     [<DataRow("Co1a", "x:=Cls()", 4, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls(); }", 2)>]
     [<DataRow("Co1b", "base.Cls()", 6, "2~56~ctor Cls(), 2~64~Cls(), 2~66~base.Cls(); }", 2)>]
@@ -108,12 +110,16 @@ type TestFindReferences() =
     [<DataRow("Pre01", "func Pre", 0, "2~82~func Pref(a:, 2~83~-x }", 2)>]
     [<DataRow("Pre01a", "-x", 0, "2~82~func Pref(a:, 2~83~-x }", 2)>]
 
+    // symbol operation
+    [<DataRow("Sym01", "cl Cl2", 0, "2~73~cl Cl2, 2~74~∅ =, 2~74~∅ }", 2)>]
+    [<DataRow("Sym01a", "∅ = ∅", 0, "2~73~cl Cl2, 2~74~∅ =, 2~74~∅ }", 2)>]
+    [<DataRow("Sym02a", "∅ = ∅", 4, "2~73~cl Cl2, 2~74~∅ =, 2~74~∅ }", 2)>]
+
     [<TestMethod>]
     member _.TestFindReferences(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string, where:int) =
 
         let (cursorLine, cursorColumn, cursorNode) = assertPrepareWorked cursorAnchor cursorOffset where 
 
-        
         let references =
             findReferenceNodes cursorNode.Value heap.SymbolTable.Nodes
 
@@ -140,5 +146,17 @@ type TestFindReferences() =
             )
             |> String.concat Environment.NewLine
 
+
         printfn "%s" info
+        let rec ancestors (n: FplGenericNode) =
+            match n.Parent with
+            | Some p -> $"{p.GetType().Name}@{p.StartPos.Line}:{p.StartPos.Column}-{p.EndPos.Line}:{p.EndPos.Column}" :: ancestors p
+            | None -> []
+
+        printfn "CURSOR-C02a: %s@%d:%d-%d:%d" (cursorNode.Value.GetType().Name) cursorNode.Value.StartPos.Line cursorNode.Value.StartPos.Column cursorNode.Value.EndPos.Line cursorNode.Value.EndPos.Column
+        printfn "ANCESTORS-C02a: %s" (String.Join(" < ", ancestors cursorNode.Value))
+        for n in heap.SymbolTable.Nodes do
+            if n.FplId = "Cl1" then
+                printfn "NODE-Cl1: %s@%d:%d-%d:%d refersTo=%A" (n.GetType().Name) n.StartPos.Line n.StartPos.Column n.EndPos.Line n.EndPos.Column (n.RefersTo |> Option.map (fun r -> r.FplId))
+
         Assert.AreEqual<string>(expectedLines, actual, $"Reference lines differ for '{cursorAnchor}'.")

@@ -188,7 +188,7 @@ let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>)
             |> Seq.filter (fun node ->
                 match node with
                 | :? FplVariable as var ->
-                    match var.TypeOccurence with
+                    match var.TypeOccurrence with
                     | Some typeOcc when typeOcc.RefersTo.IsSome && obj.ReferenceEquals(typeOcc.RefersTo.Value, declaration) ->
                         typeOccurences.Add typeOcc |> ignore
                         false

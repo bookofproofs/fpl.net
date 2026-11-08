@@ -16,6 +16,7 @@ open Fpl1Parser.Types
 open Fpl2Interpreter.BasicTypes
 open Fpl2Interpreter.Helpers.Basic
 open Fpl2Interpreter.Helpers.Debug
+open Fpl2Interpreter.SymbolTable.Storage.Heap
 open Fpl2Interpreter.SymbolTable.Types2.Intrinsic
 
 /// <summary>
@@ -510,7 +511,7 @@ type FplGenericVariableWithType(fplId, positions: Positions, parent: FplGenericN
     /// <summary>
     /// Gets the positioned type occurrence of a type identifier in a variable declaration (e.g. <c>Cls</c> in <c>x:Cls</c>).
     /// </summary>
-    member this.TypeOccurence 
+    member this.TypeOccurrence 
         with get () = _typeOccurrence
 
 /// <summary>
