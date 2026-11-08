@@ -20,7 +20,7 @@ open Fpl3LanguageServer.ServicesDiagnostics.Diags
 open Fpl3LanguageServer.ServiceAutoCompletion.Handler
 open Fpl3LanguageServer.ServiceFormatting.Handler
 open Fpl3LanguageServer.ServiceGoToDefinition.Handler
-open Fpl3LanguageServer.ServiceFindReferences.Handler
+open Fpl3LanguageServer.ServiceFindReferences.FindReferencesHandler
 
 /// <summary>
 /// Registers the singleton services used by the language server handlers and the buffer and diagnostics infrastructure.

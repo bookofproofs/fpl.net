@@ -1,4 +1,4 @@
-module Fpl3LanguageServer.ServiceFindReferences.Handler
+module Fpl3LanguageServer.ServiceFindReferences.FindReferencesHandler
 open System
 open System.IO
 open System.Threading

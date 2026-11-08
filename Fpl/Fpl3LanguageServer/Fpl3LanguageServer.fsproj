@@ -53,7 +53,7 @@
         <Compile Include="ServiceFormatting\SettingsPull.fs" />
         <Compile Include="ServiceFormatting\Handler.fs" />
         <Compile Include="ServiceGoToDefinition\Handler.fs" />
-        <Compile Include="ServiceFindReferences\Handler.fs" />
+        <Compile Include="ServiceFindReferences\FindReferencesHandler.fs" />
     </ItemGroup>
 
     <ItemGroup>
