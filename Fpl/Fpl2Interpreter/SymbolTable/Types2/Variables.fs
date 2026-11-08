@@ -655,7 +655,10 @@ type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
         else
             let indexAllowedType = FplMapping((pos1,pos2), this) 
             indexAllowedType.TypeId <- typeId
+            indexAllowedType.FplId <- typeId
+            heap.SymbolTable.NodesCollector.Add indexAllowedType
             indexAllowedType.RefersTo <- typeNodeOpt
+
             this.DimensionTypes.Add indexAllowedType
 
     interface IHasDimensions with

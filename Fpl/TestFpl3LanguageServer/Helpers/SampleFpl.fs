@@ -211,6 +211,10 @@ let fplSecondCode = """
 
     // group 13: array variable references (involve FplVariableArray)
     def pred ArrVarTest() {dec i,j:ind x:*pred[ind,ind] x[i,j]:=x[j,i]; true}
+
+    // group 14: is operator (the second argument is a type reference)
+    def cl IsCl {intr}
+    def pred IsTest() {dec x:obj; is(x,IsCl)}
 """
 
 /// <summary>

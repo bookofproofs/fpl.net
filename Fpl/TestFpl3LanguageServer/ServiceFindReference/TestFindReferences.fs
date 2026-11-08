@@ -82,10 +82,10 @@ type TestFindReferences() =
     [<DataRow("C02a", "z:Cl1", 3, "2~70~cl Cl1, 2~71~Cl1)", 2)>]
 
     // group 9: properties (FplMandatoryPredicate and FplMandatoryFunctionalTerm)
-    [<DataRow("Pp01", "prty pred PropP", 10, "2~86~prty pred, 2~87~x.PropP() }", 2)>]
-    [<DataRow("Pp01a", "x.PropP()", 2, "2~86~prty pred, 2~87~x.PropP() }", 2)>]
-    [<DataRow("Pp02", "prty func PropF", 10, "2~88~prty func, 2~89~x.PropF() }", 2)>]
-    [<DataRow("Pp02a", "x.PropF()", 2, "2~88~prty func, 2~89~x.PropF() }", 2)>]
+    [<DataRow("Pp01", "prty pred PropP", 10, "2~86~prty pred, 2~87~.PropP() }", 2)>]
+    [<DataRow("Pp01a", "x.PropP()", 2, "2~86~prty pred, 2~87~.PropP() }", 2)>]
+    [<DataRow("Pp02", "prty func PropF", 10, "2~88~prty func, 2~89~.PropF() }", 2)>]
+    [<DataRow("Pp02a", "x.PropF()", 2, "2~88~prty func, 2~89~.PropF() }", 2)>]
 
     // group 10: extensions (FplExtension and FplExtensionObj)
     [<DataRow("Ext01", "ext Digits", 4, "2~92~ext Digits, 2~93~@1}", 2)>]
@@ -129,6 +129,10 @@ type TestFindReferences() =
     [<DataRow("Sym01", "cl Cl2", 0, "2~73~cl Cl2, 2~74~∅ =, 2~74~∅ }", 2)>]
     [<DataRow("Sym01a", "∅ = ∅", 0, "2~73~cl Cl2, 2~74~∅ =, 2~74~∅ }", 2)>]
     [<DataRow("Sym02a", "∅ = ∅", 4, "2~73~cl Cl2, 2~74~∅ =, 2~74~∅ }", 2)>]
+
+    // group 14: is operator (the second argument is a type reference)
+    [<DataRow("IS01", "cl IsCl", 3, "2~107~cl IsCl, 2~108~IsCl)}", 2)>]
+    [<DataRow("IS01a", "is(x,IsCl)", 5, "2~107~cl IsCl, 2~108~IsCl)}", 2)>]
 
     [<TestMethod>]
     member _.TestFindReferences(no:string, cursorAnchor: string, cursorOffset: int, expectedLines: string, where:int) =
