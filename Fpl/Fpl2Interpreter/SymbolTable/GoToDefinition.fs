@@ -22,9 +22,12 @@ open Fpl2Interpreter.SymbolTable.Types2.Variables
 /// <param name="node">Symbol-table node under the cursor.</param>
 /// <returns>The declaration node, or <c>None</c> if it cannot be resolved.</returns>
 /// <remarks>
-/// Proof arguments are resolved only through <c>RefersTo</c>. Proofs and corollaries refer to the
-/// theorem-like statement they belong to (their parent node). Other nodes use <c>RefersTo</c> first.
-/// Variables without <c>RefersTo</c> are looked up in the scope of their ultimate block node.
+/// Declaration kinds (theorem-like statements, blocks, functional terms, predicates, constructors, arguments and axioms)
+/// resolve to themselves.
+/// Justification items by reference or by proof argument resolve only through <c>RefersTo</c>.
+/// Proofs and corollaries resolve to their parent node, unless the parent is the root.
+/// All other nodes use <c>RefersTo</c> first. If <c>RefersTo</c> is missing and the identifier starts with a
+/// lowercase letter, the node is looked up in the scope of its ultimate block node.
 /// </remarks>
 let resolveDeclaration (node: FplGenericNode) : FplGenericNode option =
     match node with
@@ -71,7 +74,7 @@ type ReferenceIndex = Dictionary<FplGenericNode, ResizeArray<FplGenericNode>>
 /// Builds the declaration → referencing nodes index from the flattened nodes of one evaluation.
 /// </summary>
 /// <param name="nodes">All flattened symbol-table nodes, across all files.</param>
-/// <returns>The inverse index.</returns>
+/// <returns>The inverse index. Nodes that do not resolve to a declaration are not contained in it.</returns>
 let buildReferenceIndex (nodes: seq<FplGenericNode>) : ReferenceIndex =
     let index = ReferenceIndex(HashIdentity.Reference)
     for node in nodes do
@@ -91,7 +94,10 @@ let buildReferenceIndex (nodes: seq<FplGenericNode>) : ReferenceIndex =
 /// </summary>
 /// <param name="index">Inverse index built by <c>buildReferenceIndex</c>.</param>
 /// <param name="declaration">Declaration node to search references for.</param>
-/// <returns>The referencing nodes, or an empty list.</returns>
+/// <returns>The referencing nodes, or an empty list if none exist.</returns>
+/// <remarks>
+/// This function is not used by <c>findReferenceNodes</c>, which scans the nodes directly.
+/// </remarks>
 let findReferences (index: ReferenceIndex) (declaration: FplGenericNode) : FplGenericNode list =
     match index.TryGetValue declaration with
     | true, references -> List.ofSeq references
@@ -101,10 +107,13 @@ let findReferences (index: ReferenceIndex) (declaration: FplGenericNode) : FplGe
 /// Maps the node under the cursor to the node that the "go to definition" and "find references" services act on.
 /// </summary>
 /// <param name="cursorNode">Innermost symbol-table node containing the cursor.</param>
-/// <returns>The argument that owns a justification, otherwise the cursor node itself.</returns>
+/// <returns>
+/// The argument that owns a justification, the <c>RefersTo</c> target of a reference, or the cursor node itself.
+/// </returns>
 /// <remarks>
 /// A justification has no identifier of its own. A cursor on a justification therefore refers to the
 /// argument it belongs to, which carries the identifier that is resolved.
+/// A reference with an unresolved <c>RefersTo</c> is returned unchanged.
 /// </remarks>
 let cursorTargetNode (cursorNode: FplGenericNode) : FplGenericNode =
     match cursorNode with
@@ -123,6 +132,9 @@ let cursorTargetNode (cursorNode: FplGenericNode) : FplGenericNode =
 /// Returns true if both nodes belong to the same justification kind for find-references purposes.
 /// Argument references by ref-argument and by proof-argument are treated as the same kind.
 /// </summary>
+/// <param name="a">First node to compare.</param>
+/// <param name="b">Second node to compare.</param>
+/// <returns><c>true</c> if both nodes are argument references of any kind, or if they have the same runtime type.</returns>
 let private isSameJustificationKind (a: FplGenericNode) (b: FplGenericNode) : bool =
     let isArgumentReference (node: FplGenericNode) =
         match node with
@@ -139,13 +151,18 @@ let private isSameJustificationKind (a: FplGenericNode) (b: FplGenericNode) : bo
 /// </summary>
 /// <param name="cursorNode">Innermost symbol-table node containing the cursor.</param>
 /// <param name="nodes">All flattened symbol-table nodes of the current evaluation.</param>
-/// <returns>The declaration followed by all nodes resolving to it.</returns>
+/// <returns>The declaration followed by all nodes resolving to it, without duplicates.</returns>
 /// <remarks>
-/// If the cursor target does not resolve to a declaration, it is treated as the declaration itself.
-/// The index is built on each call, so results never depend on earlier evaluations.
-/// This implementation always includes the declaration, if one exists.
+/// The cursor target is resolved by <c>cursorTargetNode</c>.
+/// Justification items: the resolved declaration (<c>RefersTo</c>), the target itself, and all nodes of the same
+/// justification kind or plain references that point to that declaration. If the item has no <c>RefersTo</c>,
+/// only the target is returned.
+/// Other targets: the declaration (the target itself if it does not resolve), its proof or corollary parents
+/// (excluding root and theory nodes), all variables whose type occurrence refers to it, all nodes whose
+/// <c>RefersTo</c> is the declaration, and proofs or corollaries embedded as its children.
+/// No index is built here. The nodes are scanned on each call, so results never depend on earlier evaluations.
 /// </remarks>
-let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>) =
+let findReferenceNodes (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>) : FplGenericNode list =
     let target = cursorTargetNode cursorNode
     match target with
     | :? FplGenericJustificationItem ->
