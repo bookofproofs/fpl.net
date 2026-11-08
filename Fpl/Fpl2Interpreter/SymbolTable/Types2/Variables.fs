@@ -414,11 +414,13 @@ type FplMapping(positions: Positions, parent: FplGenericNode) as this =
                     $"*{typeId}"
                 else
                     typeId
+            this.FplId <- this.TypeId
             this.RefersTo <- typeNodeOpt 
             _dimensionTypesBeingSet <- true
         else
             let indexAllowedType = FplMapping((pos1,pos2), this) 
             indexAllowedType.TypeId <- typeId
+            indexAllowedType.FplId <- this.TypeId
             indexAllowedType.RefersTo <- typeNodeOpt 
             this.DimensionTypes.Add indexAllowedType
 
@@ -499,6 +501,11 @@ type FplGenericVariableWithType(fplId, positions: Positions, parent: FplGenericN
     /// </summary>
     member this.SetTypeOccurrence (typeNodeOpt:FplGenericNode option, pos1:Position, pos2:Position) =
         let typeNode = FplMapping((pos1,pos2), this)
+        match typeNodeOpt with
+        | Some t ->
+            typeNode.FplId <- t.FplId
+            typeNode.TypeId <- t.TypeId
+        | _ -> ()
         typeNode.RefersTo <- typeNodeOpt
         _typeOccurrence <- Some typeNode
 

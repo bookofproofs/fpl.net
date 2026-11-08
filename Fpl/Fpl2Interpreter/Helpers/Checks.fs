@@ -276,14 +276,12 @@ let rec getFullName (fv: FplGenericNode) (first: bool) =
     match fv.Name with
     | PrimRoot -> ""
     | _ -> 
-
-
         if first then
             if fv.Parent.Value.Name = PrimRoot then
                 getFullName fv.Parent.Value false + fplValueType
             elif (isVar fv) && not (isVar fv.Parent.Value) then
                 fplValueType
-            elif fplValueType = String.Empty then
+            elif fplValueType = String.Empty || fv.Name = PrimMappingL then
                 getFullName fv.Parent.Value false
             else
                 getFullName fv.Parent.Value false + "." + fplValueType
