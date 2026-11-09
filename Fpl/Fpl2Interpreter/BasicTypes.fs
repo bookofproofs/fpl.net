@@ -62,17 +62,6 @@ type SignatureType =
 let maxRecursion = 15
 
 /// <summary>
-/// Check whether the provided string starts with a lowercase character.
-/// </summary>
-/// <param name="s">Input string to test.</param>
-/// <returns>True when the first character exists and is lowercase; otherwise false.</returns>
-let checkStartsWithLowerCase (s:string) =
-    if s.Length > 0 then 
-        System.Char.IsLower(s[0])
-    else
-        false
-
-/// <summary>
 /// Represents a mutable variable abstraction observed by the interpreter.
 /// </summary>
 type IVariable =

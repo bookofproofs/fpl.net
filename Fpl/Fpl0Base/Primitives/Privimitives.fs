@@ -530,3 +530,8 @@ let PrimVariableL = "variable"
 let PrimVariableArray = "*var"
 [<Literal>]
 let PrimVariableArrayL = "variable array"
+[<Literal>]
+let PrimFplLowerCase = @"[a-z]\w*" 
+[<Literal>]
+let PrimFplPascalCase = @"[A-Z]\w*"
+

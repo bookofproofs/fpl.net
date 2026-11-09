@@ -54,6 +54,7 @@
         <Compile Include="ServiceFormatting\FormattingHandler.fs" />
         <Compile Include="ServiceGoToDefinition\GoToDefinitionHandler.fs" />
         <Compile Include="ServiceFindReferences\FindReferencesHandler.fs" />
+        <Compile Include="ServiceRename\RenameHandler.fs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -17,12 +17,12 @@ open Fpl1Parser.Debug
 /// <summary>
 /// Regex parser matching identifiers starting with a lower-case letter (used for variables).
 /// </summary>
-let IdStartsWithSmallCase = regex @"[a-z]\w*" 
+let IdStartsWithSmallCase = regex PrimFplLowerCase
 
 /// <summary>
 /// Regex parser matching identifiers starting with an upper-case letter (PascalCase).
 /// </summary>
-let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
+let idStartsWithCap = (regex PrimFplPascalCase) <?> "<PascalCaseId>"
 
 /// <summary>
 /// Parser that records positions for a PascalCase identifier and constructs <c>Ast.PascalCaseId</c>.
