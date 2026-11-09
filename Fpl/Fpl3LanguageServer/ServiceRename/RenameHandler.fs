@@ -13,11 +13,11 @@ open System.Text.RegularExpressions
 open System.Threading
 open System.Threading.Tasks
 open OmniSharp.Extensions.JsonRpc
+open OmniSharp.Extensions.LanguageServer.Protocol
 open OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities
 open OmniSharp.Extensions.LanguageServer.Protocol.Document
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open OmniSharp.Extensions.LanguageServer.Protocol.Server
-open OmniSharp.Extensions.LanguageServer.Protocol
 open Fpl0Base.Primitives
 open Fpl2Interpreter.BasicTypes
 open Fpl2Interpreter.SymbolTable.Types2.Variables
@@ -126,12 +126,22 @@ let private normalizePath (path: string) =
     Path.GetFullPath(path).Replace('\\', '/').TrimEnd('/')
 
 /// <summary>
+/// Rejects an LSP request with a message that the client shows to the user.
+/// </summary>
+/// <param name="message">Message explaining why the request was rejected.</param>
+/// <returns>Never returns; always raises an <c>Exception</c>.</returns>
+let private rejectRequest (message: string) : 'a =
+    raise (Exception message)
+
+/// <summary>
 /// Builds one <c>TextDocumentEdit</c> per file for all nodes that must be renamed.
 /// </summary>
 /// <param name="nodes">Nodes whose identifier is replaced, across all files.</param>
 /// <param name="oldName">Current identifier text.</param>
 /// <param name="newName">Replacement identifier text.</param>
-/// <returns>The workspace edit, or an error message if an identifier range cannot be located in the source text.</returns>
+/// <returns>
+/// The workspace edit, or an error message if an identifier range cannot be located in the source text.
+/// </returns>
 let private buildWorkspaceEdit (nodes: FplGenericNode list) (oldName: string) (newName: string)
     : Result<WorkspaceEdit, string> =
     let perFile =
@@ -143,20 +153,21 @@ let private buildWorkspaceEdit (nodes: FplGenericNode list) (oldName: string) (n
             if List.exists Option.isNone ranges then
                 Result.Error $"Cannot locate the identifier '{oldName}' in '{path}'."
             else
-                Ok(path, List.choose id ranges))
+                Result.Ok(path, List.choose id ranges))
     match List.tryPick (function Result.Error e -> Some e | Result.Ok _ -> None) perFile with
     | Some error -> Result.Error error
     | None ->
         let documentChanges =
             perFile
-            |> List.choose (function Ok(path, ranges) -> Some(path, ranges) | Result.Error _ -> None)
+            |> List.choose (function Result.Ok(path, ranges) -> Some(path, ranges) | Result.Error _ -> None)
             |> List.map (fun (path, ranges) ->
                 let edits = ranges |> List.map (fun range -> TextEdit(Range = range, NewText = newName))
-                TextDocumentEdit(
-                    TextDocument = OptionalVersionedTextDocumentIdentifier(Uri = DocumentUri.FromFileSystemPath path),
-                    Edits = TextEditContainer(edits)))
-            |> List.map WorkspaceEditDocumentChange.From
-        Ok(WorkspaceEdit(DocumentChanges = Container<WorkspaceEditDocumentChange>(documentChanges)))
+                let textDocumentEdit =
+                    TextDocumentEdit(
+                        TextDocument = VersionedTextDocumentIdentifier(Uri = DocumentUri.FromFileSystemPath path, Version = 0L),
+                        Edits = TextEditContainer(edits))
+                WorkspaceEditDocumentChange(textDocumentEdit))
+        Result.Ok(WorkspaceEdit(DocumentChanges = Container<WorkspaceEditDocumentChange>(documentChanges)))
 
 /// <summary>
 /// Handles textDocument/prepareRename requests by checking that the cursor is on a renameable identifier.
@@ -171,6 +182,11 @@ type PrepareRenameHandler(languageServer: ILanguageServer) =
     /// Document selector that limits the registration to FPL source files.
     /// </summary>
     let documentSelector = DocumentSelector(DocumentFilter(Pattern = "**/*.fpl"))
+
+    /// <summary>
+    /// The client capability for prepareRename, stored by <c>SetCapability</c>. The handler does not read it.
+    /// </summary>
+    let mutable capability = RenameCapability()
 
     interface IPrepareRenameHandler with
 
@@ -197,17 +213,24 @@ type PrepareRenameHandler(languageServer: ILanguageServer) =
                 let column = int64 request.Position.Character + 1L
 
                 match heap.SymbolTable.CursorNode cursorPath line column with
-                | None -> return raise (RequestRejectedException "No identifier at the cursor position.")
+                | None -> return rejectRequest "No identifier at the cursor position."
                 | Some cursorNode ->
                     match renameDeclarationOf cursorNode with
-                    | None -> return raise (RequestRejectedException "The identifier under the cursor cannot be renamed.")
+                    | None -> return rejectRequest "The identifier under the cursor cannot be renamed."
                     | Some _ ->
                         let target = cursorTargetNode cursorNode
                         let text = File.ReadAllText target.FilePath
                         match identifierRange target target.FplId text with
                         | Some range -> return RangeOrPlaceholderRange(range)
-                        | None -> return raise (RequestRejectedException "The identifier range cannot be determined.")
+                        | None -> return rejectRequest "The identifier range cannot be determined."
             }
+
+        /// <summary>
+        /// Stores the rename capability that the client reported during initialization.
+        /// </summary>
+        /// <param name="cap">The client's <c>RenameCapability</c>.</param>
+        member _.SetCapability(cap: RenameCapability) =
+            capability <- cap
 
 /// <summary>
 /// Handles textDocument/rename requests by validating the new name and returning the workspace edit.
@@ -253,18 +276,18 @@ type RenameHandler(languageServer: ILanguageServer) =
                 let column = int64 request.Position.Character + 1L
 
                 match heap.SymbolTable.CursorNode cursorPath line column with
-                | None -> return raise (RequestRejectedException "No identifier at the cursor position.")
+                | None -> return rejectRequest "No identifier at the cursor position."
                 | Some cursorNode ->
                     match renameDeclarationOf cursorNode with
-                    | None -> return raise (RequestRejectedException "The identifier under the cursor cannot be renamed.")
+                    | None -> return rejectRequest "The identifier under the cursor cannot be renamed."
                     | Some declaration ->
                         if not (isValidNewName declaration request.NewName) then
-                            return raise (RequestRejectedException $"'{request.NewName}' is not a valid name or already exists in this scope.")
+                            return rejectRequest $"'{request.NewName}' is not a valid name or already exists in this scope."
                         else
                             let references = findReferenceNodes cursorNode heap.SymbolTable.Nodes
                             match buildWorkspaceEdit references declaration.FplId request.NewName with
                             | Result.Ok edit -> return edit
-                            | Result.Error message -> return raise (RequestRejectedException message)
+                            | Result.Error message -> return rejectRequest message
             }
 
         /// <summary>
