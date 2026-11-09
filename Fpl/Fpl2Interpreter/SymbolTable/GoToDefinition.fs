@@ -5,6 +5,7 @@ module Fpl2Interpreter.SymbolTable.GoToDefinition
 
 open System.Collections.Generic
 open Fpl2Interpreter.BasicTypes
+open Fpl2Interpreter.Helpers.Checks
 open Fpl2Interpreter.SymbolTable.Types2.References
 open Fpl2Interpreter.SymbolTable.ExpressionMatching
 open Fpl2Interpreter.SymbolTable.Types1.TopLevel
