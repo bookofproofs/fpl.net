@@ -27,6 +27,7 @@ Each entry is tagged with the part(s) of the solution it affects:
 - **[interpreter]** Add `resolveDeclaration` to map a symbol-table node to its declaration, including proofs and corollaries (they resolve to their theorem-like statement).
 - **[language-server]** Add a find-references service (`textDocument/references`) that returns all locations, across all files, that refer to the declaration under the cursor. The declaration is included when the client requests it (`ReferenceContext.IncludeDeclaration`).
 - **[interpreter]** Add `SymbolTable.NodesCollector`, which records every node evaluated while the symbol table is built, across all theories and files, to support the reference lookups.
+- **[language-server]** Add an alpha rename service (`textDocument/prepareRename` and `textDocument/rename`). The rename covers the same references as find-references, across all files, and validates the new name against the FPL identifier rules, keywords and scope collisions. Edits use exact identifier ranges from the source text.
 
 ### Changed
 - **[parser]** consolidate unit test namespaces and convert single-case test methods to datarow-driven test methods (if not already the case)

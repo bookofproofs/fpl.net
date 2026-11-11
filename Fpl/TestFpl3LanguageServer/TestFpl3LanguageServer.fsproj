@@ -56,6 +56,7 @@
         <Compile Include="ServiceGoToDefinition\TestGoToDefinition.fs" />
         <Compile Include="ServiceFindReference\TestReferenceIndex.fs" />
         <Compile Include="ServiceFindReference\TestFindReferences.fs" />
+        <Compile Include="ServiceRename\TestRename.fs" />
     </ItemGroup>
 
     <ItemGroup>
