@@ -48,7 +48,7 @@ let private normalizePath (path: string) =
 /// The handler registers for files matching <c>**/*.fpl</c>.
 /// </remarks>
 type DefinitionHandler(languageServer: ILanguageServer) =
-
+    let logName = "DefinitionHandler: "
     /// <summary>
     /// Document selector that limits the registration to FPL source files.
     /// </summary>
@@ -84,7 +84,7 @@ type DefinitionHandler(languageServer: ILanguageServer) =
         /// </remarks>
         member _.Handle(request: DefinitionParams, cancellationToken: CancellationToken) : Task<LocationOrLocationLinks> =
             task {
-                logMsg languageServer "Task<LocationOrLocationLinks>" "DefinitionHandler.Handle"
+                logMsg languageServer "Task<LocationOrLocationLinks>" $"{logName}Handle"
 
                 // wait for the interpreter
                 while heap.IsEvaluating do ()
@@ -102,7 +102,7 @@ type DefinitionHandler(languageServer: ILanguageServer) =
                     logMsg languageServer $"{cursorNode.Value.Name} {cursorNode.Value.Type SignatureType.Name}" "cursorNode" 
                 else
                     logMsg languageServer "None" "cursorNode" 
-                logMsg languageServer $"{cursorPath} {line} {column}" "Coords" 
+                logMsg languageServer $"{cursorPath} {line} {column}" $"{logName}Coords" 
 
                 // Try to find the declaration / definition of the innermost symbol table node
                 let resolvedNodeOpt =
@@ -131,7 +131,7 @@ type DefinitionHandler(languageServer: ILanguageServer) =
                             Range = Range(Start = start, End = finish))
                     return LocationOrLocationLinks([| LocationOrLocationLink(location) |])
                 | None ->
-                    logMsg languageServer "F12" "no definition found"
+                    logMsg languageServer "F12" $"{logName}no definition found"
                     return LocationOrLocationLinks()
             }
 
@@ -143,4 +143,5 @@ type DefinitionHandler(languageServer: ILanguageServer) =
         /// The stored value is not used by <c>Handle</c>. Keep it only if other parts of the server need it.
         /// </remarks>
         member _.SetCapability(cap: DefinitionCapability) =
+            logMsg languageServer "client capability received" $"{logName}SetCapability"
             capability <- cap

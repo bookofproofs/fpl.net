@@ -11,7 +11,7 @@
         <Compile Include="Buffers\BuffMgr.fs" />
         <Compile Include="Buffers\SettingsStore.fs" />
         <Compile Include="Buffers\DocSync.fs" />
-        <Compile Include="ServiceDiagnostics\Diags.fs" />
+        <Compile Include="ServiceDiagnostics\DiagnosticsHandler.fs" />
         <Compile Include="ServiceAutoCompletion\Item.fs" />
         <Compile Include="ServiceAutoCompletion\Choices.fs" />
         <Compile Include="ServiceAutoCompletion\ArgumentIdentifier.fs" />
@@ -48,7 +48,7 @@
         <Compile Include="ServiceAutoCompletion\Word.fs" />
         <Compile Include="ServiceAutoCompletion\ItemChoices.fs" />
         <Compile Include="ServiceAutoCompletion\Main.fs" />
-        <Compile Include="ServiceAutoCompletion\Handler.fs" />
+        <Compile Include="ServiceAutoCompletion\CompletionHandler.fs" />
         <Compile Include="ServiceFormatting\SettingsTranslation.fs" />
         <Compile Include="ServiceFormatting\SettingsPull.fs" />
         <Compile Include="ServiceFormatting\FormattingHandler.fs" />

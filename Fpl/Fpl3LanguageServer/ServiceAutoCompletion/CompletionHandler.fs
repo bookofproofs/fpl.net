@@ -1,4 +1,4 @@
-module Fpl3LanguageServer.ServiceAutoCompletion.Handler
+module Fpl3LanguageServer.ServiceAutoCompletion.CompletionHandler
 open System.Threading
 open System.Threading.Tasks
 open OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities
@@ -24,7 +24,7 @@ let private getPosition (buffer: string) (line: int) (col: int) : int =
 /// autocompletion service to compute suggestions at the requested cursor position.
 /// </summary>
 type CompletionHandler(languageServer: ILanguageServer, bufferManager: BufferManager) =
-
+    let logName = "CompletionHandler: "
     let documentSelector = DocumentSelector(DocumentFilter(Pattern = "**/*.fpl"))
 
     let mutable capability = CompletionCapability()
@@ -36,7 +36,7 @@ type CompletionHandler(languageServer: ILanguageServer, bufferManager: BufferMan
 
         member _.Handle(request: CompletionParams, cancellationToken: CancellationToken) : Task<CompletionList> =
             task {
-                logMsg languageServer "Task<CompletionList>" "CompletionHandler.Handle"
+                logMsg languageServer "Task<CompletionList>" $"{logName}Handle"
                 let uri = PathEquivalentUri(request.TextDocument.Uri.GetFileSystemPath())
                 let buffer = bufferManager.GetBuffer(uri)
                 if isNull buffer then
@@ -50,4 +50,5 @@ type CompletionHandler(languageServer: ILanguageServer, bufferManager: BufferMan
             }
 
         member _.SetCapability(cap: CompletionCapability) =
+            logMsg languageServer "client capability received" $"{logName}SetCapability"
             capability <- cap

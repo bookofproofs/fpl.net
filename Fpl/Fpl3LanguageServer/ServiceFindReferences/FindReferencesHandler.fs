@@ -78,7 +78,7 @@ let private toLocation (node: FplGenericNode) : Location =
 /// includes the declaration in its result, so a client that sets <c>IncludeDeclaration = false</c> still receives it.
 /// </remarks>
 type ReferencesHandler(languageServer: ILanguageServer) =
-
+    let logName = "ReferencesHandler: "
     /// <summary>
     /// Document selector that limits the registration to FPL source files.
     /// </summary>
@@ -115,7 +115,7 @@ type ReferencesHandler(languageServer: ILanguageServer) =
         /// </remarks>
         member _.Handle(request: ReferenceParams, cancellationToken: CancellationToken) : Task<LocationContainer> =
             task {
-                logMsg languageServer "Task<LocationContainer>" "ReferencesHandler.Handle"
+                logMsg languageServer "Task<LocationContainer>" $"{logName}Handle"
 
                 // wait for the interpreter
                 while heap.IsEvaluating do ()
@@ -133,7 +133,7 @@ type ReferencesHandler(languageServer: ILanguageServer) =
                     | Some node ->
                         findReferenceNodes node heap.SymbolTable.Nodes
 
-                logMsg languageServer $"{nodes.Length} location(s)" "references"
+                logMsg languageServer $"{nodes.Length} location(s)" $"{logName}references"
                 return LocationContainer(nodes |> List.map toLocation)
             }
 
@@ -145,4 +145,5 @@ type ReferencesHandler(languageServer: ILanguageServer) =
         /// The stored value is not used by <c>Handle</c>. Keep it only if other parts of the server need it.
         /// </remarks>
         member _.SetCapability(cap: ReferenceCapability) =
+            logMsg languageServer "client capability received" $"{logName}SetCapability"
             capability <- cap

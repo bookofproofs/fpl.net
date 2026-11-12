@@ -1,4 +1,4 @@
-module Fpl3LanguageServer.ServicesDiagnostics.Diags
+module Fpl3LanguageServer.ServicesDiagnostics.DiagnosticsHandler
 
 open System
 open System.Collections.Generic
@@ -128,35 +128,29 @@ let private getTextPositionsByUri () : Dictionary<PathEquivalentUri, TextPositio
 /// Handles publishing FPL parser/interpreter diagnostics to the language client.
 /// </summary>
 type DiagnosticsHandler(languageServer: ILanguageServer) =
-
+    let logName = "DiagnosticsHandler: "
     /// <summary>
     /// Casts a list of F# ErrRecovery module diagnostics into a list of OmniSharp's Diagnostics.
     /// </summary>
-    /// <returns>Casted list.</returns>
+    /// <returns>Cast list.</returns>
     member _.CastDiagnostics() : UriDiagnostics =
         let castedListDiagnostics = UriDiagnostics()
         let uriTotextPositionsDict = getTextPositionsByUri ()
-        logMsg languageServer diagnosticsContainer.DiagnosticsToString "~~~~~Diagnostics Count Orig"
-        logMsg
-            languageServer
-            (uriTotextPositionsDict.Keys |> Seq.map (fun k -> k.AbsoluteUri) |> String.concat ", ")
-            $"~~~~~{uriTotextPositionsDict.Keys.Count} source code keys"
+        logMsg languageServer $"{diagnosticsContainer.CountDiagnostics}" $"{logName}Count Orig"
 
         diagnosticsContainer.Collection
         |> Seq.iter (fun diagnostic ->
             let key = PathEquivalentUri.EscapedUri(diagnostic.Uri.AbsoluteUri)
-            logMsg languageServer key.AbsoluteUri "~~~~~new key"
-            logMsg languageServer diagnostic.Uri.AbsoluteUri "~~~~~old key"
 
             let tpByUri = uriTotextPositionsDict.[diagnostic.Uri]
             castedListDiagnostics.AddDiagnostics(diagnostic.Uri, castDiagnostic diagnostic tpByUri))
 
-        logMsg languageServer (diagnosticsContainer.Collection.Length.ToString()) "~~~~~Diagnostics Count Orig"
-        logMsg languageServer heap.ParsedAsts.TraceStatistics "~~~~~Statistics"
+        logMsg languageServer (diagnosticsContainer.Collection.Length.ToString()) $"{logName}Diagnostics Count Orig"
+        logMsg languageServer heap.ParsedAsts.TraceStatistics $"{logName}Statistics"
 
         castedListDiagnostics.Enumerator()
         |> Seq.iter (fun kvp ->
-            logMsg languageServer $"{kvp.Value.Count} diagnostics in {kvp.Key.AbsolutePath}" "~~~~~Diagnostics Count VS Code")
+            logMsg languageServer $"{kvp.Value.Count} diagnostics in {kvp.Key.AbsolutePath}" $"{logName}Diagnostics Count VS Code")
 
         castedListDiagnostics
 
@@ -164,7 +158,7 @@ type DiagnosticsHandler(languageServer: ILanguageServer) =
     /// Runs the FPL interpreter on the given buffer and refreshes the stored diagnostics.
     /// </summary>
     member this.RefreshFplDiagnosticsStorage(uri: PathEquivalentUri, buffer: StringBuilder) : UriDiagnostics =
-        logMsg languageServer uri.AbsoluteUri "Uri in RefreshFplDiagnosticsStorage"
+        logMsg languageServer uri.AbsoluteUri $"{logName}Uri in RefreshFplDiagnosticsStorage"
         if isNull (box buffer) then
             raise (ArgumentNullException(nameof buffer))
 
@@ -217,8 +211,8 @@ type DiagnosticsHandler(languageServer: ILanguageServer) =
                             Diagnostics = List<UODiagnostic>()
                         )
                     )
-                    logMsg languageServer uriPath.AbsoluteUri "Remaining in PublishDiagnostics"
+                    logMsg languageServer uriPath.AbsoluteUri $"{logName}Remaining in PublishDiagnostics"
             with ex ->
                 logException languageServer ex "PublishDiagnostics"
         else
-            logMsg languageServer "buffer was unexpectedly null" "PublishDiagnostics"
+            logMsg languageServer "buffer was unexpectedly null" $"{logName}PublishDiagnostics"

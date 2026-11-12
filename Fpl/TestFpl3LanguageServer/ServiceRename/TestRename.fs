@@ -144,7 +144,8 @@ type TestRename() =
             | Result.Ok(path, range) -> rangeText (File.ReadAllText path) range
             | Result.Error message -> failwith $"prepareRename rejected '{cursorAnchor}' (case {no}): {message}"
 
-        match renameEdits cursorNode.Value heap.SymbolTable.Nodes newName with
+        let myEdits = renameEdits cursorNode.Value heap.SymbolTable.Nodes newName 
+        match myEdits with
         | Result.Error message ->
             Assert.Fail($"Rename to '{newName}' rejected (case {no}): {message}")
         | Result.Ok edits ->

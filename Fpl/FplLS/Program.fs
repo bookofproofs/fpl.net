@@ -13,11 +13,12 @@ open Newtonsoft.Json.Linq
 open OmniSharp.Extensions.LanguageServer.Server
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.SymbolTable.Storage.Heap
+open Fpl3LanguageServer.Buffers.Logging
 open Fpl3LanguageServer.Buffers.BuffMgr
 open Fpl3LanguageServer.Buffers.DocSync
 open Fpl3LanguageServer.Buffers.SettingsStore
-open Fpl3LanguageServer.ServicesDiagnostics.Diags
-open Fpl3LanguageServer.ServiceAutoCompletion.Handler
+open Fpl3LanguageServer.ServicesDiagnostics.DiagnosticsHandler
+open Fpl3LanguageServer.ServiceAutoCompletion.CompletionHandler
 open Fpl3LanguageServer.ServiceFormatting.FormattingHandler
 open Fpl3LanguageServer.ServiceGoToDefinition.GoToDefinitionHandler
 open Fpl3LanguageServer.ServiceFindReferences.FindReferencesHandler
@@ -81,6 +82,8 @@ let main _ =
                                 let serviceProvider = languageServer.Services
                                 let bufferManager = serviceProvider.GetService<BufferManager>()
                                 let diagnosticsHandler = serviceProvider.GetService<DiagnosticsHandler>()
+
+                                logMsg languageServer "OnInitialize reached" "Program: OnInitialize"
 
                                 bufferManager.BufferUpdated.Add(fun x ->
                                     diagnosticsHandler.PublishDiagnostics(
