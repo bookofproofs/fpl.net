@@ -36,7 +36,6 @@ let private configureServices (services: IServiceCollection) =
     services.AddSingleton<FormattingHandler>() |> ignore
     services.AddSingleton<DefinitionHandler>() |> ignore
     services.AddSingleton<ReferencesHandler>() |> ignore
-    services.AddSingleton<PrepareRenameHandler>() |> ignore
     services.AddSingleton<RenameHandler>() |> ignore
 
 /// <summary>
@@ -65,7 +64,6 @@ let main _ =
                         .WithHandler<FormattingHandler>()
                         .WithHandler<DefinitionHandler>()
                         .WithHandler<ReferencesHandler>()
-                        .WithHandler<PrepareRenameHandler>()
                         .WithHandler<RenameHandler>()
                         // custom request: symbol table as JSON for the VS Code tree view
                         .OnRequest<JToken, string>("getTreeData", (fun _request _cancellationToken ->

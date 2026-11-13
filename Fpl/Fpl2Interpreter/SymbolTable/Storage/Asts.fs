@@ -435,7 +435,7 @@ type ParsedAstList() =
                 |> Seq.map (fun (groupId, group) -> $"{groupId}:{Seq.length group}")
                 |> String.concat ", "
 
-            sb.AppendLine $"{pa.Id}(chksm {pa.Parsing.Checksum}): #total diags {paDiagnostics.Count}, {statsDiags}"
+            sb.Append $"{pa.Id}(chksm {pa.Parsing.Checksum}): #total diags {paDiagnostics.Count}, {statsDiags}"
             |> ignore)
 
         sb.ToString()

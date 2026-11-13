@@ -10,6 +10,7 @@ open System
 open System.IO
 open System.Threading
 open System.Threading.Tasks
+open System.Collections.Generic
 open OmniSharp.Extensions.LanguageServer.Protocol
 open OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities
 open OmniSharp.Extensions.LanguageServer.Protocol.Document
@@ -36,44 +37,53 @@ let private rejectRequest (message: string) : 'a =
     raise (Exception message)
 
 /// <summary>
-/// Converts the edits of <c>renameEdits</c> into an LSP workspace edit with one text document edit per file.
+/// Converts the edits of <c>renameEdits</c> into an unversioned LSP workspace edit, with one entry per file.
 /// </summary>
 /// <param name="edits">Tuples of file path, range and new text.</param>
 /// <returns>The workspace edit for the client.</returns>
 let private toWorkspaceEdit (edits: (string * Range * string) list) : WorkspaceEdit =
-    let documentChanges =
-        edits
-        |> List.groupBy (fun (path, _, _) -> path)
-        |> List.map (fun (path, fileEdits) ->
-            let textEdits =
-                fileEdits
-                |> List.map (fun (_, range, newText) -> TextEdit(Range = range, NewText = newText))
-            let textDocumentEdit =
-                TextDocumentEdit(
-                    TextDocument = VersionedTextDocumentIdentifier(Uri = DocumentUri.FromFileSystemPath path, Version = 0L),
-                    Edits = TextEditContainer(textEdits))
-            WorkspaceEditDocumentChange(textDocumentEdit))
-    WorkspaceEdit(DocumentChanges = Container<WorkspaceEditDocumentChange>(documentChanges))
+    let changes = Dictionary<DocumentUri, IEnumerable<TextEdit>>()
+    edits
+    |> List.groupBy (fun (path, _, _) -> path)
+    |> List.iter (fun (path, fileEdits) ->
+        let textEdits =
+            fileEdits
+            |> List.map (fun (_, range, newText) -> TextEdit(Range = range, NewText = newText))
+        changes[DocumentUri.FromFileSystemPath path] <- textEdits)
+    WorkspaceEdit(Changes = changes)
 
 /// <summary>
-/// Handles textDocument/prepareRename requests by checking that the cursor is on a renameable identifier.
+/// Language server handler for the textDocument/prepareRename and textDocument/rename requests of FPL files.
 /// </summary>
 /// <param name="languageServer">The language server instance used for logging.</param>
 /// <remarks>
-/// The request is rejected if the cursor is not on a renameable identifier, or if the identifier range lies in
-/// another file.
+/// A single type implements both request interfaces, so the server builds one rename registration with prepare support.
+/// The shared <c>ICapability&lt;RenameCapability&gt;</c> interface is implemented once, in its own block, because both
+/// request interfaces inherit it.
+/// The handler only translates LSP requests into calls of <c>Fpl3LanguageServer.ServiceRename.RenameCore</c>.
 /// </remarks>
-type PrepareRenameHandler(languageServer: ILanguageServer) =
-    let logName = "PrepareRenameHandler: "
+type RenameHandler(languageServer: ILanguageServer) =
+    let logName = "RenameHandler: "
+
     /// <summary>
     /// Document selector that limits the registration to FPL source files.
     /// </summary>
     let documentSelector = DocumentSelector(DocumentFilter(Pattern = "**/*.fpl"))
 
     /// <summary>
-    /// The client capability for prepareRename, stored by <c>SetCapability</c>. The handler does not read it.
+    /// The client capability for rename, stored by <c>SetCapability</c>. The handler does not read it.
     /// </summary>
     let mutable capability = RenameCapability()
+
+    interface ICapability<RenameCapability> with
+
+        /// <summary>
+        /// Stores the rename capability that the client reported during initialization.
+        /// </summary>
+        /// <param name="cap">The client's <c>RenameCapability</c>.</param>
+        member _.SetCapability(cap: RenameCapability) =
+            logMsg languageServer "client capability received" $"{logName}SetCapability"
+            capability <- cap
 
     interface IPrepareRenameHandler with
 
@@ -82,7 +92,7 @@ type PrepareRenameHandler(languageServer: ILanguageServer) =
         /// </summary>
         /// <returns>A <c>RenameRegistrationOptions</c> with the FPL document selector and prepare support enabled.</returns>
         member _.GetRegistrationOptions() =
-            logMsg languageServer "registration options requested" $"{logName}GetRegistrationOptions"
+            logMsg languageServer "registration options requested" $"{logName}PrepareRename GetRegistrationOptions"
             RenameRegistrationOptions(DocumentSelector = documentSelector, PrepareProvider = true)
 
         /// <summary>
@@ -93,7 +103,7 @@ type PrepareRenameHandler(languageServer: ILanguageServer) =
         /// <returns>A task that yields the range of the identifier to rename.</returns>
         member _.Handle(request: PrepareRenameParams, cancellationToken: CancellationToken) =
             task {
-                logMsg languageServer "Task<RangeOrPlaceholderRange>" $"{logName}Handle"
+                logMsg languageServer "Task<RangeOrPlaceholderRange>" $"{logName}PrepareRename Handle"
 
                 while heap.IsEvaluating do
                     do! Task.Delay(10, cancellationToken)
@@ -122,33 +132,6 @@ type PrepareRenameHandler(languageServer: ILanguageServer) =
                             return RangeOrPlaceholderRange(range)
             }
 
-        /// <summary>
-        /// Stores the rename capability that the client reported during initialization.
-        /// </summary>
-        /// <param name="cap">The client's <c>RenameCapability</c>.</param>
-        member _.SetCapability(cap: RenameCapability) =
-            logMsg languageServer "client capability received" $"{logName}SetCapability"
-            capability <- cap
-
-/// <summary>
-/// Handles textDocument/rename requests by validating the new name and returning the workspace edit.
-/// </summary>
-/// <param name="languageServer">The language server instance used for logging.</param>
-/// <remarks>
-/// The edits come from <c>renameEdits</c>, which uses the same reference set as find-references.
-/// </remarks>
-type RenameHandler(languageServer: ILanguageServer) =
-    let logName = "RenameHandler: "
-    /// <summary>
-    /// Document selector that limits the registration to FPL source files.
-    /// </summary>
-    let documentSelector = DocumentSelector(DocumentFilter(Pattern = "**/*.fpl"))
-
-    /// <summary>
-    /// The client capability for rename, stored by <c>SetCapability</c>. The handler does not read it.
-    /// </summary>
-    let mutable capability = RenameCapability()
-
     interface IRenameHandler with
 
         /// <summary>
@@ -156,7 +139,7 @@ type RenameHandler(languageServer: ILanguageServer) =
         /// </summary>
         /// <returns>A <c>RenameRegistrationOptions</c> with the FPL document selector and prepare support enabled.</returns>
         member _.GetRegistrationOptions() =
-            logMsg languageServer "registration options requested" $"{logName}GetRegistrationOptions"
+            logMsg languageServer "registration options requested" $"{logName}Rename GetRegistrationOptions"
             RenameRegistrationOptions(DocumentSelector = documentSelector, PrepareProvider = true)
 
         /// <summary>
@@ -167,7 +150,7 @@ type RenameHandler(languageServer: ILanguageServer) =
         /// <returns>A task that yields the workspace edit, or rejects the request with a message.</returns>
         member _.Handle(request: RenameParams, cancellationToken: CancellationToken) =
             task {
-                logMsg languageServer "Task<WorkspaceEdit>" $"{logName}Handle"
+                logMsg languageServer "Task<WorkspaceEdit>" $"{logName}Rename Handle"
 
                 while heap.IsEvaluating do
                     do! Task.Delay(10, cancellationToken)
@@ -179,8 +162,8 @@ type RenameHandler(languageServer: ILanguageServer) =
 
                 match heap.SymbolTable.CursorNode cursorPath line column with
                 | None ->
-                    logMsg languageServer $"{logName}no symbol-table node at the cursor" "rename"
-                    return rejectRequest $"{logName}No identifier at the cursor position."
+                    logMsg languageServer "no symbol-table node at the cursor" $"{logName}rename"
+                    return rejectRequest "No identifier at the cursor position."
                 | Some cursorNode ->
                     logMsg languageServer $"{cursorNode.Name} '{cursorNode.FplId}'" $"{logName}rename cursor node"
                     match renameEdits cursorNode heap.SymbolTable.Nodes request.NewName with
@@ -188,14 +171,7 @@ type RenameHandler(languageServer: ILanguageServer) =
                         logMsg languageServer message $"{logName}rename rejected"
                         return rejectRequest message
                     | Result.Ok edits ->
-                        logMsg languageServer $"{edits.Length} edit(s) in {edits |> List.map (fun (p, _, _) -> p) |> List.distinct |> List.length} file(s)" $"{logName}rename accepted"
+                        let fileCount = edits |> List.map (fun (p, _, _) -> p) |> List.distinct |> List.length
+                        logMsg languageServer $"{edits.Length} edit(s) in {fileCount} file(s)" $"{logName}rename accepted"
                         return toWorkspaceEdit edits
             }
-
-        /// <summary>
-        /// Stores the rename capability that the client reported during initialization.
-        /// </summary>
-        /// <param name="cap">The client's <c>RenameCapability</c>.</param>
-        member _.SetCapability(cap: RenameCapability) =
-            logMsg languageServer "client capability received" $"{logName}SetCapability"
-            capability <- cap
