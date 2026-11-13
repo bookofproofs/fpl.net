@@ -42,7 +42,7 @@ type TestRename() =
 
         Assert.IsTrue(cursorNode.IsSome, $"No node found at {cursorLine}:{cursorColumn} at code #{where}.")
 
-        match prepareRenameAt cursorNode.Value with
+        match prepareRenameAt File.ReadAllText cursorNode.Value with
         | Result.Error message ->
             Assert.Fail($"prepareRename rejected '{cursorAnchor}' (case {no}): {message}")
         | Result.Ok(path, range) ->
@@ -140,11 +140,10 @@ type TestRename() =
 
         // the identifier that the rename must replace, as reported by prepareRename
         let oldName =
-            match prepareRenameAt cursorNode.Value with
+            match prepareRenameAt File.ReadAllText cursorNode.Value with
             | Result.Ok(path, range) -> rangeText (File.ReadAllText path) range
             | Result.Error message -> failwith $"prepareRename rejected '{cursorAnchor}' (case {no}): {message}"
-
-        let myEdits = renameEdits cursorNode.Value heap.SymbolTable.Nodes newName 
+        let myEdits = renameEdits File.ReadAllText cursorNode.Value heap.SymbolTable.Nodes newName
         match myEdits with
         | Result.Error message ->
             Assert.Fail($"Rename to '{newName}' rejected (case {no}): {message}")
@@ -169,8 +168,8 @@ type TestRename() =
         let (cursorLine, cursorColumn, cursorNode) = assertPrepareWorked cursorAnchor cursorOffset where
 
         Assert.IsTrue(cursorNode.IsSome, $"No node found at {cursorLine}:{cursorColumn} at code #{where}.")
-
-        match renameEdits cursorNode.Value heap.SymbolTable.Nodes newName with
+        let myEdits = renameEdits File.ReadAllText cursorNode.Value heap.SymbolTable.Nodes newName
+        match myEdits with
         | Result.Error _ -> ()
         | Result.Ok _ ->
             Assert.Fail($"Rename to '{newName}' at '{cursorAnchor}' (case {no}) should be rejected.")

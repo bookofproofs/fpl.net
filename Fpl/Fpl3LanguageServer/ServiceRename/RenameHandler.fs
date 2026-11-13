@@ -16,8 +16,11 @@ open OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities
 open OmniSharp.Extensions.LanguageServer.Protocol.Document
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open OmniSharp.Extensions.LanguageServer.Protocol.Server
+open Microsoft.Extensions.DependencyInjection
+open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.SymbolTable.Storage.Heap
 open Fpl3LanguageServer.Buffers.Logging
+open Fpl3LanguageServer.Buffers.BuffMgr
 open Fpl3LanguageServer.ServiceRename.RenameCore
 
 /// <summary>
@@ -53,6 +56,21 @@ let private toWorkspaceEdit (edits: (string * Range * string) list) : WorkspaceE
     WorkspaceEdit(Changes = changes)
 
 /// <summary>
+/// Returns the source text of a file from the editor buffer, falling back to the file on disk if the file is not open.
+/// </summary>
+/// <param name="bufferManager">The buffer manager that holds the text of open documents.</param>
+/// <param name="path">File path of the document.</param>
+/// <returns>The current text of the document as the symbol table sees it.</returns>
+/// <remarks>
+/// The buffer contains unsaved edits, which the interpreter parses. Using the same text keeps the symbol-table
+/// positions and the identifier ranges consistent.
+/// </remarks>
+let private sourceTextOf (bufferManager: BufferManager) (path: string) : string =
+    let castUri = (DocumentUri.FromFileSystemPath path).ToUri()
+    let buffer = bufferManager.GetBuffer(PathEquivalentUri(castUri.AbsoluteUri))
+    if isNull (box buffer) then File.ReadAllText path else buffer.ToString()
+
+/// <summary>
 /// Language server handler for the textDocument/prepareRename and textDocument/rename requests of FPL files.
 /// </summary>
 /// <param name="languageServer">The language server instance used for logging.</param>
@@ -64,6 +82,8 @@ let private toWorkspaceEdit (edits: (string * Range * string) list) : WorkspaceE
 /// </remarks>
 type RenameHandler(languageServer: ILanguageServer) =
     let logName = "RenameHandler: "
+
+    let bufferManager = languageServer.Services.GetService<BufferManager>()
 
     /// <summary>
     /// Document selector that limits the registration to FPL source files.
@@ -119,7 +139,7 @@ type RenameHandler(languageServer: ILanguageServer) =
                     return rejectRequest "No identifier at the cursor position."
                 | Some cursorNode ->
                     logMsg languageServer $"{cursorNode.Name} '{cursorNode.FplId}'" $"{logName}prepareRename cursor node"
-                    match prepareRenameAt cursorNode with
+                    match prepareRenameAt (sourceTextOf bufferManager) cursorNode with
                     | Result.Error message ->
                         logMsg languageServer message $"{logName}prepareRename rejected"
                         return rejectRequest message
@@ -166,7 +186,7 @@ type RenameHandler(languageServer: ILanguageServer) =
                     return rejectRequest "No identifier at the cursor position."
                 | Some cursorNode ->
                     logMsg languageServer $"{cursorNode.Name} '{cursorNode.FplId}'" $"{logName}rename cursor node"
-                    match renameEdits cursorNode heap.SymbolTable.Nodes request.NewName with
+                    match renameEdits (sourceTextOf bufferManager) cursorNode heap.SymbolTable.Nodes request.NewName with
                     | Result.Error message ->
                         logMsg languageServer message $"{logName}rename rejected"
                         return rejectRequest message

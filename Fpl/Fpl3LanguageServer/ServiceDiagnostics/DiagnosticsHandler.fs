@@ -103,7 +103,7 @@ let private castCode (code: string) : UODiagnosticCode =
 /// </summary>
 /// <param name="diagnostic">Input diagnostic.</param>
 /// <param name="tp">TextPositions object to handle ranges in the input stream.</param>
-/// <returns>Casted diagnostic.</returns>
+/// <returns>Cast diagnostic.</returns>
 let castDiagnostic (diagnostic: Diagnostic) (tp: TextPositions) : UODiagnostic =
     UODiagnostic(
         Source = diagnostic.Emitter.ToString(),
@@ -134,7 +134,7 @@ type DiagnosticsHandler(languageServer: ILanguageServer) =
     /// </summary>
     /// <returns>Cast list.</returns>
     member _.CastDiagnostics() : UriDiagnostics =
-        let castedListDiagnostics = UriDiagnostics()
+        let castListDiagnostics = UriDiagnostics()
         let uriTotextPositionsDict = getTextPositionsByUri ()
         logMsg languageServer $"{diagnosticsContainer.CountDiagnostics}" $"{logName}Count Orig"
 
@@ -143,16 +143,16 @@ type DiagnosticsHandler(languageServer: ILanguageServer) =
             let key = PathEquivalentUri.EscapedUri(diagnostic.Uri.AbsoluteUri)
 
             let tpByUri = uriTotextPositionsDict.[diagnostic.Uri]
-            castedListDiagnostics.AddDiagnostics(diagnostic.Uri, castDiagnostic diagnostic tpByUri))
+            castListDiagnostics.AddDiagnostics(diagnostic.Uri, castDiagnostic diagnostic tpByUri))
 
         logMsg languageServer (diagnosticsContainer.Collection.Length.ToString()) $"{logName}Diagnostics Count Orig"
         logMsg languageServer heap.ParsedAsts.TraceStatistics $"{logName}Statistics"
 
-        castedListDiagnostics.Enumerator()
+        castListDiagnostics.Enumerator()
         |> Seq.iter (fun kvp ->
             logMsg languageServer $"{kvp.Value.Count} diagnostics in {kvp.Key.AbsolutePath}" $"{logName}Diagnostics Count VS Code")
 
-        castedListDiagnostics
+        castListDiagnostics
 
     /// <summary>
     /// Runs the FPL interpreter on the given buffer and refreshes the stored diagnostics.

@@ -186,16 +186,16 @@ let private identifierRange (node: FplGenericNode) (text: string) : Range option
 /// <summary>
 /// Returns the file path and the range of the identifier at the cursor, as shown by <c>textDocument/prepareRename</c>.
 /// </summary>
+/// <param name="sourceTextOf">Returns the source text that the symbol table was built from for a file path.</param>
 /// <param name="cursorNode">Innermost symbol-table node containing the cursor.</param>
 /// <returns>
 /// <c>Result.Ok</c> with the file path and the identifier range, or <c>Result.Error</c> with a message for the client.
 /// </returns>
 /// <remarks>
-/// The range is taken from the cursor node when it has its own identifier, so the client highlights the text under
-/// the cursor. A justification has no identifier of its own. For it, the range of its argument is returned, which may
-/// lie in another file. The handler rejects such cases.
+/// The text must be the same text that the positions of the symbol table refer to. The language server passes the
+/// editor buffer, not the file on disk, because unsaved edits change the positions.
 /// </remarks>
-let prepareRenameAt (cursorNode: FplGenericNode) : Result<string * Range, string> =
+let prepareRenameAt (sourceTextOf: string -> string) (cursorNode: FplGenericNode) : Result<string * Range, string> =
     match declarationOf cursorNode with
     | Result.Error message -> Result.Error message
     | Result.Ok _ ->
@@ -203,18 +203,19 @@ let prepareRenameAt (cursorNode: FplGenericNode) : Result<string * Range, string
             if cursorNode.FplId = "" then
                 None
             else
-                identifierRange cursorNode (File.ReadAllText cursorNode.FilePath)
+                identifierRange cursorNode (sourceTextOf cursorNode.FilePath)
         match ownRange with
         | Some range -> Result.Ok(cursorNode.FilePath, range)
         | None ->
             let target = cursorTargetNode cursorNode
-            match identifierRange target (File.ReadAllText target.FilePath) with
+            match identifierRange target (sourceTextOf target.FilePath) with
             | Some range -> Result.Ok(target.FilePath, range)
             | None -> Result.Error "The identifier range cannot be determined."
 
 /// <summary>
 /// Computes the edits that rename the declaration under the cursor and all nodes that refer to it.
 /// </summary>
+/// <param name="sourceTextOf">Returns the source text that the symbol table was built from for a file path.</param>
 /// <param name="cursorNode">Innermost symbol-table node containing the cursor.</param>
 /// <param name="nodes">All flattened symbol-table nodes of the current evaluation, across all files.</param>
 /// <param name="newName">The proposed new name.</param>
@@ -223,12 +224,10 @@ let prepareRenameAt (cursorNode: FplGenericNode) : Result<string * Range, string
 /// with a message for the client.
 /// </returns>
 /// <remarks>
-/// The reference set is the one of <c>findReferenceNodes</c>. Nodes with an empty <c>FplId</c> are placeholders and
-/// are excluded. Each edit replaces the node's own identifier, not the new name's length. Duplicate ranges are removed.
-/// Rejects the rename if any identifier cannot be located in its source text, since a partial rename would leave the
-/// code inconsistent.
+/// Each file's text is read once per call. The rename is rejected if any identifier cannot be located, so a partial
+/// rename is never returned.
 /// </remarks>
-let renameEdits (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>) (newName: string)
+let renameEdits (sourceTextOf: string -> string) (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>) (newName: string)
     : Result<(string * Range * string) list, string> =
     match declarationOf cursorNode with
     | Result.Error message -> Result.Error message
@@ -241,7 +240,7 @@ let renameEdits (cursorNode: FplGenericNode) (nodes: seq<FplGenericNode>) (newNa
                 match texts.TryGetValue path with
                 | true, text -> text
                 | _ ->
-                    let text = File.ReadAllText path
+                    let text = sourceTextOf path
                     texts[path] <- text
                     text
 
