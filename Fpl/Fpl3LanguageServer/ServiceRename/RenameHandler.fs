@@ -3,6 +3,7 @@
 /// </summary>
 /// <remarks>
 /// The handlers only translate LSP requests into calls of <c>Fpl3LanguageServer.ServiceRename.RenameCore</c>.
+/// Rejected requests are shown to the user as warnings, not as exceptions, so the client does not report an internal error.
 /// </remarks>
 module Fpl3LanguageServer.ServiceRename.RenameHandler
 
@@ -16,6 +17,7 @@ open OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities
 open OmniSharp.Extensions.LanguageServer.Protocol.Document
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open OmniSharp.Extensions.LanguageServer.Protocol.Server
+open OmniSharp.Extensions.LanguageServer.Protocol.Window
 open Microsoft.Extensions.DependencyInjection
 open Fpl0Base.Errors.Diagnostics
 open Fpl2Interpreter.SymbolTable.Storage.Heap
@@ -30,14 +32,6 @@ open Fpl3LanguageServer.ServiceRename.RenameCore
 /// <returns>The full path with forward slashes and no trailing separator.</returns>
 let private normalizePath (path: string) =
     Path.GetFullPath(path).Replace('\\', '/').TrimEnd('/')
-
-/// <summary>
-/// Rejects an LSP request with a message that the client shows to the user.
-/// </summary>
-/// <param name="message">Message explaining why the request was rejected.</param>
-/// <returns>Never returns; always raises an <c>Exception</c>.</returns>
-let private rejectRequest (message: string) : 'a =
-    raise (Exception message)
 
 /// <summary>
 /// Converts the edits of <c>renameEdits</c> into an unversioned LSP workspace edit, with one entry per file.
@@ -71,14 +65,26 @@ let private sourceTextOf (bufferManager: BufferManager) (path: string) : string 
     if isNull (box buffer) then File.ReadAllText path else buffer.ToString()
 
 /// <summary>
+/// Shows a rejection reason to the user as a warning notification, without raising an exception.
+/// </summary>
+/// <param name="languageServer">The language server whose window shows the message.</param>
+/// <param name="message">The reason the request was rejected.</param>
+/// <remarks>
+/// Raising an exception makes the client report "Internal Error". A rejected rename is a normal outcome,
+/// so the reason is shown as a notification and the request returns an empty result.
+/// </remarks>
+let private notifyRejection (languageServer: ILanguageServer) (message: string) : unit =
+    languageServer.Window.ShowWarning(message)
+
+/// <summary>
 /// Language server handler for the textDocument/prepareRename and textDocument/rename requests of FPL files.
 /// </summary>
-/// <param name="languageServer">The language server instance used for logging.</param>
+/// <param name="languageServer">The language server instance used for logging and notifications.</param>
 /// <remarks>
 /// A single type implements both request interfaces, so the server builds one rename registration with prepare support.
 /// The shared <c>ICapability&lt;RenameCapability&gt;</c> interface is implemented once, in its own block, because both
-/// request interfaces inherit it.
-/// The handler only translates LSP requests into calls of <c>Fpl3LanguageServer.ServiceRename.RenameCore</c>.
+/// request interfaces inherit it. Each <c>Handle</c> member has an explicit return type, so the compiler checks every
+/// branch against the interface type.
 /// </remarks>
 type RenameHandler(languageServer: ILanguageServer) =
     let logName = "RenameHandler: "
@@ -116,12 +122,12 @@ type RenameHandler(languageServer: ILanguageServer) =
             RenameRegistrationOptions(DocumentSelector = documentSelector, PrepareProvider = true)
 
         /// <summary>
-        /// Returns the range of the identifier under the cursor, or rejects the request.
+        /// Returns the range of the identifier under the cursor. Rejected requests show a warning and return <c>null</c>.
         /// </summary>
         /// <param name="request">The request with the document URI and the 0-based cursor position.</param>
         /// <param name="cancellationToken">Cancellation token of the request.</param>
-        /// <returns>A task that yields the range of the identifier to rename.</returns>
-        member _.Handle(request: PrepareRenameParams, cancellationToken: CancellationToken) =
+        /// <returns>A task that yields the range of the identifier to rename, or <c>null</c> if rename is not possible.</returns>
+        member _.Handle(request: PrepareRenameParams, cancellationToken: CancellationToken) : Task<RangeOrPlaceholderRange> =
             task {
                 logMsg languageServer "Task<RangeOrPlaceholderRange>" $"{logName}PrepareRename Handle"
 
@@ -136,17 +142,20 @@ type RenameHandler(languageServer: ILanguageServer) =
                 match heap.SymbolTable.CursorNode cursorPath line column with
                 | None ->
                     logMsg languageServer "no symbol-table node at the cursor" $"{logName}prepareRename"
-                    return rejectRequest "No identifier at the cursor position."
+                    notifyRejection languageServer "No identifier at the cursor position."
+                    return Unchecked.defaultof<RangeOrPlaceholderRange>
                 | Some cursorNode ->
                     logMsg languageServer $"{cursorNode.Name} '{cursorNode.FplId}'" $"{logName}prepareRename cursor node"
                     match prepareRenameAt (sourceTextOf bufferManager) cursorNode with
                     | Result.Error message ->
                         logMsg languageServer message $"{logName}prepareRename rejected"
-                        return rejectRequest message
+                        notifyRejection languageServer message
+                        return Unchecked.defaultof<RangeOrPlaceholderRange>
                     | Result.Ok(path, range) ->
                         if normalizePath path <> cursorPath then
                             logMsg languageServer $"declared in {path}" $"{logName}prepareRename rejected"
-                            return rejectRequest "The identifier is declared in another file. Rename it there."
+                            notifyRejection languageServer "The identifier is declared in another file. Rename it there."
+                            return Unchecked.defaultof<RangeOrPlaceholderRange>
                         else
                             logMsg languageServer $"range {range.Start.Line}:{range.Start.Character}-{range.End.Line}:{range.End.Character}" $"{logName}prepareRename accepted"
                             return RangeOrPlaceholderRange(range)
@@ -164,11 +173,12 @@ type RenameHandler(languageServer: ILanguageServer) =
 
         /// <summary>
         /// Validates the new name and returns the edits that rename the declaration and all its references.
+        /// Rejected requests show a warning and return an empty workspace edit.
         /// </summary>
         /// <param name="request">The request with the document URI, the cursor position and the new name.</param>
         /// <param name="cancellationToken">Cancellation token of the request.</param>
-        /// <returns>A task that yields the workspace edit, or rejects the request with a message.</returns>
-        member _.Handle(request: RenameParams, cancellationToken: CancellationToken) =
+        /// <returns>A task that yields the workspace edit, which is empty if the request was rejected.</returns>
+        member _.Handle(request: RenameParams, cancellationToken: CancellationToken) : Task<WorkspaceEdit> =
             task {
                 logMsg languageServer "Task<WorkspaceEdit>" $"{logName}Rename Handle"
 
@@ -183,13 +193,15 @@ type RenameHandler(languageServer: ILanguageServer) =
                 match heap.SymbolTable.CursorNode cursorPath line column with
                 | None ->
                     logMsg languageServer "no symbol-table node at the cursor" $"{logName}rename"
-                    return rejectRequest "No identifier at the cursor position."
+                    notifyRejection languageServer "No identifier at the cursor position."
+                    return WorkspaceEdit()
                 | Some cursorNode ->
                     logMsg languageServer $"{cursorNode.Name} '{cursorNode.FplId}'" $"{logName}rename cursor node"
                     match renameEdits (sourceTextOf bufferManager) cursorNode heap.SymbolTable.Nodes request.NewName with
                     | Result.Error message ->
                         logMsg languageServer message $"{logName}rename rejected"
-                        return rejectRequest message
+                        notifyRejection languageServer message
+                        return WorkspaceEdit()
                     | Result.Ok edits ->
                         let fileCount = edits |> List.map (fun (p, _, _) -> p) |> List.distinct |> List.length
                         logMsg languageServer $"{edits.Length} edit(s) in {fileCount} file(s)" $"{logName}rename accepted"

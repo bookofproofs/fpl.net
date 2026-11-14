@@ -96,6 +96,7 @@ let private isValidIdentifierForm (declaration: FplGenericNode) (newName: string
 /// the declaration itself, so renaming a node to its current name is allowed.
 /// </remarks>
 let private validateNewName (declaration: FplGenericNode) (newName: string) : Result<unit, string> =
+    // TODO: adjust collides logic and error messages depending on declaration type
     let collides =
         match declaration.UltimateBlockNode with
         | Some ultimate ->
