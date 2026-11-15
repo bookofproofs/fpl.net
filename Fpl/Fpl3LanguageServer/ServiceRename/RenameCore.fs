@@ -10,11 +10,11 @@ module Fpl3LanguageServer.ServiceRename.RenameCore
 
 open System
 open System.Collections.Generic
-open System.IO
 open System.Text.RegularExpressions
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open Fpl0Base.Primitives
 open Fpl2Interpreter.BasicTypes
+open Fpl2Interpreter.Helpers.Checks
 open Fpl2Interpreter.SymbolTable.Types2.Variables
 open Fpl2Interpreter.SymbolTable.GoToDefinition
 
@@ -56,34 +56,16 @@ let private declarationOf (cursorNode: FplGenericNode) : Result<FplGenericNode, 
     | Some node -> Result.Ok node
 
 /// <summary>
-/// Returns true if the text matches the whole pattern from <c>Fpl0Base.Primitives</c>.
+/// Returns true if the text matches the a whole pattern.
 /// </summary>
-/// <param name="pattern">Unanchored pattern, such as <c>PrimFplLowerCase</c>.</param>
+/// <param name="pattern">Unanchored pattern.</param>
 /// <param name="name">Text to test.</param>
 /// <returns><c>true</c> if the whole text matches the pattern; otherwise <c>false</c>.</returns>
 /// <remarks>
-/// The primitives carry no anchors, so the pattern is wrapped in <c>\A(?:...)\z</c>. Unlike <c>^</c> and <c>$</c>,
-/// <c>\z</c> rejects a trailing newline.
+/// The pattern is anchored in ^ ... $ to be matched as a whole pattern. Empty strings are matched by any pattern.
 /// </remarks>
 let private matchesGrammar (pattern: string) (name: string) : bool =
-    name <> "" && Regex.IsMatch(name, @"\A(?:" + pattern + @")\z", RegexOptions.CultureInvariant)
-
-/// <summary>
-/// Returns true if <paramref name="newName"/> has the identifier form required for the declaration.
-/// </summary>
-/// <param name="declaration">The declaration that will be renamed.</param>
-/// <param name="newName">The proposed new name.</param>
-/// <returns><c>true</c> if the form is valid; otherwise <c>false</c>.</returns>
-/// <remarks>
-/// Variables use <c>PrimFplLowerCase</c>. Argument identifiers, which start with a digit, must be numeric.
-/// All other declarations use <c>PrimFplPascalCase</c>.
-/// </remarks>
-let private isValidIdentifierForm (declaration: FplGenericNode) (newName: string) : bool =
-    match declaration with
-    | :? FplGenericVariable -> matchesGrammar PrimFplLowerCase newName
-    | _ when declaration.FplId <> "" && Char.IsDigit declaration.FplId[0] ->
-        newName <> "" && String.forall Char.IsDigit newName
-    | _ -> matchesGrammar PrimFplPascalCase newName
+    name <> "" && Regex.IsMatch(name, $"^{pattern}$", RegexOptions.CultureInvariant)
 
 /// <summary>
 /// Validates a proposed new name for the declaration.
@@ -95,24 +77,43 @@ let private isValidIdentifierForm (declaration: FplGenericNode) (newName: string
 /// Checks the identifier form, then the keyword set, then the scope of the declaration. The scope check ignores
 /// the declaration itself, so renaming a node to its current name is allowed.
 /// </remarks>
-let private validateNewName (declaration: FplGenericNode) (newName: string) : Result<unit, string> =
-    // TODO: adjust collides logic and error messages depending on declaration type
-    let collides =
+let validateNewName (declaration: FplGenericNode) (newName: string) (nodes:seq<FplGenericNode>)=
+    let collidesForScope =
         match declaration.UltimateBlockNode with
         | Some ultimate ->
             match ultimate.Scope.TryGetValue newName with
-            | true, existing -> not (obj.ReferenceEquals(existing, declaration))
-            | _ -> false
-        | None -> false
-    if not (isValidIdentifierForm declaration newName) then
-        Result.Error $"'{newName}' is not a valid identifier for '{declaration.FplId}'."
-    elif keyWordSet.Contains newName then
-        Result.Error $"'{newName}' is a keyword and cannot be used as an identifier."
-    elif collides then
-        Result.Error $"'{newName}' already exists in the scope of '{declaration.FplId}'."
-    else
-        Result.Ok()
+            | true, existing -> Some ultimate
+            | _ -> None
+        | None -> None
+    let collidesForMainBlock = nodes |> Seq.tryFind (fun fv -> fv.FplId = newName)
 
+    if keyWordSet.Contains newName then
+        Result.Error $"`{newName}` is a keyword and cannot be used as an identifier."
+    else
+        match declaration.Name with
+        | LiteralCorL ->
+            match collidesForScope with
+            | Some ultimate ->
+                Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}` because it already exists in the scope of {ultimate.Name} `{ultimate.FplId}`."
+            | None when matchesGrammar PrimFplPascalCaseQualified newName -> Result.Ok()
+            | _ -> 
+                Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}`, must match pattern `{PrimFplPascalCaseQualified}` (a pascal-case identifier followed by a one or more $number sequences)."
+        | PrimVariableL ->
+            match collidesForScope with
+            | Some ultimate ->
+                Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}` because it already exists in the scope of {ultimate.Name} `{ultimate.FplId}`."
+            | None when matchesGrammar PrimFplLowerCase newName -> Result.Ok()
+            | _ -> 
+                Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}`, must be lower-case identifier."
+        | _ ->
+            if (matchesGrammar PrimFplPascalCase newName) then
+                if collidesForMainBlock.IsSome then 
+                    Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}`, name already exists for {qualifiedNameSimple collidesForMainBlock.Value}{collidesForMainBlock.Value.StartPos}."
+                else
+                    Result.Ok()
+            else 
+                Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}`, must be a pascal-case identifier."
+ 
 /// <summary>
 /// Returns true if the character can be part of an FPL identifier.
 /// </summary>
@@ -233,7 +234,7 @@ let renameEdits (sourceTextOf: string -> string) (cursorNode: FplGenericNode) (n
     match declarationOf cursorNode with
     | Result.Error message -> Result.Error message
     | Result.Ok declaration ->
-        match validateNewName declaration newName with
+        match validateNewName declaration newName nodes with
         | Result.Error message -> Result.Error message
         | Result.Ok() ->
             let texts = Dictionary<string, string>()

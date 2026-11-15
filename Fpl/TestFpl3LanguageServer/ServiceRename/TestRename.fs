@@ -1,5 +1,6 @@
 namespace TestFpl3LanguageServer.ServiceRename
 
+open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open OmniSharp.Extensions.LanguageServer.Protocol.Models
@@ -138,10 +139,11 @@ type TestRename() =
 
         Assert.IsTrue(cursorNode.IsSome, $"No node found at {cursorLine}:{cursorColumn} at code #{where}.")
 
-        // the identifier that the rename must replace, as reported by prepareRename
-        let oldName =
+        // the identifier that the rename must replace, as reported by prepareRename, along with its
+        // path and range so that we can identify the one edit that corresponds to the cursor itself.
+        let cursorPath, cursorRange, oldName =
             match prepareRenameAt File.ReadAllText cursorNode.Value with
-            | Result.Ok(path, range) -> rangeText (File.ReadAllText path) range
+            | Result.Ok(path, range) -> path, range, rangeText (File.ReadAllText path) range
             | Result.Error message -> failwith $"prepareRename rejected '{cursorAnchor}' (case {no}): {message}"
         let myEdits = renameEdits File.ReadAllText cursorNode.Value heap.SymbolTable.Nodes newName
         match myEdits with
@@ -149,27 +151,84 @@ type TestRename() =
             Assert.Fail($"Rename to '{newName}' rejected (case {no}): {message}")
         | Result.Ok edits ->
             Assert.AreEqual(expectedCount, edits.Length, $"Edit count differs for case {no}.")
-            for (path, range, newText) in edits do
+            let cursorEdit =
+                edits
+                |> List.tryFind (fun (path, range, _) -> path = cursorPath && range = cursorRange)
+            match cursorEdit with
+            | None ->
+                Assert.Fail($"No edit found matching the cursor position for case {no}.")
+            | Some(path, range, newText) ->
                 Assert.AreEqual<string>(newName, newText, $"New text differs for case {no}.")
                 Assert.AreEqual<string>(oldName, rangeText (File.ReadAllText path) range, $"Edited range differs for case {no}.")
 
-    // columns: no, cursorAnchor, cursorOffset, newName, where
-    // invalid names (E01 to E05) and an unresolved reference (R01) must be rejected
-    [<DataRow("E01", "axiom A1", 0, "ax", 1)>]        // keyword
-    [<DataRow("E02", "axiom A1", 0, "a1", 1)>]        // axioms use PascalCase
-    [<DataRow("E03", "x, y:", 0, "1x", 2)>]           // variables start with a lowercase letter
-    [<DataRow("E04", "x, y:", 0, "X", 2)>]            // variables start with a lowercase letter
-    [<DataRow("E05", "x, y:", 0, "", 2)>]             // empty name
-    [<DataRow("E06", "x, y:", 0, "y", 2)>]            // collision with dec y in the same axiom A4
-    [<DataRow("R01", "byax ExtAx", 5, "Renamed", 2)>] // unresolved reference: nothing to rename
+
+    // columns: no, cursorAnchor, cursorOffset, newName, where, isValid, substring of error 
+    [<DataRow("01",  "axiom A1", 0, "Ren", 1, true, "")>]
+    [<DataRow("01a", "axiom A1", 0, "1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("01b", "axiom A1", 0, "", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("01c", "axiom A1", 0, "x", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("01d", "axiom A1", 0, "T1", 1, false, "already exists for theorem")>]
+    [<DataRow("01e", "axiom A1", 0, "Ren$1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("01f", "axiom A1", 0, "xor", 1, false, "is a keyword")>]
+    [<DataRow("02",  "theorem T1", 0, "Ren", 1, true, "")>]
+    [<DataRow("02a", "theorem T1", 0, "1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("02b", "theorem T1", 0, "", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("02c", "theorem T1", 0, "x", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("02d", "theorem T1", 0, "A1", 1, false, "already exists for axiom")>]
+    [<DataRow("02e", "theorem T1", 0, "Ren$1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("02f", "theorem T1", 0, "xor", 1, false, "is a keyword")>]
+    [<DataRow("03",  "cor T1$2", 0, "Ren$1", 1, true, "")>]
+    [<DataRow("03a", "cor T1$2", 0, "1", 1, false, "must match pattern")>]
+    [<DataRow("03b", "cor T1$2", 0, "", 1, false, "must match pattern")>]
+    [<DataRow("03c", "cor T1$2", 0, "x", 1, false, "must match pattern")>]
+    [<DataRow("03d", "cor T1$2", 0, "A1", 1, false, "must match pattern")>]
+    [<DataRow("03e", "cor T1$2", 0, "Ren", 1, false, "must match pattern")>]
+    [<DataRow("03f", "cor T1$2", 0, "xor", 1, false, "is a keyword")>]
+    [<DataRow("04",  "lem Le", 0, "Ren", 1, true, "")>]
+    [<DataRow("04a", "lem Le", 0, "1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("04b", "lem Le", 0, "", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("04c", "lem Le", 0, "x", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("04d", "lem Le", 0, "A1", 1, false, "already exists for axiom")>]
+    [<DataRow("04e", "lem Le", 0, "Ren$1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("04f", "lem Le", 0, "xor", 1, false, "is a keyword")>]
+    [<DataRow("05",  "prop Pr", 0, "Ren", 1, true, "")>]
+    [<DataRow("05a", "prop Pr", 0, "1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("05b", "prop Pr", 0, "", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("05c", "prop Pr", 0, "x", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("05d", "prop Pr", 0, "A1", 1, false, "already exists for axiom")>]
+    [<DataRow("05e", "prop Pr", 0, "Ren$1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("05f", "prop Pr", 0, "xor", 1, false, "is a keyword")>]
+    [<DataRow("06",  "conj Co", 0, "Ren", 1, true, "")>]
+    [<DataRow("06a", "conj Co", 0, "1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("06b", "conj Co", 0, "", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("06c", "conj Co", 0, "x", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("06d", "conj Co", 0, "A1", 1, false, "already exists for axiom")>]
+    [<DataRow("06e", "conj Co", 0, "Ren$1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("06f", "conj Co", 0, "xor", 1, false, "is a keyword")>]
+    [<DataRow("07",  "inf ModusPonens", 0, "Ren", 1, true, "")>]
+    [<DataRow("07a", "inf ModusPonens", 0, "1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("07b", "inf ModusPonens", 0, "", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("07c", "inf ModusPonens", 0, "x", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("07d", "inf ModusPonens", 0, "A1", 1, false, "already exists for axiom")>]
+    [<DataRow("07e", "inf ModusPonens", 0, "Ren$1", 1, false, "must be a pascal-case identifier")>]
+    [<DataRow("07f", "inf ModusPonens", 0, "xor", 1, false, "is a keyword")>]
+    
     [<TestMethod>]
-    member _.TestRenameRejected(no: string, cursorAnchor: string, cursorOffset: int, newName: string, where: int) =
+    member _.TestValidateNewName(no: string, cursorAnchor: string, cursorOffset: int, newName: string, where: int, isValid:bool, sError:string) =
 
         let (cursorLine, cursorColumn, cursorNode) = assertPrepareWorked cursorAnchor cursorOffset where
 
         Assert.IsTrue(cursorNode.IsSome, $"No node found at {cursorLine}:{cursorColumn} at code #{where}.")
-        let myEdits = renameEdits File.ReadAllText cursorNode.Value heap.SymbolTable.Nodes newName
-        match myEdits with
-        | Result.Error _ -> ()
-        | Result.Ok _ ->
-            Assert.Fail($"Rename to '{newName}' at '{cursorAnchor}' (case {no}) should be rejected.")
+        let validated = validateNewName cursorNode.Value newName heap.SymbolTable.Nodes
+   
+        match isValid, validated with 
+        | true, Result.Error error ->
+            Assert.Fail($"Failed - produced error for a valid rename to '{newName}' at '{cursorAnchor}'{Environment.NewLine}{error}")
+        | true, Result.Ok _ ->
+            printfn "%s" $"Succeeded validation to '{newName}' at '{cursorAnchor}'"
+        | false, Result.Error error when error.Contains(sError) ->
+            printfn "%s" $"Succeeded check for invalid rename to '{newName}' at '{cursorAnchor}' with error {Environment.NewLine}{error}"
+        | false, Result.Error error when not (error.Contains(sError)) ->
+            Assert.Fail($"Failed - produced wrong validation error for an invalid rename to '{newName}' at '{cursorAnchor}'{Environment.NewLine}{error}{Environment.NewLine}does not contain '{sError}'")
+        | _, _ ->
+            Assert.Fail($"Failed - produced no error for an invalid rename to '{newName}' at '{cursorAnchor}'")

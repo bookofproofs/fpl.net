@@ -58,6 +58,8 @@ type TestFindReferences() =
     [<DataRow("09a", "bycor Le$1", 0, "2~4~cor Le$1, 2~9~bycor Le$1, 2~13~bycor Le$1", 2)>] 
     [<DataRow("10", "cor Le$1$2", 0, "2~4~cor Le$1, 2~5~cor Le$1$2, 2~7~prf Le$1$2$1, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
     [<DataRow("10a", "bycor Le$1$2", 0, "2~5~cor Le$1$2, 2~12~bycor Le$1$2, 2~14~bycor Le$1$2", 2)>] 
+    [<DataRow("11", "prop Pr", 0, "1~89~prop Pr, 2~11~Pr |-", 1)>]
+    [<DataRow("11a", "Le, Pr", 4, "1~89~prop Pr, 2~11~Pr |-", 2)>]
 
     // group 1: variables
     [<DataRow("V01", "x, y:", 0, "2~20~x, y:, 2~21~x ⇒, 2~21~x)) ⇒, 2~21~x ⇒, 2~21~x)", 2)>]

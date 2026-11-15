@@ -35,6 +35,8 @@ type TestGoToDefinitionSameFile () =
     [<DataRow("09a", "bycor Le$1", 0, "cor Le$1 {", 2)>] // bycor corollary goes to its declaration
     [<DataRow("10", "cor Le$1$2", 0, "cor Le$1 {", 2)>] // go-to-definition of corollary reveals its parent node (here corollary)
     [<DataRow("10a", "bycor Le$1$2", 0, "cor Le$1$2 {", 2)>] // bycor corollary goes to its declaration
+    [<DataRow("11", "prop Pr", 0, "prop Pr", 1)>]
+    [<DataRow("11a", "Le, Pr", 4, "prop Pr", 2)>]
 
     // group 1: variables
     [<DataRow("V01", "x, y:", 0, "x, y: pred", 2)>]
