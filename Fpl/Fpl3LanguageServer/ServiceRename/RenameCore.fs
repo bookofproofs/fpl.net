@@ -78,41 +78,49 @@ let private matchesGrammar (pattern: string) (name: string) : bool =
 /// the declaration itself, so renaming a node to its current name is allowed.
 /// </remarks>
 let validateNewName (declaration: FplGenericNode) (newName: string) (nodes:seq<FplGenericNode>)=
-    let collidesForScope =
+    let prefix = $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}`; "
+    let reasonScope (collision:FplGenericNode) = $"name already exists for {qualifiedNameSimple collision}{collision.StartPos}."
+    let reasonKeyword name = $"`{name}` is a keyword."
+    let reasonPattern pattern patternDescr = $"must match pattern `{pattern}` ({patternDescr})."
+
+    let collidesForScopeOfNode =
         match declaration.UltimateBlockNode with
-        | Some ultimate ->
-            match ultimate.Scope.TryGetValue newName with
-            | true, existing -> Some ultimate
-            | _ -> None
+        | Some ultimate -> ultimate.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.tryFind (fun kvp -> kvp.FplId = newName) 
         | None -> None
     let collidesForMainBlock = nodes |> Seq.tryFind (fun fv -> fv.FplId = newName)
 
     if keyWordSet.Contains newName then
-        Result.Error $"`{newName}` is a keyword and cannot be used as an identifier."
+        Result.Error $"`{prefix}{reasonKeyword newName}"
     else
         match declaration.Name with
+        | LiteralPrfL 
         | LiteralCorL ->
-            match collidesForScope with
-            | Some ultimate ->
-                Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}` because it already exists in the scope of {ultimate.Name} `{ultimate.FplId}`."
+            match collidesForScopeOfNode with
+            | Some collision ->
+                Result.Error $"{prefix}{reasonScope collision}"
             | None when matchesGrammar PrimFplPascalCaseQualified newName -> Result.Ok()
-            | _ -> 
-                Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}`, must match pattern `{PrimFplPascalCaseQualified}` (a pascal-case identifier followed by a one or more $number sequences)."
+            | _ ->
+                let reason = reasonPattern PrimFplPascalCaseQualified "a pascal-case identifier followed by a one or more $number sequences"
+                Result.Error $"`{prefix}{reason}"
         | PrimVariableL ->
-            match collidesForScope with
-            | Some ultimate ->
-                Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}` because it already exists in the scope of {ultimate.Name} `{ultimate.FplId}`."
+            match collidesForScopeOfNode with
+            | Some collision ->
+                Result.Error $"`{prefix}{reasonScope collision}"
             | None when matchesGrammar PrimFplLowerCase newName -> Result.Ok()
-            | _ -> 
-                Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}`, must be lower-case identifier."
+            | _ when not (matchesGrammar PrimFplLowerCase newName)->
+                let reason = reasonPattern PrimFplLowerCase "a lower-case identifier"
+                Result.Error $"`{prefix}{reason}"
+            | _ ->
+                Result.Ok()
+        | _ when not (matchesGrammar PrimFplPascalCase newName) ->
+            let reason = reasonPattern PrimFplLowerCase "a pascal-case identifier"
+            Result.Error $"`{prefix}{reason}"
         | _ ->
-            if (matchesGrammar PrimFplPascalCase newName) then
-                if collidesForMainBlock.IsSome then 
-                    Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}`, name already exists for {qualifiedNameSimple collidesForMainBlock.Value}{collidesForMainBlock.Value.StartPos}."
-                else
-                    Result.Ok()
-            else 
-                Result.Error $"`{newName}` is not a valid identifier for {declaration.Name} `{declaration.FplId}`, must be a pascal-case identifier."
+            match collidesForMainBlock with
+            | Some collision ->
+                Result.Error $"{prefix}{reasonScope collision}"
+            | None ->
+                Result.Ok()
  
 /// <summary>
 /// Returns true if the character can be part of an FPL identifier.
