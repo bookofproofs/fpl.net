@@ -389,6 +389,8 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
     member this.NextBlockNode = 
         let rec nextBlockNode (node:FplGenericNode) =
             match node.Name with 
+            | LiteralCorL
+            | LiteralPrfL
             | LiteralCtorL
             | PrimMandatoryFunctionalTermL
             | PrimMandatoryPredicateL ->
