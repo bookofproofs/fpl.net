@@ -531,9 +531,11 @@ let PrimVariableArray = "*var"
 [<Literal>]
 let PrimVariableArrayL = "variable array"
 [<Literal>]
-let PrimFplLowerCase = @"[a-z][a-zA-Z0-9]*" 
+let PrimFplLowerCase = @"[a-z][a-zA-Z0-9_]*" 
 [<Literal>]
-let PrimFplPascalCase = @"[A-Z][a-zA-Z0-9]*"
+let PrimFplPascalCase = @"[A-Z][a-zA-Z0-9_]*"
 [<Literal>]
-let PrimFplPascalCaseQualified = @"[A-Z][a-zA-Z0-9]*(?:\$\d+)+"
+let PrimFplPascalCaseQualified = @"[A-Z][a-zA-Z0-9_]*(?:\$\d+)+"
+[<Literal>]
+let PrimFplArgumentId = @"[a-zA-Z0-9_]+" 
 
