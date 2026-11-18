@@ -215,6 +215,13 @@ let fplSecondCode = """
     // group 14: is operator (the second argument is a type reference)
     def cl IsCl {intr}
     def pred IsTest() {dec x:obj; is(x,IsCl)}
+
+    prf T3$2
+    {
+        1. T1 |- trivial
+        2. byconj Co |- trivial
+    }
+
 """
 
 /// <summary>

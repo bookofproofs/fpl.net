@@ -15,6 +15,7 @@ type TestUsesClause () =
     [<DataRow("05", """uses TestNamespace1.TestNamespace2 *""")>]
     [<DataRow("06", """uses TestNamespace alias T1""")>]
     [<DataRow("07", """uses TestNamespace1.TestNamespace2 alias T2""")>]
+    [<DataRow("08", """uses NSP03Coverage_A alias T1""")>]
     [<TestMethod>]
     member this.TestUsesClauseSuccess (no:string, fplCode:string) =
         let result = run (usesClause .>> eof) fplCode

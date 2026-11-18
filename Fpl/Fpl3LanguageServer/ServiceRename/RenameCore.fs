@@ -83,19 +83,32 @@ let validateNewName (declaration: FplGenericNode) (newName: string) (nodes:seq<F
     let reasonKeyword name = $"`{name}` is a keyword."
     let reasonPattern pattern patternDescr = $"must match pattern `{pattern}` ({patternDescr})."
 
-    let collidesForScopeOfNode =
+    let collidesForScopeOfUltimateNode =
         match declaration.UltimateBlockNode with
         | Some ultimate -> ultimate.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.tryFind (fun kvp -> kvp.FplId = newName) 
         | None -> None
     let collidesForMainBlock = nodes |> Seq.tryFind (fun fv -> fv.FplId = newName)
+    let collidesForScopeOfNextNode =
+        match declaration.NextBlockNode with
+        | Some next -> next.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.tryFind (fun kvp -> kvp.FplId = newName) 
+        | None -> None
 
     if keyWordSet.Contains newName then
         Result.Error $"`{prefix}{reasonKeyword newName}"
     else
         match declaration.Name with
+        | PrimArgL 
+        | PrimJIByRefArgument ->
+            match collidesForScopeOfNextNode with
+            | Some collision ->
+                Result.Error $"{prefix}{reasonScope collision}"
+            | None when matchesGrammar PrimFplArgumentId newName -> Result.Ok()
+            | _ ->
+                let reason = reasonPattern PrimFplArgumentId "an argument identifier"
+                Result.Error $"`{prefix}{reason}"
         | LiteralPrfL 
         | LiteralCorL ->
-            match collidesForScopeOfNode with
+            match collidesForScopeOfUltimateNode with
             | Some collision ->
                 Result.Error $"{prefix}{reasonScope collision}"
             | None when matchesGrammar PrimFplPascalCaseQualified newName -> Result.Ok()
@@ -103,7 +116,7 @@ let validateNewName (declaration: FplGenericNode) (newName: string) (nodes:seq<F
                 let reason = reasonPattern PrimFplPascalCaseQualified "a pascal-case identifier followed by a one or more $number sequences"
                 Result.Error $"`{prefix}{reason}"
         | PrimVariableL ->
-            match collidesForScopeOfNode with
+            match collidesForScopeOfUltimateNode with
             | Some collision ->
                 Result.Error $"`{prefix}{reasonScope collision}"
             | None when matchesGrammar PrimFplLowerCase newName -> Result.Ok()
@@ -113,7 +126,7 @@ let validateNewName (declaration: FplGenericNode) (newName: string) (nodes:seq<F
             | _ ->
                 Result.Ok()
         | _ when not (matchesGrammar PrimFplPascalCase newName) ->
-            let reason = reasonPattern PrimFplLowerCase "a pascal-case identifier"
+            let reason = reasonPattern PrimFplPascalCase "a pascal-case identifier"
             Result.Error $"`{prefix}{reason}"
         | _ ->
             match collidesForMainBlock with
