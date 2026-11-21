@@ -538,4 +538,6 @@ let PrimFplPascalCase = @"[A-Z][a-zA-Z0-9_]*"
 let PrimFplPascalCaseQualified = @"[A-Z][a-zA-Z0-9_]*(?:\$\d+)+"
 [<Literal>]
 let PrimFplArgumentId = @"[a-zA-Z0-9_]+" 
+[<Literal>]
+let PrimFplArgumentInAnotherProof = @"[A-Z][a-zA-Z0-9_]*(?:\$\d+)+\:[a-zA-Z0-9_]+"
 

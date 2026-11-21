@@ -220,6 +220,7 @@ let fplSecondCode = """
     {
         1. T1 |- trivial
         2. byconj Co |- trivial
+        3. bycor T1$2 |- trivial
     }
 
 """
