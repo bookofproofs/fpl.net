@@ -200,6 +200,30 @@ let findCandidatesByName (name: string) withClassConstructors withCorollariesOrP
     pm
     |> Seq.toList
 
+/// <summary>
+/// Finds candidate nodes (actually it can be only 0 or exactly one) for a proof
+/// that has the same identifier as a provided proof argument reference identifier.
+/// </summary>
+/// <param name="name">An identifier to an argument in another proof.</param>
+/// <returns>List of matching <see cref="FplGenericNode"/> candidates (may be empty).</returns>
+/// <remarks>
+/// An identifier to an argument in another proof has the regex pattern defined in <see cref="PrimFplArgumentInAnotherProof"/>.
+/// </remarks>
+let findCandidatesForArgumentInAnotherProofIdentifier (proofReferenceIdentifier:string) =
+    let splitOffAnyArgumentId (input: string) =
+        let parts = input.Split(':')
+        if parts.Length = 0 then
+            "", ""
+        elif parts.Length > 1 then
+            parts[0], parts[1]
+        else
+            parts[0], ""
+    let proofName, argId = splitOffAnyArgumentId proofReferenceIdentifier
+    let candidates = findCandidatesByName proofName false true 
+    if candidates.Length > 1 then 
+        candidates |> List.filter (fun fv -> fv.FplId = proofName), proofName, argId
+    else
+        candidates, proofName, argId
 
 /// <summary>
 /// Attempts to add an FPL block to its parent's scope using its `FplId`.

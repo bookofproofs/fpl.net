@@ -270,19 +270,10 @@ let evalProofs ast =
             evalRef.Value predicateIdentifierAst
             dollarDigitListAsts.Value |> List.map evalRef.Value |> ignore
             evalRef.Value refArgumentIdentifierAst.Value 
-            let splitOffAnyArgumentId (input: string) =
-                let parts = input.Split(':')
-                if parts.Length > 0 then parts.[0] else ""
-            let name = splitOffAnyArgumentId fvJi.FplId
-            let candidates = findCandidatesByName name false true 
-            let candidatesFiltered = 
-                if candidates.Length > 1 then 
-                    candidates |> List.filter (fun fv -> fv.FplId = name)
-                else
-                    candidates
+            let candidates, _, _ = findCandidatesForArgumentInAnotherProofIdentifier fvJi.FplId
             // check, if indeed the predicateId points to another proof, if not issue diagnostics, 
             // also check if arg exists, if not issue diagnostics
-            checkPR001_PR006Diagnostics fvJi candidatesFiltered
+            checkPR001_PR006Diagnostics fvJi candidates
             heap.Eval.PopEvalStack()
         | None, None, Some _ ->  
             // issue diagnostics a theorem-like statement justification cannot be used together with a proof argument reference 

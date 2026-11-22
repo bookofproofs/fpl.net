@@ -338,13 +338,18 @@ type TestRename() =
     [<DataRow("14a", "T1$1:4", 0, "T1$1:5", 1, false, "already exists for argument")>]
     [<DataRow("14b", "T1$1:4", 0, "", 1, false, "must match pattern `[A-Z][a-zA-Z0-9_]*(?:\$\d+)+\:[a-zA-Z0-9_]+`")>]
     [<DataRow("14c", "T1$1:4", 0, "x", 1, false, "must match pattern `[A-Z][a-zA-Z0-9_]*(?:\$\d+)+\:[a-zA-Z0-9_]+`")>]
-    [<DataRow("14d", "T1$1:4", 0, "A1", 1, true, "must match pattern `[A-Z][a-zA-Z0-9_]*(?:\$\d+)+\:[a-zA-Z0-9_]+`")>]
-    [<DataRow("14e", "T1$1:4", 0, "Ren$1", 1, false, "must match pattern `[a-zA-Z0-9_]+`")>]
+    [<DataRow("14d", "T1$1:4", 0, "A1", 1, false, "must match pattern `[A-Z][a-zA-Z0-9_]*(?:\$\d+)+\:[a-zA-Z0-9_]+`")>]
+    [<DataRow("14e", "T1$1:4", 0, "Ren$1", 1, false, "must match pattern `[A-Z][a-zA-Z0-9_]*(?:\$\d+)+\:[a-zA-Z0-9_]+`")>]
     [<DataRow("14f", "T1$1:4", 0, "xor", 1, false, "is a keyword")>]
     [<DataRow("14g", "T1$1:4", 0, "T1$1:x", 1, true, "")>]
     [<DataRow("14h", "T1$1:4", 0, "T1$1:Ren", 1, true, "")>]
     [<DataRow("14i", "T1$1:4", 0, "T1$1:A1", 1, true, "")>]
     [<DataRow("14j", "T1$1:4", 0, "T1$1:9", 1, true, "")>]
+    [<DataRow("14j", "T1$1:4", 0, "Bla1$1:9", 1, false, "no proof with identifier `Bla1$1` exists")>]
+    [<DataRow("14k", "T1$1:4", 0, "T1$1:4", 1, true, "")>] // same rename
+    [<DataRow("14l", "T1$1:4", 0, "T2$1:a", 1, true, "")>]
+    [<DataRow("14m", "T1$1:4", 0, "T2$1:3", 1, false, "already exists for argument")>]
+    
     [<TestMethod>]
     member _.TestValidateNewName(no: string, cursorAnchor: string, cursorOffset: int, newName: string, where: int, isValid:bool, sError:string) =
 

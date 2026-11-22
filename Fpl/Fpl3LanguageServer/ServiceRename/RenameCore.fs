@@ -15,6 +15,7 @@ open OmniSharp.Extensions.LanguageServer.Protocol.Models
 open Fpl0Base.Primitives
 open Fpl2Interpreter.BasicTypes
 open Fpl2Interpreter.Helpers.Checks
+open Fpl2Interpreter.SymbolTable.Storage.Util
 open Fpl2Interpreter.SymbolTable.Types2.Variables
 open Fpl2Interpreter.SymbolTable.Types4.Proofs
 open Fpl2Interpreter.SymbolTable.GoToDefinition
@@ -111,13 +112,21 @@ let validateNewName (declaration: FplGenericNode) (newName: string) (nodes:seq<F
     else
         match declaration.Name with
         | PrimJIByProofArgument ->
-            match collidesForOtherProof declaration with
-            | Some collision ->
-                Result.Error $"{prefix}{reasonScope collision}"
-            | None when matchesGrammar PrimFplArgumentInAnotherProof newName -> Result.Ok()
-            | _ ->
+            if not (matchesGrammar PrimFplArgumentInAnotherProof newName) then
                 let reason = reasonPattern PrimFplArgumentInAnotherProof "an argument identifier in another proof"
                 Result.Error $"`{prefix}{reason}"
+            else                 
+                let candidates, proofName, argId = findCandidatesForArgumentInAnotherProofIdentifier newName
+                if candidates.Length = 0 then
+                    let reason = $"no proof with identifier `{proofName}` exists"
+                    Result.Error $"`{prefix}{reason}"
+                else
+                    let candidate = candidates.Head
+                    match candidate.Scope.TryGetValue argId with
+                    | true, argInAnotherProof ->
+                        Result.Error $"{prefix}{reasonScope argInAnotherProof}"
+                    | _,_ ->                           
+                        Result.Ok()
         | PrimArgL 
         | PrimJIByRefArgument ->
             match collidesForScopeOfNextNode newName with
